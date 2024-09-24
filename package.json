@@ -6,6 +6,7 @@
     "tauri": "pnpm --filter @digest/digest-app tauri"
   },
   "devDependencies": {
+    "@sindresorhus/tsconfig": "^6.0.0",
     "cross-env": "^7.0.3",
     "eslint": "^8",
     "husky": "^9.1.6",
