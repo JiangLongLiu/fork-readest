@@ -2,7 +2,8 @@
   "name": "@readest/monorepo",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tauri": "pnpm --filter @digest/digest-app tauri"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
