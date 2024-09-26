@@ -3,14 +3,16 @@
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tauri": "pnpm --filter @digest/digest-app tauri"
+    "tauri": "pnpm --filter @readest/readest-app tauri"
   },
   "devDependencies": {
     "@sindresorhus/tsconfig": "^6.0.0",
     "cross-env": "^7.0.3",
     "eslint": "^8",
+    "eslint-config-prettier": "^9.1.0",
     "husky": "^9.1.6",
     "prettier": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.8",
     "typescript": "^5"
   }
 }

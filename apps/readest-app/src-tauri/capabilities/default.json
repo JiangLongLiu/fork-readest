@@ -6,6 +6,16 @@
     "main"
   ],
   "permissions": [
-    "core:default"
+    "core:default",
+    "fs:default",
+    {
+      "identifier": "fs:scope-document-recursive",
+      "allow": [
+        {
+          "path": "$DOCUMENT/**/*"
+        }
+      ],
+      "deny": []
+    }
   ]
 }

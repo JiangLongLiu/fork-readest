@@ -1,0 +1,48 @@
+.libraryContainer {
+    padding: 16px;
+}
+
+.viewToggle {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+
+.viewToggle button {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #333;
+}
+
+.viewToggle button.active {
+    color: blue;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.list {
+    display: block;
+}
+
+.bookCard {
+    text-align: center;
+    border: 1px solid #eaeaea;
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.bookCard img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.bookCard h3 {
+    margin-top: 12px;
+}
