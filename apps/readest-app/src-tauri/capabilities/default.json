@@ -17,6 +17,23 @@
       ],
       "deny": []
     },
-    "dialog:default"
+    {
+      "identifier": "fs:allow-appdata-read",
+      "allow": [
+        {
+          "path": "$APPDATA/settings.json"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-appdata-write",
+      "allow": [
+        {
+          "path": "$APPDATA/settings.json"
+        }
+      ]
+    },
+    "dialog:default",
+    "os:default"
   ]
 }

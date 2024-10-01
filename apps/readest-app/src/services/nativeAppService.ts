@@ -9,7 +9,15 @@ import {
   remove,
   BaseDirectory,
 } from '@tauri-apps/plugin-fs';
-import { appConfigDir, appDataDir, appCacheDir, appLogDir } from '@tauri-apps/api/path';
+import { type as osType } from '@tauri-apps/plugin-os';
+import {
+  join,
+  appConfigDir,
+  appDataDir,
+  appCacheDir,
+  appLogDir,
+  documentDir,
+} from '@tauri-apps/api/path';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { open, message } from '@tauri-apps/plugin-dialog';
 
@@ -17,7 +25,9 @@ import { Book } from '../types/book';
 import { SystemSettings } from '../types/settings';
 import { AppService, BaseDir, ToastType } from '../types/system';
 
-let BOOKS_DIR: string;
+const IS_MOBILE = osType() === 'ios' || osType() === 'android';
+const BOOKS_SUBDIR = 'DigestLibrary/Books';
+let BOOKS_DIR = '';
 
 function resolvePath(
   fp: string,
@@ -34,8 +44,8 @@ function resolvePath(
       return { baseDir: BaseDirectory.AppLog, fp, base, dir: appLogDir };
     case 'Books':
       return {
-        baseDir: BaseDirectory.Document,
-        fp: `${BOOKS_DIR}/${fp}`,
+        baseDir: IS_MOBILE ? BaseDirectory.AppData : BaseDirectory.Document,
+        fp: `${BOOKS_SUBDIR}/${fp}`,
         base,
         dir: () => new Promise((r) => r(`${BOOKS_DIR}/`)),
       };
@@ -113,8 +123,12 @@ export const nativeAppService: AppService = {
       const txt = await nativeAppService.fs.readFile(fp, base, 'text');
       settings = JSON.parse(txt as string);
     } catch {
+      const INIT_BOOKS_DIR = await join(
+        IS_MOBILE ? await appDataDir() : await documentDir(),
+        BOOKS_SUBDIR,
+      );
       settings = {
-        localBooksDir: '',
+        localBooksDir: INIT_BOOKS_DIR,
         globalReadSettings: {
           themeType: 'auto',
           fontFamily: '',
@@ -124,7 +138,7 @@ export const nativeAppService: AppService = {
         },
       };
 
-      await nativeAppService.fs.createDir(fp, base, true);
+      await nativeAppService.fs.createDir('', base, true);
       await nativeAppService.fs.writeFile(fp, base, JSON.stringify(settings));
     }
 
@@ -133,7 +147,7 @@ export const nativeAppService: AppService = {
   },
   saveSettings: async (settings: SystemSettings) => {
     const { fp, base } = SETTINGS_PATH;
-    await nativeAppService.fs.createDir(fp, base, true);
+    await nativeAppService.fs.createDir('', base, true);
     await nativeAppService.fs.writeFile(fp, base, JSON.stringify(settings));
     BOOKS_DIR = settings.localBooksDir;
   },
@@ -162,7 +176,23 @@ export const nativeAppService: AppService = {
   showMessage: async (msg: string, kind: ToastType = 'info', title?: string, okLabel?: string) => {
     await message(msg, { kind, title, okLabel });
   },
-  getCoverUrl: (book: Book) => {
+
+  loadLibraryBooks: async () => {
+    let books: Book[] = [];
+    try {
+      const txt = await nativeAppService.fs.readFile('books.json', 'Books', 'text');
+      books = JSON.parse(txt as string);
+    } catch {
+      await nativeAppService.fs.writeFile('books.json', 'Books', '[]');
+    }
+
+    books.forEach((book) => {
+      book.coverImageUrl = nativeAppService.generateCoverUrl(book);
+    });
+
+    return books;
+  },
+  generateCoverUrl: (book: Book) => {
     return convertFileSrc(`${BOOKS_DIR}/${book.id}/cover.png`);
   },
 };
