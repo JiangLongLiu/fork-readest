@@ -29,3 +29,10 @@ export interface BookConfig {
   annotations: BookNote[];
   removedNotesTimestamps?: Record<string, number>;
 }
+
+export interface BooksGroup {
+  id: string;
+  name: string;
+  books: Book[];
+  lastUpdated: number;
+}

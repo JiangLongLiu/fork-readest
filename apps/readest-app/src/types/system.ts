@@ -1,5 +1,5 @@
 import { SystemSettings } from './settings';
-import { Book } from './book';
+import { Book, BooksGroup } from './book';
 
 export type BaseDir = 'Books' | 'Settings' | 'Data' | 'Log' | 'Cache' | 'None';
 export type ToastType = 'info' | 'warning' | 'error';
@@ -23,6 +23,6 @@ export interface AppService {
   selectFiles(name: string, extensions: string[]): Promise<string[]>;
   showMessage(msg: string, kind?: ToastType, title?: string, okLabel?: string): Promise<void>;
 
-  loadLibraryBooks(): Promise<Book[]>;
+  loadLibraryBooks(): Promise<BooksGroup[]>;
   generateCoverUrl(book: Book): string;
 }

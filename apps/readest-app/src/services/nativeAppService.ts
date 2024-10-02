@@ -21,13 +21,22 @@ import {
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { open, message } from '@tauri-apps/plugin-dialog';
 
-import { Book } from '../types/book';
+import { Book, BooksGroup } from '../types/book';
 import { SystemSettings } from '../types/settings';
 import { AppService, BaseDir, ToastType } from '../types/system';
 
 const IS_MOBILE = osType() === 'ios' || osType() === 'android';
 const BOOKS_SUBDIR = 'DigestLibrary/Books';
 let BOOKS_DIR = '';
+
+const MOCK_BOOKS: Book[] = Array.from({ length: 14 }, (_v, k) => ({
+  id: `book-${k}`,
+  format: 'EPUB',
+  title: `Book ${k}`,
+  author: `Author ${k}`,
+  lastUpdated: Date.now() - 1000000 * k,
+  coverImageUrl: `https://placehold.co/800?text=Book+${k}&font=roboto`,
+}));
 
 function resolvePath(
   fp: string,
@@ -176,8 +185,8 @@ export const nativeAppService: AppService = {
   showMessage: async (msg: string, kind: ToastType = 'info', title?: string, okLabel?: string) => {
     await message(msg, { kind, title, okLabel });
   },
-
   loadLibraryBooks: async () => {
+    // TODO: Burrently only ungrouped books are supported
     let books: Book[] = [];
     try {
       const txt = await nativeAppService.fs.readFile('books.json', 'Books', 'text');
@@ -189,8 +198,16 @@ export const nativeAppService: AppService = {
     books.forEach((book) => {
       book.coverImageUrl = nativeAppService.generateCoverUrl(book);
     });
-
-    return books;
+    books = [...books, ...MOCK_BOOKS];
+    const ungroupedBooks: BooksGroup[] = [
+      {
+        id: 'ungrouped',
+        name: 'Ungrouped',
+        books,
+        lastUpdated: Date.now(),
+      },
+    ];
+    return ungroupedBooks;
   },
   generateCoverUrl: (book: Book) => {
     return convertFileSrc(`${BOOKS_DIR}/${book.id}/cover.png`);
