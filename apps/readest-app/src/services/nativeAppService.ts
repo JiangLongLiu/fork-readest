@@ -9,7 +9,6 @@ import {
   remove,
   BaseDirectory,
 } from '@tauri-apps/plugin-fs';
-import { type as osType } from '@tauri-apps/plugin-os';
 import {
   join,
   appConfigDir,
@@ -25,7 +24,6 @@ import { Book, BooksGroup } from '../types/book';
 import { SystemSettings } from '../types/settings';
 import { AppService, BaseDir, ToastType } from '../types/system';
 
-const IS_MOBILE = osType() === 'ios' || osType() === 'android';
 const BOOKS_SUBDIR = 'DigestLibrary/Books';
 let BOOKS_DIR = '';
 
@@ -53,7 +51,7 @@ function resolvePath(
       return { baseDir: BaseDirectory.AppLog, fp, base, dir: appLogDir };
     case 'Books':
       return {
-        baseDir: IS_MOBILE ? BaseDirectory.AppData : BaseDirectory.Document,
+        baseDir: BaseDirectory.Document,
         fp: `${BOOKS_SUBDIR}/${fp}`,
         base,
         dir: () => new Promise((r) => r(`${BOOKS_DIR}/`)),
@@ -132,10 +130,8 @@ export const nativeAppService: AppService = {
       const txt = await nativeAppService.fs.readFile(fp, base, 'text');
       settings = JSON.parse(txt as string);
     } catch {
-      const INIT_BOOKS_DIR = await join(
-        IS_MOBILE ? await appDataDir() : await documentDir(),
-        BOOKS_SUBDIR,
-      );
+      const INIT_BOOKS_DIR = await join(await documentDir(), BOOKS_SUBDIR);
+      await nativeAppService.fs.createDir('', 'Books', true);
       settings = {
         localBooksDir: INIT_BOOKS_DIR,
         globalReadSettings: {
