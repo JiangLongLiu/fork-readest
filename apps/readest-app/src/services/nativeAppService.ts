@@ -20,21 +20,12 @@ import {
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { open, message } from '@tauri-apps/plugin-dialog';
 
-import { Book, BooksGroup } from '../types/book';
+import { Book } from '../types/book';
 import { SystemSettings } from '../types/settings';
 import { AppService, BaseDir, ToastType } from '../types/system';
+import { LOCAL_BOOKS_SUBDIR } from './constants';
 
-const BOOKS_SUBDIR = 'DigestLibrary/Books';
 let BOOKS_DIR = '';
-
-const MOCK_BOOKS: Book[] = Array.from({ length: 14 }, (_v, k) => ({
-  id: `book-${k}`,
-  format: 'EPUB',
-  title: `Book ${k}`,
-  author: `Author ${k}`,
-  lastUpdated: Date.now() - 1000000 * k,
-  coverImageUrl: `https://placehold.co/800?text=Book+${k}&font=roboto`,
-}));
 
 function resolvePath(
   fp: string,
@@ -52,7 +43,7 @@ function resolvePath(
     case 'Books':
       return {
         baseDir: BaseDirectory.Document,
-        fp: `${BOOKS_SUBDIR}/${fp}`,
+        fp: `${LOCAL_BOOKS_SUBDIR}/${fp}`,
         base,
         dir: () => new Promise((r) => r(`${BOOKS_DIR}/`)),
       };
@@ -130,7 +121,7 @@ export const nativeAppService: AppService = {
       const txt = await nativeAppService.fs.readFile(fp, base, 'text');
       settings = JSON.parse(txt as string);
     } catch {
-      const INIT_BOOKS_DIR = await join(await documentDir(), BOOKS_SUBDIR);
+      const INIT_BOOKS_DIR = await join(await documentDir(), LOCAL_BOOKS_SUBDIR);
       await nativeAppService.fs.createDir('', 'Books', true);
       settings = {
         localBooksDir: INIT_BOOKS_DIR,
@@ -182,7 +173,6 @@ export const nativeAppService: AppService = {
     await message(msg, { kind, title, okLabel });
   },
   loadLibraryBooks: async () => {
-    // TODO: Burrently only ungrouped books are supported
     let books: Book[] = [];
     try {
       const txt = await nativeAppService.fs.readFile('books.json', 'Books', 'text');
@@ -194,16 +184,8 @@ export const nativeAppService: AppService = {
     books.forEach((book) => {
       book.coverImageUrl = nativeAppService.generateCoverUrl(book);
     });
-    books = [...books, ...MOCK_BOOKS];
-    const ungroupedBooks: BooksGroup[] = [
-      {
-        id: 'ungrouped',
-        name: 'Ungrouped',
-        books,
-        lastUpdated: Date.now(),
-      },
-    ];
-    return ungroupedBooks;
+
+    return books;
   },
   generateCoverUrl: (book: Book) => {
     return convertFileSrc(`${BOOKS_DIR}/${book.id}/cover.png`);

@@ -5,6 +5,8 @@ export interface Book {
   format: BookFormat;
   title: string;
   author: string;
+  group?: string;
+  tags?: string[];
   lastUpdated: number;
   isRemoved?: boolean;
   coverImageUrl?: string | null;
@@ -31,10 +33,7 @@ export interface BookConfig {
 }
 
 export interface BooksGroup {
-  id: string;
   name: string;
   books: Book[];
   lastUpdated: number;
 }
-
-export type LibraryItem = Book | BooksGroup;
