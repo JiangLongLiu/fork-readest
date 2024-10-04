@@ -3,23 +3,18 @@ import Image from 'next/image';
 import { Book, BooksGroup } from '../types/book';
 import { FaPlus } from 'react-icons/fa';
 
-interface BookshelfProps {
-  libraryBooks: Book[];
-  onImport: () => void;
-}
-
 type BookshelfItem = Book | BooksGroup;
 
 const UNGROUPED_NAME = 'ungrouped';
 
-const MOCK_BOOKS: Book[] = Array.from({ length: 14 }, (_v, k) => ({
-  id: `book-${k}`,
-  format: 'EPUB',
-  title: `Book ${k}`,
-  author: `Author ${k}`,
-  lastUpdated: Date.now() - 1000000 * k,
-  coverImageUrl: `https://placehold.co/800?text=Book+${k}&font=roboto`,
-}));
+// const MOCK_BOOKS: Book[] = Array.from({ length: 14 }, (_v, k) => ({
+//   hash: `book-${k}`,
+//   format: 'EPUB',
+//   title: `Book ${k}`,
+//   author: `Author ${k}`,
+//   lastUpdated: Date.now() - 1000000 * k,
+//   coverImageUrl: `https://placehold.co/800?text=Book+${k}&font=roboto`,
+// }));
 
 const generateBookshelfItems = (books: Book[]): BookshelfItem[] => {
   const groups: BooksGroup[] = books.reduce((acc: BooksGroup[], book: Book) => {
@@ -43,8 +38,12 @@ const generateBookshelfItems = (books: Book[]): BookshelfItem[] => {
   return [...ungroupedBooks, ...groupedBooks].sort((a, b) => b.lastUpdated - a.lastUpdated);
 };
 
-const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, onImport }) => {
-  libraryBooks = [...libraryBooks, ...MOCK_BOOKS];
+interface BookshelfProps {
+  libraryBooks: Book[];
+  onImportBooks: () => void;
+}
+
+const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, onImportBooks }) => {
   const bookshelfItems = generateBookshelfItems(libraryBooks);
   return (
     <div>
@@ -55,7 +54,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, onImport }) => {
             <div className='grid gap-2'>
               {'format' in item ? (
                 <div>
-                  <div key={(item as Book).id} className='card bg-base-100 w-full shadow-md'>
+                  <div key={(item as Book).hash} className='card bg-base-100 w-full shadow-md'>
                     <Image
                       width={10}
                       height={10}
@@ -65,13 +64,13 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, onImport }) => {
                     />
                   </div>
                   <div className='card-body p-0 pt-2'>
-                    <h3 className='card-title text-sm'>{(item as Book).title}</h3>
+                    <h3 className='card-title line-clamp-1 text-sm'>{(item as Book).title}</h3>
                   </div>
                 </div>
               ) : (
                 <div>
                   {(item as BooksGroup).books.map((book) => (
-                    <div key={book.id} className='card bg-base-100 w-full shadow-md'>
+                    <div key={book.hash} className='card bg-base-100 w-full shadow-md'>
                       <figure>
                         <Image
                           width={10}
@@ -94,7 +93,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, onImport }) => {
           <div
             className='border-1 flex aspect-[28/41] items-center justify-center bg-white'
             role='button'
-            onClick={onImport}
+            onClick={onImportBooks}
           >
             <FaPlus className='size-8' color='gray' />
           </div>

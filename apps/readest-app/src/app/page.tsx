@@ -41,19 +41,42 @@ const LibraryPage = () => {
     });
   }, [envConfig, appState]);
 
-  const handleImport = () => {
-    // logic to import books
+  const handleImportBooks = async () => {
     console.log('Importing books...');
+    const appService = await envConfig.appService();
+    appService.selectFiles('Select Books', ['epub', 'pdf']).then(async (files) => {
+      setLoading(true);
+      for (const file of files) {
+        await dav?.addBook(file, libraryBooks).then(() => {});
+        setLibraryBooks(libraryBooks);
+      }
+      setLoading(false);
+    });
   };
 
   return (
     <div className='min-h-screen bg-gray-100'>
-      <Navbar onImport={handleImport} />
+      <Navbar onImportBooks={handleImportBooks} />
       <div className='min-h-screen p-2 pt-16'>
         <div className='hero-content'>
           <Spinner loading={loading} />
-          <Bookshelf libraryBooks={libraryBooks} onImport={handleImport} />
+          <Bookshelf libraryBooks={libraryBooks} onImportBooks={handleImportBooks} />
         </div>
+        {libraryBooks.length === 0 && (
+          <div className='hero min-h-screen'>
+            <div className='hero-content text-neutral-content text-center'>
+              <div className='max-w-md'>
+                <h1 className='mb-5 text-5xl font-bold'>Your Library</h1>
+                <p className='mb-5'>
+                  Welcome to your library. You can upload your books here and read them anytime.
+                </p>
+                <button className='btn btn-primary' onClick={handleImportBooks}>
+                  Upload Books
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

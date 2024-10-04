@@ -1,7 +1,7 @@
-export type BookFormat = 'EPUB' | 'PDF';
+export type BookFormat = 'EPUB' | 'PDF' | 'MOBI' | 'CBZ' | 'FB2' | 'FBZ';
 
 export interface Book {
-  id: string;
+  hash: string;
   format: BookFormat;
   title: string;
   author: string;

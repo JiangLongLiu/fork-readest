@@ -66,7 +66,7 @@ export const nativeAppService: AppService = {
 
       return mode === 'text'
         ? (readTextFile(fp, base && { baseDir }) as Promise<string>)
-        : (await readFile(fp, base && { baseDir })).buffer;
+        : ((await readFile(fp, base && { baseDir })).buffer as ArrayBuffer);
     },
     async writeFile(path: string, base: BaseDir, content: string | ArrayBuffer) {
       const { fp, baseDir } = resolvePath(path, base);
@@ -188,6 +188,6 @@ export const nativeAppService: AppService = {
     return books;
   },
   generateCoverUrl: (book: Book) => {
-    return convertFileSrc(`${BOOKS_DIR}/${book.id}/cover.png`);
+    return convertFileSrc(`${BOOKS_DIR}/${book.hash}/cover.png`);
   },
 };

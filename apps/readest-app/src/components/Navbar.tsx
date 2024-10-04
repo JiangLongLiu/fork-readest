@@ -2,10 +2,10 @@ import * as React from 'react';
 import { FaSearch, FaPlus } from 'react-icons/fa';
 
 interface NavbarProps {
-  onImport: () => void;
+  onImportBooks: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onImport }) => {
+const Navbar: React.FC<NavbarProps> = ({ onImportBooks }) => {
   return (
     <div className='fixed top-0 z-10 w-full bg-gray-100 p-6'>
       <div className='flex items-center justify-between'>
@@ -29,7 +29,7 @@ const Navbar: React.FC<NavbarProps> = ({ onImport }) => {
               className='dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow'
             >
               <li>
-                <button onClick={onImport}>From Local File</button>
+                <button onClick={onImportBooks}>From Local File</button>
               </li>
             </ul>
           </span>
