@@ -1,117 +1,31 @@
-import {
-  exists,
-  mkdir,
-  readTextFile,
-  readFile,
-  writeTextFile,
-  writeFile,
-  readDir,
-  remove,
-  BaseDirectory,
-} from '@tauri-apps/plugin-fs';
-import {
-  join,
-  appConfigDir,
-  appDataDir,
-  appCacheDir,
-  appLogDir,
-  documentDir,
-} from '@tauri-apps/api/path';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { open, message } from '@tauri-apps/plugin-dialog';
+import { join, documentDir } from '@tauri-apps/api/path';
 
-import { Book } from '../types/book';
+import { Book, BookConfig, BookFormat } from '../types/book';
 import { SystemSettings } from '../types/settings';
-import { AppService, BaseDir, ToastType } from '../types/system';
+import { AppService, ToastType } from '../types/system';
 import { LOCAL_BOOKS_SUBDIR } from './constants';
+import { resolvePath, nativeFileSystem } from './nativeFileSystem';
+import {
+  getBaseFilename,
+  getConfigFilename,
+  getCoverFilename,
+  getDir,
+  getFilename,
+  getLibraryFilename,
+  INIT_BOOK_CONFIG,
+} from '@/utils/book';
+import { BookDoc, DocumentLoader } from '@/libs/document';
+import { RemoteFile } from '@/utils/file';
+import { partialMD5 } from '@/utils/md5';
 
 let BOOKS_DIR = '';
-
-function resolvePath(
-  fp: string,
-  base: BaseDir,
-): { baseDir: number; base: BaseDir; fp: string; dir: () => Promise<string> } {
-  switch (base) {
-    case 'Settings':
-      return { baseDir: BaseDirectory.AppConfig, fp, base, dir: appConfigDir };
-    case 'Data':
-      return { baseDir: BaseDirectory.AppData, fp, base, dir: appDataDir };
-    case 'Cache':
-      return { baseDir: BaseDirectory.AppCache, fp, base, dir: appCacheDir };
-    case 'Log':
-      return { baseDir: BaseDirectory.AppLog, fp, base, dir: appLogDir };
-    case 'Books':
-      return {
-        baseDir: BaseDirectory.Document,
-        fp: `${LOCAL_BOOKS_SUBDIR}/${fp}`,
-        base,
-        dir: () => new Promise((r) => r(`${BOOKS_DIR}/`)),
-      };
-    default:
-      return {
-        baseDir: BaseDirectory.Temp,
-        fp,
-        base,
-        dir: () => new Promise((r) => r('')),
-      };
-  }
-}
 
 const SETTINGS_PATH = resolvePath('settings.json', 'Settings');
 
 export const nativeAppService: AppService = {
-  fs: {
-    async readFile(path: string, base: BaseDir, mode: 'text' | 'binary') {
-      const { fp, baseDir } = resolvePath(path, base);
-
-      return mode === 'text'
-        ? (readTextFile(fp, base && { baseDir }) as Promise<string>)
-        : ((await readFile(fp, base && { baseDir })).buffer as ArrayBuffer);
-    },
-    async writeFile(path: string, base: BaseDir, content: string | ArrayBuffer) {
-      const { fp, baseDir } = resolvePath(path, base);
-
-      return typeof content === 'string'
-        ? writeTextFile(fp, content, base && { baseDir })
-        : writeFile(fp, new Uint8Array(content), base && { baseDir });
-    },
-    async removeFile(path: string, base: BaseDir) {
-      const { fp, baseDir } = resolvePath(path, base);
-
-      return remove(fp, base && { baseDir });
-    },
-    async createDir(path: string, base: BaseDir, recursive = false) {
-      const { fp, baseDir } = resolvePath(path, base);
-
-      await mkdir(fp, base && { baseDir, recursive });
-    },
-    async removeDir(path: string, base: BaseDir, recursive = false) {
-      const { fp, baseDir } = resolvePath(path, base);
-
-      await remove(fp, base && { baseDir, recursive });
-    },
-    async readDir(path: string, base: BaseDir) {
-      const { fp, baseDir } = resolvePath(path, base);
-
-      const list = await readDir(fp, base && { baseDir });
-      return list.map((entity) => {
-        return {
-          path: entity.name,
-          isDir: entity.isDirectory,
-        };
-      });
-    },
-    async exists(path: string, base: BaseDir) {
-      const { fp, baseDir } = resolvePath(path, base);
-
-      try {
-        const res = await exists(fp, base && { baseDir });
-        return res;
-      } catch {
-        return false;
-      }
-    },
-  },
+  fs: nativeFileSystem,
   loadSettings: async () => {
     let settings: SystemSettings;
     const { fp, base } = SETTINGS_PATH;
@@ -172,22 +86,114 @@ export const nativeAppService: AppService = {
   showMessage: async (msg: string, kind: ToastType = 'info', title?: string, okLabel?: string) => {
     await message(msg, { kind, title, okLabel });
   },
+  importBook: async (
+    file: string | File,
+    books: Book[],
+    overwrite: boolean = false,
+  ): Promise<Book[]> => {
+    try {
+      let loadedBook: BookDoc;
+      let format: BookFormat;
+      let filename: string;
+      let fileobj: File;
+
+      try {
+        if (typeof file === 'string') {
+          filename = file;
+          fileobj = await new RemoteFile(nativeAppService.fs.getURL(file), file).open();
+        } else {
+          filename = file.name;
+          fileobj = file;
+        }
+        ({ book: loadedBook, format } = await new DocumentLoader(fileobj).open());
+        if (!loadedBook.metadata.title) {
+          loadedBook.metadata.title = getBaseFilename(filename);
+        }
+      } catch (error) {
+        console.error(error);
+        throw new Error(`Failed to open the book: ${(error as Error).message || error}`);
+      }
+
+      const hash = await partialMD5(fileobj);
+      const existingBook = books.filter((b) => b.hash === hash)[0];
+      if (existingBook) {
+        if (existingBook.isRemoved) {
+          delete existingBook.isRemoved;
+        }
+        existingBook.lastUpdated = Date.now();
+      }
+
+      const book: Book = {
+        hash,
+        format,
+        title: loadedBook.metadata.title,
+        author: loadedBook.metadata.author,
+        lastUpdated: Date.now(),
+      };
+      book.coverImageUrl = nativeAppService.getCoverImageUrl(book);
+
+      if (!(await nativeAppService.fs.exists(getDir(book), 'Books'))) {
+        await nativeAppService.fs.createDir(getDir(book), 'Books');
+      }
+      if (!(await nativeAppService.fs.exists(getFilename(book), 'Books')) || overwrite) {
+        if (typeof file === 'string') {
+          await nativeAppService.fs.copyFile(file, getFilename(book), 'Books');
+        } else {
+          await nativeAppService.fs.writeFile(getFilename(book), 'Books', await file.arrayBuffer());
+        }
+      }
+      if (!(await nativeAppService.fs.exists(getCoverFilename(book), 'Books')) || overwrite) {
+        const cover = await loadedBook.getCover();
+        if (cover) {
+          await nativeAppService.fs.writeFile(
+            getCoverFilename(book),
+            'Books',
+            await cover.arrayBuffer(),
+          );
+        }
+      }
+      // Never overwrite the config file only when it's not existed
+      if (!existingBook) {
+        await nativeAppService.saveBookConfig(book, INIT_BOOK_CONFIG);
+        books.splice(0, 0, book);
+      }
+    } catch (error) {
+      throw error;
+    }
+
+    return books;
+  },
+  loadBookConfig: async (book: Book): Promise<BookConfig> => {
+    try {
+      const str = await nativeAppService.fs.readFile(getConfigFilename(book), 'Books', 'text');
+      return JSON.parse(str as string);
+    } catch {
+      return INIT_BOOK_CONFIG;
+    }
+  },
+  saveBookConfig: async (book: Book, config: BookConfig) => {
+    await nativeAppService.fs.writeFile(getConfigFilename(book), 'Books', JSON.stringify(config));
+  },
   loadLibraryBooks: async () => {
     let books: Book[] = [];
+    const libraryFilename = getLibraryFilename();
     try {
-      const txt = await nativeAppService.fs.readFile('books.json', 'Books', 'text');
+      const txt = await nativeAppService.fs.readFile(libraryFilename, 'Books', 'text');
       books = JSON.parse(txt as string);
     } catch {
-      await nativeAppService.fs.writeFile('books.json', 'Books', '[]');
+      await nativeAppService.fs.writeFile(libraryFilename, 'Books', '[]');
     }
 
     books.forEach((book) => {
-      book.coverImageUrl = nativeAppService.generateCoverUrl(book);
+      book.coverImageUrl = nativeAppService.getCoverImageUrl(book);
     });
 
     return books;
   },
-  generateCoverUrl: (book: Book) => {
-    return convertFileSrc(`${BOOKS_DIR}/${book.hash}/cover.png`);
+  saveLibraryBooks: async (books: Book[]) => {
+    await nativeAppService.fs.writeFile(getLibraryFilename(), 'Books', JSON.stringify(books));
+  },
+  getCoverImageUrl: (book: Book) => {
+    return convertFileSrc(`${BOOKS_DIR}/${getCoverFilename(book)}`);
   },
 };

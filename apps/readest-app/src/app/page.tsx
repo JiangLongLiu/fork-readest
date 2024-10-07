@@ -16,7 +16,7 @@ const LibraryPage = () => {
   const { envConfig } = useEnv();
   const [appState, setAppState] = useState<AppState>('Init');
   const [libraryBooks, setLibraryBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   React.useEffect(() => {
     if (appState !== 'Init') return;
@@ -47,7 +47,7 @@ const LibraryPage = () => {
     appService.selectFiles('Select Books', ['epub', 'pdf']).then(async (files) => {
       setLoading(true);
       for (const file of files) {
-        await dav?.addBook(file, libraryBooks).then(() => {});
+        await appService.importBook(file, libraryBooks);
         setLibraryBooks(libraryBooks);
       }
       setLoading(false);
@@ -62,7 +62,7 @@ const LibraryPage = () => {
           <Spinner loading={loading} />
           <Bookshelf libraryBooks={libraryBooks} onImportBooks={handleImportBooks} />
         </div>
-        {libraryBooks.length === 0 && (
+        {!loading && libraryBooks.length === 0 && (
           <div className='hero min-h-screen'>
             <div className='hero-content text-neutral-content text-center'>
               <div className='max-w-md'>

@@ -41,6 +41,15 @@ export interface BookDoc {
   getCover(): Promise<Blob | null>;
 }
 
+export const EXTS: Record<BookFormat, string> = {
+  EPUB: 'epub',
+  PDF: 'pdf',
+  MOBI: 'mobi',
+  CBZ: 'cbz',
+  FB2: 'fb2',
+  FBZ: 'fbz',
+};
+
 export class DocumentLoader {
   private file: DocumentFile;
 
@@ -86,18 +95,22 @@ export class DocumentLoader {
   }
 
   private isCBZ(): boolean {
-    return this.file.type === 'application/vnd.comicbook+zip' || this.file.name.endsWith('.cbz');
+    return (
+      this.file.type === 'application/vnd.comicbook+zip' || this.file.name.endsWith(`.${EXTS.CBZ}`)
+    );
   }
 
   private isFB2(): boolean {
-    return this.file.type === 'application/x-fictionbook+xml' || this.file.name.endsWith('.fb2');
+    return (
+      this.file.type === 'application/x-fictionbook+xml' || this.file.name.endsWith(`.${EXTS.FB2}`)
+    );
   }
 
   private isFBZ(): boolean {
     return (
       this.file.type === 'application/x-zip-compressed-fb2' ||
       this.file.name.endsWith('.fb2.zip') ||
-      this.file.name.endsWith('.fbz')
+      this.file.name.endsWith(`.${EXTS.FBZ}`)
     );
   }
 
@@ -116,7 +129,7 @@ export class DocumentLoader {
         book = makeComicBook(loader, this.file);
         format = 'CBZ';
       } else if (this.isFBZ()) {
-        const entry = entries.find((entry) => entry.filename.endsWith('.fb2'));
+        const entry = entries.find((entry) => entry.filename.endsWith(`.${EXTS.FB2}`));
         const blob = await loader.loadBlob((entry ?? entries[0]!).filename);
         const { makeFB2 } = await import('foliate-js/fb2.js');
         book = await makeFB2(blob);
