@@ -1,3 +1,7 @@
 {
-    "typescript.tsdk": "node_modules/typescript/lib"
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "rust-analyzer.linkedProjects": [
+        "packages/tauri/Cargo.toml",
+        "apps/digest-app/src-tauri/Cargo.toml"
+    ],
 }
