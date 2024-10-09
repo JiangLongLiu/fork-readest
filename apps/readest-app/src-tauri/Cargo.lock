@@ -3026,7 +3026,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tauri",
- "tauri-build",
+ "tauri-build 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "tauri-plugin-dialog",
  "tauri-plugin-fs",
  "tauri-plugin-http",

@@ -1,6 +1,7 @@
+import * as React from 'react';
 import type { Metadata } from 'next';
-import { AuthProvider } from '../context/AuthContext';
-import { EnvProvider } from '../context/EnvContext';
+import { AuthProvider } from '@/context/AuthContext';
+import { EnvProvider } from '@/context/EnvContext';
 import './globals.css';
 
 export const metadata: Metadata = {

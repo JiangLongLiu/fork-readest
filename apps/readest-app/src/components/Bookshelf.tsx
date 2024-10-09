@@ -1,5 +1,7 @@
 import * as React from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+
 import { Book, BooksGroup } from '../types/book';
 import { FaPlus } from 'react-icons/fa';
 
@@ -44,16 +46,23 @@ interface BookshelfProps {
 }
 
 const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, onImportBooks }) => {
+  const router = useRouter();
+
   const bookshelfItems = generateBookshelfItems(libraryBooks);
+
+  const handleBookClick = (id: string) => {
+    router.push(`/reader?id=${id}`);
+  };
+
   return (
-    <div>
+    <div className='bookshelf'>
       {/* Books Grid */}
       <div className='grid grid-cols-3 gap-6 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8'>
         {bookshelfItems.map((item, index) => (
           <div key={`library-item-${index}`} className=''>
             <div className='grid gap-2'>
               {'format' in item ? (
-                <div>
+                <div className='bookItem' onClick={() => handleBookClick(item.hash)}>
                   <div key={(item as Book).hash} className='card bg-base-100 w-full shadow-md'>
                     <Image
                       width={10}

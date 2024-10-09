@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { FaSearch, FaPlus } from 'react-icons/fa';
 
-interface NavbarProps {
+interface SearchBarProps {
   onImportBooks: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onImportBooks }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ onImportBooks }) => {
   return (
     <div className='fixed top-0 z-10 w-full bg-gray-100 p-6'>
       <div className='flex items-center justify-between'>
@@ -39,4 +39,4 @@ const Navbar: React.FC<NavbarProps> = ({ onImportBooks }) => {
   );
 };
 
-export default Navbar;
+export default SearchBar;
