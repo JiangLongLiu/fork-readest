@@ -73,7 +73,9 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, onImportBooks }) =>
                     />
                   </div>
                   <div className='card-body p-0 pt-2'>
-                    <h3 className='card-title line-clamp-1 text-sm'>{(item as Book).title}</h3>
+                    <h4 className='card-title line-clamp-1 text-[0.6em] text-xs font-semibold'>
+                      {(item as Book).title}
+                    </h4>
                   </div>
                 </div>
               ) : (
@@ -85,7 +87,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, onImportBooks }) =>
                           width={10}
                           height={10}
                           src={book.coverImageUrl!}
-                          alt={book.title}
+                          alt={book.title || ''}
                           className='h-48 w-full object-cover'
                         />
                       </figure>

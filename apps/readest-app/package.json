@@ -7,7 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "build-pdfjs": "pnpm -C ../../packages/pdf-js exec npx gulp generic-legacy",
+    "prepare-public-vendor": "mkdirp ./public/vendor/pdfjs",
+    "copy-pdfjs-js": "dotenv -- cross-var cpx \"%PDFJS_BUILD_PATH%/pdf*\" ./public/vendor/pdfjs",
+    "copy-pdfjs-fonts": "dotenv -- cross-var cpx \"%PDFJS_FONTS_PATH%/{cmaps,standard_fonts}/*\" ./public/vendor/pdfjs",
+    "copy-pdfjs-css": "dotenv -- cross-var cpx \"%PDFJS_STYLE_PATH%/{annotation_layer_builder,text_layer_builder}.css\" ./public/vendor/pdfjs",
+    "copy-pdfjs": "pnpm copy-pdfjs-js && pnpm copy-pdfjs-fonts && pnpm copy-pdfjs-css",
+    "copy-pdfjs-to-foloate": "cpx \"./public/vendor/pdfjs/**/*\" ../../packages/foliate-js/vendor/pdfjs",
+    "setup-pdfjs": "pnpm build-pdfjs && pnpm prepare-public-vendor && pnpm copy-pdfjs && pnpm copy-pdfjs-to-foloate"
   },
   "dependencies": {
     "@tauri-apps/api": "2.0.2",
@@ -32,9 +40,13 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.4.20",
+    "cpx": "^1.5.0",
+    "cross-var": "^1.1.0",
     "daisyui": "^4.12.10",
+    "dotenv-cli": "^7.4.2",
     "eslint": "^8",
     "eslint-config-next": "14.2.13",
+    "mkdirp": "^3.0.1",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"

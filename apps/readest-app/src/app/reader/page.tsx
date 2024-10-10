@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Spinner from '@/components/Spinner';
 import ReaderContent from '@/components/ReaderContent';
-import NavBar from '@/components/Navbar';
+import NavBar from '@/components/NavBar';
 import { useReaderStore } from '@/store/readerStore';
 import { useEnv } from '@/context/EnvContext';
 

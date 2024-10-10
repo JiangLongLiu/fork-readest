@@ -4,3 +4,6 @@
 [submodule "packages/tauri"]
 	path = packages/tauri
 	url = git@github.com:chrox/tauri.git
+[submodule "packages/pdf-js"]
+	path = packages/pdf-js
+	url = git@github.com:mozilla/pdf.js.git
