@@ -21,7 +21,7 @@ const ReaderContent = () => {
 
   React.useEffect(() => {
     if (id && !bookState.content) {
-      envConfig.appService().then((appService) => {
+      envConfig.initAppService().then((appService) => {
         fetchBook(appService, id).then((book) => {
           if (book) {
             book.lastUpdated = Date.now();

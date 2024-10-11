@@ -59,18 +59,19 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, onImportBooks }) =>
       {/* Books Grid */}
       <div className='grid grid-cols-3 gap-6 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8'>
         {bookshelfItems.map((item, index) => (
-          <div key={`library-item-${index}`} className=''>
-            <div className='grid gap-2'>
+          <div key={`library-item-${index}`} className='flex h-full flex-col'>
+            <div className='flex-grow'>
               {'format' in item ? (
-                <div className='bookItem' onClick={() => handleBookClick(item.hash)}>
-                  <div key={(item as Book).hash} className='card bg-base-100 w-full shadow-md'>
-                    <Image
-                      width={10}
-                      height={10}
-                      src={(item as Book).coverImageUrl!}
-                      alt={(item as Book).title}
-                      className='aspect-[28/41] w-full object-cover'
-                    />
+                <div className='bookItem cursor-pointer' onClick={() => handleBookClick(item.hash)}>
+                  <div key={(item as Book).hash} className='card bg-base-100 shadow-md'>
+                    <div className='relative aspect-[28/41]'>
+                      <Image
+                        src={(item as Book).coverImageUrl!}
+                        alt={(item as Book).title}
+                        fill={true}
+                        className='object-cover'
+                      />
+                    </div>
                   </div>
                   <div className='card-body p-0 pt-2'>
                     <h4 className='card-title line-clamp-1 text-[0.6em] text-xs font-semibold'>

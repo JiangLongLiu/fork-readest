@@ -11,7 +11,7 @@ import Spinner from '@/components/Spinner';
 import Bookshelf from '@/components/Bookshelf';
 
 const LibraryPage = () => {
-  const { envConfig } = useEnv();
+  const { envConfig, getAppService, appService } = useEnv();
   const [libraryBooks, setLibraryBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const isInitiating = useRef(false);
@@ -20,7 +20,7 @@ const LibraryPage = () => {
     if (isInitiating.current) return;
     isInitiating.current = true;
     setLoading(true);
-    envConfig.appService().then((appService) => {
+    getAppService(envConfig).then((appService) => {
       appService.loadSettings().then((settings) => {
         console.log('Settings', settings);
         appService
@@ -38,17 +38,43 @@ const LibraryPage = () => {
     });
   }, [envConfig]);
 
+  const importBooks = async (files: [string | File]) => {
+    setLoading(true);
+    for (const file of files) {
+      await appService?.importBook(file, libraryBooks).then(() => {});
+      setLibraryBooks(libraryBooks);
+    }
+    setLoading(false);
+  };
+
+  const selectFilesTauri = async () => {
+    return appService?.selectFiles('Select Books', ['epub', 'pdf']);
+  };
+
+  const selectFilesWeb = () => {
+    return new Promise((resolve) => {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.epub, .pdf';
+      fileInput.multiple = true;
+      fileInput.click();
+
+      fileInput.onchange = () => {
+        resolve(fileInput.files);
+      };
+    });
+  };
+
   const handleImportBooks = async () => {
     console.log('Importing books...');
-    const appService = await envConfig.appService();
-    appService.selectFiles('Select Books', ['epub', 'pdf']).then(async (files) => {
-      setLoading(true);
-      for (const file of files) {
-        await appService.importBook(file, libraryBooks);
-        setLibraryBooks(libraryBooks);
-      }
-      setLoading(false);
-    });
+    const { type } = await import('@tauri-apps/plugin-os');
+    let files;
+    if (['android', 'ios'].includes(type())) {
+      files = (await selectFilesWeb()) as [File];
+    } else {
+      files = (await selectFilesTauri()) as [string];
+    }
+    importBooks(files);
   };
 
   return (
