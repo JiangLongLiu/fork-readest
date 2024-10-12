@@ -142,7 +142,7 @@ export class NativeAppService extends BaseAppService {
   }
 
   async getInitBooksDir(): Promise<string> {
-    return join(appDataDir ? await appDataDir() : await documentDir(), LOCAL_BOOKS_SUBDIR);
+    return join(isMobile ? await appDataDir() : await documentDir(), LOCAL_BOOKS_SUBDIR);
   }
 
   async selectDirectory(title: string): Promise<string> {

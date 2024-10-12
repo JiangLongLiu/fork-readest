@@ -19,7 +19,7 @@
       "identifier": "fs:scope-appdata-recursive",
       "allow": [
         {
-          "path": "$APPDATA/DigestLibrary/**/*"
+          "path": "$APPDATA/Readest/**/*"
         }
       ],
       "deny": []
