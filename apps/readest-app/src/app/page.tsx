@@ -41,7 +41,7 @@ const LibraryPage = () => {
   const importBooks = async (files: [string | File]) => {
     setLoading(true);
     for (const file of files) {
-      await appService?.importBook(file, libraryBooks).then(() => {});
+      await appService?.importBook(file, libraryBooks);
       setLibraryBooks(libraryBooks);
     }
     setLoading(false);
