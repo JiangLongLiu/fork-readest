@@ -25,10 +25,11 @@ export interface BookNote {
 
 export interface BookConfig {
   lastUpdated: number;
-  remoteProgress: number;
-  localProgress: number;
-  bookmarks: BookNote[];
-  annotations: BookNote[];
+  progress?: number;
+  location?: string;
+  pageinfo?: Record<string, number>;
+  bookmarks?: BookNote[];
+  annotations?: BookNote[];
   removedNotesTimestamps?: Record<string, number>;
 }
 

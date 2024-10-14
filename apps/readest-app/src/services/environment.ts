@@ -1,14 +1,18 @@
 import { AppService } from '@/types/system';
 
+let appService: AppService | null = null;
+
 export interface EnvConfigType {
   initAppService: () => Promise<AppService>;
 }
 
 const environmentConfig: EnvConfigType = {
   initAppService: async () => {
-    const { NativeAppService } = await import('@/services/nativeAppService');
-    const appService = new NativeAppService();
-    await appService.loadSettings();
+    if (!appService) {
+      const { NativeAppService } = await import('@/services/nativeAppService');
+      appService = new NativeAppService();
+      await appService.loadSettings();
+    }
     return appService;
   },
 };

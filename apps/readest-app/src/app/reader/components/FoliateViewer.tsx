@@ -1,10 +1,14 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useFoliateEvents } from '../hooks/useFoliateEvents';
 import { BookDoc } from '@/libs/document';
+import { BookConfig } from '@/types/book';
 
 type FoliateViewerProps = {
-  book: BookDoc;
+  bookId: string;
+  bookConfig: BookConfig;
+  bookDoc: BookDoc;
 };
 
 const getCSS = (spacing: number, justify: boolean, hyphenate: boolean) => `
@@ -46,8 +50,10 @@ const getCSS = (spacing: number, justify: boolean, hyphenate: boolean) => `
     }
 `;
 
-interface FoliateView extends HTMLElement {
+export interface FoliateView extends HTMLElement {
   open: (book: BookDoc) => Promise<void>;
+  init: (options: { lastLocation: string }) => void;
+  goToFraction: (fraction: number) => void;
   renderer: {
     setStyles: (css: string) => void;
     next: () => Promise<void>;
@@ -55,8 +61,9 @@ interface FoliateView extends HTMLElement {
   };
 }
 
-const FoliateViewer: React.FC<FoliateViewerProps> = ({ book }) => {
+const FoliateViewer: React.FC<FoliateViewerProps> = ({ bookId, bookConfig, bookDoc }) => {
   const viewRef = useRef<HTMLDivElement>(null);
+  const [view, setView] = useState<FoliateView | null>(null);
   const isViewCreated = useRef(false);
 
   useEffect(() => {
@@ -66,18 +73,24 @@ const FoliateViewer: React.FC<FoliateViewerProps> = ({ book }) => {
       const view = document.createElement('foliate-view') as FoliateView;
       document.body.append(view);
       viewRef.current?.appendChild(view);
-
-      console.log('Open the book with foliate-view:', book);
-      await view.open(book);
+      setView(view);
+      await view.open(bookDoc);
       if ('setStyles' in view.renderer) {
-        view.renderer.setStyles(getCSS(1.4, true, true));
+        view.renderer.setStyles(getCSS(2.4, true, true));
       }
-      await view.renderer.next();
+      const lastLocation = bookConfig.location;
+      if (lastLocation) {
+        view.init({ lastLocation });
+      } else {
+        view.goToFraction(0);
+      }
     };
 
     openBook();
     isViewCreated.current = true;
-  }, [book]);
+  }, [bookDoc]);
+
+  useFoliateEvents(view, bookId);
 
   const handleTap = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const { clientX } = event;
@@ -85,11 +98,10 @@ const FoliateViewer: React.FC<FoliateViewerProps> = ({ book }) => {
     const leftThreshold = width * 0.5;
     const rightThreshold = width * 0.5;
 
-    const existingView = viewRef.current?.querySelector('foliate-view') as FoliateView;
     if (clientX < leftThreshold) {
-      existingView?.renderer?.prev();
+      view?.renderer.prev();
     } else if (clientX > rightThreshold) {
-      existingView?.renderer?.next();
+      view?.renderer.next();
     }
   };
 

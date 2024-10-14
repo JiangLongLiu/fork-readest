@@ -3,46 +3,35 @@
 import * as React from 'react';
 import { useState, useRef } from 'react';
 
-import { Book } from '@/types/book';
 import { useEnv } from '@/context/EnvContext';
+import { useReaderStore } from '@/store/readerStore';
 
 import SearchBar from '@/components/SearchBar';
 import Spinner from '@/components/Spinner';
 import Bookshelf from '@/components/Bookshelf';
 
 const LibraryPage = () => {
-  const { envConfig, getAppService, appService } = useEnv();
-  const [libraryBooks, setLibraryBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { envConfig, appService, getAppService } = useEnv();
+  const { library: libraryBooks, setLibrary } = useReaderStore();
+  const [loading, setLoading] = useState(true);
   const isInitiating = useRef(false);
 
   React.useEffect(() => {
     if (isInitiating.current) return;
     isInitiating.current = true;
     setLoading(true);
-    getAppService(envConfig).then((appService) => {
-      appService.loadSettings().then((settings) => {
-        console.log('Settings', settings);
-        appService
-          .loadLibraryBooks()
-          .then((libraryBooks) => {
-            setLibraryBooks(libraryBooks);
-            setLoading(false);
-          })
-          .catch((err) => {
-            console.error(err);
-            setLoading(false);
-            appService.showMessage(`Failed to load library books: ${err}`, 'error');
-          });
-      });
+    getAppService(envConfig).then(async (appService) => {
+      console.log('Loading library books...');
+      setLibrary(await appService.loadLibraryBooks());
+      setLoading(false);
     });
-  }, [envConfig, getAppService]);
+  }, [envConfig, libraryBooks, setLibrary]);
 
   const importBooks = async (files: [string | File]) => {
     setLoading(true);
     for (const file of files) {
       await appService?.importBook(file, libraryBooks);
-      setLibraryBooks(libraryBooks);
+      setLibrary(libraryBooks);
     }
     appService?.saveLibraryBooks(libraryBooks);
     setLoading(false);

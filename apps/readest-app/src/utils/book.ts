@@ -26,8 +26,4 @@ export const getBaseFilename = (filename: string) => {
 };
 export const INIT_BOOK_CONFIG: BookConfig = {
   lastUpdated: 0,
-  remoteProgress: 0,
-  localProgress: 0,
-  bookmarks: [],
-  annotations: [],
 };

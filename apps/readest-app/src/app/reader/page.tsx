@@ -1,24 +1,41 @@
 'use client';
 
 import * as React from 'react';
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import ReaderContent from '@/components/ReaderContent';
+
+import { useEnv } from '@/context/EnvContext';
+import { useReaderStore } from '@/store/readerStore';
+
 import NavBar from '@/components/NavBar';
+import ReaderContent from './components/ReaderContent';
 
 const ReaderPage = () => {
   const router = useRouter();
 
   const [isNavBarVisible, setIsNavBarVisible] = useState(false);
+  const [isClosingBook, setIsClosingBook] = useState(false);
+  const { envConfig } = useEnv();
+  const { setLibrary } = useReaderStore();
 
   const handleBack = () => {
     console.log('Back to bookshelf');
+    setIsClosingBook(true);
     router.back();
   };
 
   const handleTap = () => {
     setIsNavBarVisible((pre) => !pre);
   };
+
+  useEffect(() => {
+    const fetchLibrary = async () => {
+      const appService = await envConfig.initAppService();
+      setLibrary(await appService.loadLibraryBooks());
+    };
+
+    fetchLibrary();
+  }, [setLibrary]);
 
   return (
     <div className='min-h-screen bg-gray-100'>
@@ -28,7 +45,7 @@ const ReaderPage = () => {
       />
       <NavBar onBack={handleBack} isVisible={isNavBarVisible} />
       <Suspense>
-        <ReaderContent />
+        <ReaderContent isClosingBook={isClosingBook} />
       </Suspense>
     </div>
   );
