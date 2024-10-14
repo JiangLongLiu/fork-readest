@@ -25,7 +25,7 @@ const LibraryPage = () => {
       setLibrary(await appService.loadLibraryBooks());
       setLoading(false);
     });
-  }, [envConfig, libraryBooks, setLibrary]);
+  }, [envConfig, libraryBooks, setLibrary, getAppService]);
 
   const importBooks = async (files: [string | File]) => {
     setLoading(true);

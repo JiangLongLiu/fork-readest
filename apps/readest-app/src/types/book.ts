@@ -12,6 +12,12 @@ export interface Book {
   coverImageUrl?: string | null;
 }
 
+export interface PageInfo {
+  current: number;
+  next: number;
+  total: number;
+}
+
 export interface BookNote {
   cfi: string;
   start: string;
@@ -27,7 +33,7 @@ export interface BookConfig {
   lastUpdated: number;
   progress?: number;
   location?: string;
-  pageinfo?: Record<string, number>;
+  pageinfo?: PageInfo;
   bookmarks?: BookNote[];
   annotations?: BookNote[];
   removedNotesTimestamps?: Record<string, number>;

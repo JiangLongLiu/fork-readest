@@ -37,5 +37,5 @@ export const useFoliateEvents = (
       view.removeEventListener('load', onLoad);
       view.removeEventListener('relocate', onRelocate);
     };
-  }, [view, handlers]);
+  }, [view, onLoad, onRelocate, handlers]);
 };

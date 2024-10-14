@@ -189,6 +189,7 @@ export abstract class BaseAppService implements AppService {
   }
 
   async saveLibraryBooks(books: Book[]): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const libraryBooks = books.map(({ coverImageUrl, ...rest }) => rest);
     await this.fs.writeFile(getLibraryFilename(), 'Books', JSON.stringify(libraryBooks));
   }
