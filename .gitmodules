@@ -7,3 +7,6 @@
 [submodule "packages/pdf-js"]
 	path = packages/pdf-js
 	url = git@github.com:mozilla/pdf.js.git
+[submodule "packages/wry"]
+	path = packages/wry
+	url = git@github.com:chrox/wry.git

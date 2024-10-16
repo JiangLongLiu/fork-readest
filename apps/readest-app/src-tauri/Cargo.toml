@@ -32,3 +32,4 @@ tauri-build = "2.0.1"
 tauri-plugin-devtools = "2.0.0"
 [patch.crates-io]
 tauri = { path = "../../../packages/tauri/crates/tauri" }
+wry = { path = "../../../packages/wry" }
