@@ -8,13 +8,12 @@
     "start": "next start",
     "lint": "next lint",
     "tauri": "tauri",
-    "build-pdfjs": "pnpm -C ../../packages/pdf-js exec npx gulp generic-legacy",
     "prepare-public-vendor": "mkdirp ./public/vendor/pdfjs",
     "copy-pdfjs-js": "dotenv -- cross-var cpx \"%PDFJS_BUILD_PATH%/pdf*\" ./public/vendor/pdfjs",
     "copy-pdfjs-fonts": "dotenv -- cross-var cpx \"%PDFJS_FONTS_PATH%/{cmaps,standard_fonts}/*\" ./public/vendor/pdfjs",
     "copy-pdfjs-css": "dotenv -- cross-var cpx \"%PDFJS_STYLE_PATH%/{annotation_layer_builder,text_layer_builder}.css\" ./public/vendor/pdfjs",
     "copy-pdfjs": "pnpm copy-pdfjs-js && pnpm copy-pdfjs-fonts && pnpm copy-pdfjs-css",
-    "setup-pdfjs": "pnpm build-pdfjs && pnpm prepare-public-vendor && pnpm copy-pdfjs"
+    "setup-pdfjs": "pnpm prepare-public-vendor && pnpm copy-pdfjs"
   },
   "dependencies": {
     "@tauri-apps/api": "2.0.2",
