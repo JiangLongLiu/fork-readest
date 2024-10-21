@@ -15,6 +15,7 @@ import {
 import { RemoteFile } from '@/utils/file';
 import { partialMD5 } from '@/utils/md5';
 import { BookDoc, DocumentLoader } from '@/libs/document';
+import { DEFAULT_READSETTINGS } from './constants';
 
 export abstract class BaseAppService implements AppService {
   localBooksDir: string = '';
@@ -47,13 +48,7 @@ export abstract class BaseAppService implements AppService {
     } catch {
       settings = {
         localBooksDir: await this.getInitBooksDir(),
-        globalReadSettings: {
-          themeType: 'auto',
-          fontFamily: '',
-          fontSize: 1.0,
-          wordSpacing: 0.16,
-          lineSpacing: 1.5,
-        },
+        globalReadSettings: DEFAULT_READSETTINGS,
       };
 
       await this.fs.createDir('', 'Books', true);

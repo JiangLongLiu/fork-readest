@@ -27,3 +27,29 @@ export const getBaseFilename = (filename: string) => {
 export const INIT_BOOK_CONFIG: BookConfig = {
   lastUpdated: 0,
 };
+
+interface LanguageMap {
+  [key: string]: string;
+}
+
+const formatLanguageMap = (x: string | LanguageMap): string => {
+  if (!x) return '';
+  if (typeof x === 'string') return x;
+  const keys = Object.keys(x);
+  return x[keys[0]!]!;
+};
+
+const listFormat = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' });
+
+const formatContributors = (contributors: any) =>
+  Array.isArray(contributors)
+    ? listFormat.format(
+        contributors.map((contributor) =>
+          typeof contributor === 'string' ? contributor : formatLanguageMap(contributor?.name),
+        ),
+      )
+    : typeof contributors === 'string'
+      ? contributors
+      : formatLanguageMap(contributors?.name);
+
+export const formatAuthors = (authors: any) => formatContributors(authors);

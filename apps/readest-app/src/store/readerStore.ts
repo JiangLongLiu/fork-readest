@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 
 import { BookNote, BookContent, Book, BookConfig, PageInfo } from '@/types/book';
-import { AppService } from '@/types/system';
+import { EnvConfigType } from '@/services/environment';
+import { SystemSettings } from '@/types/settings';
 
 interface BookState {
   loading?: boolean;
@@ -15,9 +16,11 @@ interface BookState {
 interface ReaderStore {
   library: Book[];
   books: Record<string, BookState>;
+  settings: SystemSettings;
 
   setLibrary: (books: Book[]) => void;
-  fetchBook: (appService: AppService, id: string) => Promise<Book | null>;
+  setSettings: (settings: SystemSettings) => void;
+  fetchBook: (envConfig: EnvConfigType, id: string) => Promise<Book | null>;
   setProgress: (id: string, progress: number, location: string, pageinfo: PageInfo) => void;
   addBookmark: (id: string, bookmark: BookNote) => void;
 }
@@ -25,10 +28,16 @@ interface ReaderStore {
 export const useReaderStore = create<ReaderStore>((set) => ({
   library: [],
   books: {},
+  settings: {} as SystemSettings,
 
   setLibrary: (books: Book[]) => set({ library: books }),
+  setSettings: (settings: SystemSettings) => set({ settings }),
+  saveSettings: async (envConfig: EnvConfigType, settings: SystemSettings) => {
+    const appService = await envConfig.getAppService();
+    await appService.saveSettings(settings);
+  },
 
-  fetchBook: async (appService: AppService, id: string) => {
+  fetchBook: async (envConfig: EnvConfigType, id: string) => {
     set((state) => ({
       books: {
         ...state.books,
@@ -37,6 +46,7 @@ export const useReaderStore = create<ReaderStore>((set) => ({
     }));
 
     try {
+      const appService = await envConfig.getAppService();
       const library = await appService.loadLibraryBooks();
       const book = library.find((b) => b.hash === id);
       if (!book) {

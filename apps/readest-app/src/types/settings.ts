@@ -6,6 +6,9 @@ export interface ReadSettings {
   fontSize: number;
   wordSpacing: number;
   lineSpacing: number;
+
+  sideBarWidth: string;
+  isSideBarPinned: boolean;
 }
 
 export interface SystemSettings {

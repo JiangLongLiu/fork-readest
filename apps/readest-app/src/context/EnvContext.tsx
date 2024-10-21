@@ -18,7 +18,7 @@ export const EnvProvider = ({ children }: { children: ReactNode }) => {
   const [appService, setAppService] = useState<AppService | null>(null);
 
   const getAppService = async (envConfig: EnvConfigType): Promise<AppService> => {
-    const service = await envConfig.initAppService();
+    const service = await envConfig.getAppService();
     setAppService(service);
     return service;
   };

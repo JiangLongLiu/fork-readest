@@ -3,11 +3,11 @@ import { AppService } from '@/types/system';
 let appService: AppService | null = null;
 
 export interface EnvConfigType {
-  initAppService: () => Promise<AppService>;
+  getAppService: () => Promise<AppService>;
 }
 
 const environmentConfig: EnvConfigType = {
-  initAppService: async () => {
+  getAppService: async () => {
     if (!appService) {
       const { NativeAppService } = await import('@/services/nativeAppService');
       appService = new NativeAppService();
