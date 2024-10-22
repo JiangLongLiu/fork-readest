@@ -32,6 +32,12 @@ Map.groupBy ??= (iterable, callbackfn) => {
 
 export type DocumentFile = File;
 
+export interface TOCItem {
+  label: string;
+  href?: string;
+  subitems?: TOCItem[];
+}
+
 export interface BookDoc {
   metadata: {
     title: string;
@@ -39,6 +45,7 @@ export interface BookDoc {
     editor?: string;
     publisher?: string;
   };
+  toc: Array<TOCItem>;
   getCover(): Promise<Blob | null>;
 }
 

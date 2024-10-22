@@ -33,6 +33,7 @@ export interface BookConfig {
   lastUpdated: number;
   progress?: number;
   location?: string;
+  href?: string;
   pageinfo?: PageInfo;
   bookmarks?: BookNote[];
   annotations?: BookNote[];

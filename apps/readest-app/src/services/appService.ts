@@ -142,7 +142,7 @@ export abstract class BaseAppService implements AppService {
 
   async loadBookContent(book: Book): Promise<BookContent> {
     const fp = getFilename(book);
-    let file = await new RemoteFile(this.fs.getURL(`${this.localBooksDir}/${fp}`), fp).open();
+    const file = await new RemoteFile(this.fs.getURL(`${this.localBooksDir}/${fp}`), fp).open();
     return { book, file, config: await this.loadBookConfig(book) };
   }
 

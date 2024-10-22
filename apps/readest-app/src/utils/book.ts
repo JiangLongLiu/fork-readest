@@ -32,6 +32,10 @@ interface LanguageMap {
   [key: string]: string;
 }
 
+interface Contributor {
+  name: LanguageMap;
+}
+
 const formatLanguageMap = (x: string | LanguageMap): string => {
   if (!x) return '';
   if (typeof x === 'string') return x;
@@ -41,7 +45,7 @@ const formatLanguageMap = (x: string | LanguageMap): string => {
 
 const listFormat = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' });
 
-const formatContributors = (contributors: any) =>
+export const formatAuthors = (contributors: string | Contributor | [string | Contributor]) =>
   Array.isArray(contributors)
     ? listFormat.format(
         contributors.map((contributor) =>
@@ -51,5 +55,3 @@ const formatContributors = (contributors: any) =>
     : typeof contributors === 'string'
       ? contributors
       : formatLanguageMap(contributors?.name);
-
-export const formatAuthors = (authors: any) => formatContributors(authors);

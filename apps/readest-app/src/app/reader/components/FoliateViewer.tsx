@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useFoliateEvents } from '../hooks/useFoliateEvents';
 import { BookDoc } from '@/libs/document';
 import { BookConfig } from '@/types/book';
+import { useReaderStore } from '@/store/readerStore';
 
 type FoliateViewerProps = {
   bookId: string;
@@ -53,6 +54,7 @@ const getCSS = (spacing: number, justify: boolean, hyphenate: boolean) => `
 export interface FoliateView extends HTMLElement {
   open: (book: BookDoc) => Promise<void>;
   init: (options: { lastLocation: string }) => void;
+  goTo: (href: string) => void;
   goToFraction: (fraction: number) => void;
   renderer: {
     setStyles: (css: string) => void;
@@ -65,15 +67,18 @@ const FoliateViewer: React.FC<FoliateViewerProps> = ({ bookId, bookConfig, bookD
   const viewRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<FoliateView | null>(null);
   const isViewCreated = useRef(false);
+  const { setFoliateView } = useReaderStore();
 
   useEffect(() => {
     if (isViewCreated.current) return;
     const openBook = async () => {
+      console.log('opening book');
       await import('foliate-js/view.js');
       const view = document.createElement('foliate-view') as FoliateView;
       document.body.append(view);
       viewRef.current?.appendChild(view);
       setView(view);
+      setFoliateView(view);
       await view.open(bookDoc);
       if ('setStyles' in view.renderer) {
         view.renderer.setStyles(getCSS(2.4, true, true));

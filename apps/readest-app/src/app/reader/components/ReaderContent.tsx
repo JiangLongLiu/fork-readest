@@ -13,55 +13,35 @@ import Spinner from '@/components/Spinner';
 import FoliateViewer from './FoliateViewer';
 import SideBar from './SideBar';
 
-interface ReaderContentProps {}
-
-const ReaderContent: React.FC<ReaderContentProps> = ({}) => {
+const ReaderContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
 
   const [bookDoc, setBookDoc] = React.useState<BookDoc>();
   const { envConfig } = useEnv();
-  const { library, books, settings, fetchBook, setLibrary } = useReaderStore();
+  const { books, settings, fetchBook, saveConfig, saveSettings } = useReaderStore();
   const defaultBookState = { loading: true, error: null, file: null, book: null, config: null };
   const bookState = id ? books[id] || defaultBookState : defaultBookState;
 
   const [sideBarWidth, setSideBarWidth] = useState(
-    settings.globalReadSettings.sideBarWidth ?? '20%',
+    settings.globalReadSettings.sideBarWidth ?? '25%',
   );
   const [isSideBarPinned, setIsSideBarPinned] = useState(
     settings.globalReadSettings.isSideBarPinned ?? true,
   );
   const [isSideBarVisible, setSideBarVisibility] = useState(isSideBarPinned);
-  const [isClosingBook, setClosingBook] = useState(false);
   const [isTopBarVisible, setTopBarVisibility] = useState(false);
 
   React.useEffect(() => {
     if (!id) {
       return;
     }
-    const { file, book, config } = bookState;
-    if (isClosingBook) {
-      if (book && config) {
-        book.lastUpdated = Date.now();
-        const bookIndex = library.findIndex((b) => b.hash === book.hash);
-        if (bookIndex !== -1) {
-          library[bookIndex] = book;
-        }
-        setLibrary(library);
-        envConfig.getAppService().then((appService) => {
-          config.lastUpdated = Date.now();
-          appService.saveBookConfig(book, config);
-          appService.saveLibraryBooks(library);
-          appService.saveSettings(settings);
-        });
-      }
-      return;
-    }
+    const { file } = bookState;
     if (id && !file) {
       fetchBook(envConfig, id);
     }
-    if (!bookDoc && bookState.file) {
+    if (!bookDoc && file) {
       const loadDocument = async () => {
         if (file) {
           const { book } = await new DocumentLoader(file).open();
@@ -70,7 +50,7 @@ const ReaderContent: React.FC<ReaderContentProps> = ({}) => {
       };
       loadDocument();
     }
-  }, [isClosingBook, bookState.file, envConfig, fetchBook, id]);
+  }, [bookState.file, envConfig, fetchBook, id]);
 
   const handleResize = (newWidth: string) => {
     setSideBarWidth(newWidth);
@@ -86,20 +66,35 @@ const ReaderContent: React.FC<ReaderContentProps> = ({}) => {
   };
 
   const handleCloseBook = () => {
-    setClosingBook(true);
+    const { book, config } = bookState;
+    if (book && config) {
+      saveConfig(envConfig, book, config);
+      saveSettings(envConfig, settings);
+    }
     router.back();
   };
 
   const topBarWidth = isSideBarPinned && isSideBarVisible ? `calc(100% - ${sideBarWidth})` : '100%';
 
   if (!id || !bookDoc || !bookState.config || !bookState.book) {
-    return null;
+    return (
+      <div className={'flex-1 overflow-hidden'}>
+        {bookState.loading && <Spinner loading={bookState.loading} />}
+        {bookState.error && (
+          <div className='text-center'>
+            <h2 className='text-red-500'>{bookState.error}</h2>
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (
-    <div className='flex h-screen overflow-hidden'>
+    <div className='flex h-screen'>
       <SideBar
         book={bookState.book}
+        tocData={bookDoc.toc}
+        currentHref={bookState.config.href ?? null}
         width={sideBarWidth}
         isVisible={isSideBarVisible}
         isPinned={isSideBarPinned}
@@ -109,13 +104,7 @@ const ReaderContent: React.FC<ReaderContentProps> = ({}) => {
         onSetVisibility={(visibility: boolean) => setSideBarVisibility(visibility)}
       />
 
-      <div className={`flex-1`}>
-        {bookState.loading && <Spinner loading={bookState.loading} />}
-        {bookState.error && (
-          <div className='text-center'>
-            <h2 className='text-red-500'>{bookState.error}</h2>
-          </div>
-        )}
+      <div className={'flex-1 overflow-hidden'}>
         <div
           className={`topbar absolute top-0 z-10 h-10 border-b ${
             isTopBarVisible ? 'opacity-100' : 'opacity-0'

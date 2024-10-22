@@ -15,13 +15,14 @@ export const useFoliateEvents = (
   const setProgress = useReaderStore((state) => state.setProgress);
 
   const defaultLoadHandler = (event: Event) => {
-    console.log('load event:', event);
+    const detail = (event as CustomEvent).detail;
+    console.log('load event:', detail);
   };
 
   const defaultRelocateHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;
     // console.log('relocate:', detail);
-    setProgress(bookId, detail.fraction, detail.cfi, detail.location);
+    setProgress(bookId, detail.fraction, detail.cfi, detail.tocItem?.href, detail.location);
   };
 
   const onLoad = handlers?.onLoad || defaultLoadHandler;

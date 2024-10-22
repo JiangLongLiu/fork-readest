@@ -25,7 +25,7 @@ const ReaderPage = () => {
     };
 
     initLibrary();
-  }, [envConfig, setLibrary]);
+  }, [envConfig, setSettings, setLibrary]);
 
   return (
     settings.globalReadSettings && (

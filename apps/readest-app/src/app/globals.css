@@ -32,12 +32,3 @@ foliate-view {
   height: 100vh;
   border: none;
 }
-
-/* Hide scrollbar for Chrome, Safari and Opera */
-::-webkit-scrollbar {
-  display: none;
-}
-/* Hide scrollbar for IE and Edge */
-*{
-  -ms-overflow-style: none;
-}

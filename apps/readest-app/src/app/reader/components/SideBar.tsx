@@ -1,5 +1,5 @@
 import { Book } from '@/types/book';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   MdSearch,
   MdOutlinePushPin,
@@ -10,10 +10,17 @@ import {
 } from 'react-icons/md';
 import { GiBookshelf } from 'react-icons/gi';
 
+import { TOCItem } from '@/libs/document';
 import BookCard from './BookCard';
+import TOCView from './TOCView';
 
-interface SideBarProps {
+const MIN_SIDEBAR_WIDTH = 0.15;
+const MAX_SIDEBAR_WIDTH = 0.45;
+
+const SideBar: React.FC<{
   book: Book;
+  tocData: TOCItem[];
+  currentHref: string | null;
   width: string;
   isVisible: boolean;
   isPinned: boolean;
@@ -21,13 +28,10 @@ interface SideBarProps {
   onTogglePin: () => void;
   onResize: (newWidth: string) => void;
   onGoToLibrary: () => void;
-}
-
-const MIN_SIDEBAR_WIDTH = '10em';
-const MAX_SIDEBAR_WIDTH = '40em';
-
-const SideBar: React.FC<SideBarProps> = ({
+}> = ({
   book,
+  tocData,
+  currentHref,
   width,
   isPinned,
   isVisible,
@@ -37,7 +41,6 @@ const SideBar: React.FC<SideBarProps> = ({
   onGoToLibrary,
 }) => {
   const [activeTab, setActiveTab] = useState('toc');
-  const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {}, [isPinned, isVisible]);
 
@@ -54,8 +57,8 @@ const SideBar: React.FC<SideBarProps> = ({
   const handleMouseMove = (e: MouseEvent) => {
     const newWidthPx = e.clientX;
     const width = `${Math.round((newWidthPx / window.innerWidth) * 10000) / 100}%`;
-    const minWidthPx = parseFloat(MIN_SIDEBAR_WIDTH) * 16;
-    const maxWidthPx = parseFloat(MAX_SIDEBAR_WIDTH) * 16;
+    const minWidthPx = MIN_SIDEBAR_WIDTH * window.innerWidth;
+    const maxWidthPx = MAX_SIDEBAR_WIDTH * window.innerWidth;
     if (newWidthPx >= minWidthPx && newWidthPx <= maxWidthPx) {
       onResize(width);
     }
@@ -72,13 +75,12 @@ const SideBar: React.FC<SideBarProps> = ({
         className='sidebar-container z-20 h-full bg-gray-200'
         style={{
           width: `${width}`,
-          height: '100%',
-          minWidth: MIN_SIDEBAR_WIDTH,
-          maxWidth: MAX_SIDEBAR_WIDTH,
+          minWidth: `${MIN_SIDEBAR_WIDTH * 100}%`,
+          maxWidth: `${MAX_SIDEBAR_WIDTH * 100}%`,
           position: isPinned ? 'relative' : 'absolute',
         }}
       >
-        <div ref={sidebarRef} className={'sidebar h-full'}>
+        <div className={'sidebar h-full'}>
           <div className='flex h-10 items-center justify-between pl-1.5 pr-3'>
             <div className='flex items-center'>
               <button className='btn btn-ghost h-8 min-h-8 w-8 p-0' onClick={onGoToLibrary}>
@@ -97,10 +99,17 @@ const SideBar: React.FC<SideBarProps> = ({
               </button>
             </div>
           </div>
-          <div className='border-b p-3 shadow-sm'>
+          <div className='border-b px-3 shadow-sm'>
             <BookCard cover={book.coverImageUrl!} title={book.title} author={book.author} />
           </div>
-          <div className='absolute bottom-0 flex w-full'>
+          <div className='sidebar-content overflow-y-auto'>
+            {activeTab === 'toc' && (
+              <TOCView toc={tocData} bookId={book.hash} currentHref={currentHref} />
+            )}
+            {activeTab === 'bookmarks' && <div>Bookmarks</div>}
+            {activeTab === 'annotations' && <div>Annotations</div>}
+          </div>
+          <div className='bottom-tab absolute bottom-0 flex w-full bg-gray-200'>
             <button
               className={`m-1.5 flex-1 rounded-md p-2 ${activeTab === 'toc' ? 'bg-gray-300' : ''}`}
               onClick={() => setActiveTab('toc')}
@@ -119,11 +128,6 @@ const SideBar: React.FC<SideBarProps> = ({
             >
               <MdBookmarkBorder size={20} className='mx-auto' />
             </button>
-          </div>
-          <div className='p-4'>
-            {activeTab === 'toc' && <div>Table of Contents</div>}
-            {activeTab === 'bookmarks' && <div>Bookmarks</div>}
-            {activeTab === 'annotations' && <div>Annotations</div>}
           </div>
           <div
             className='drag-bar bg-base-300 absolute right-0 top-0 h-full w-0.5 cursor-col-resize'
