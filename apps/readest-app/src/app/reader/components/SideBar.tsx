@@ -10,17 +10,15 @@ import {
 } from 'react-icons/md';
 import { GiBookshelf } from 'react-icons/gi';
 
-import { TOCItem } from '@/libs/document';
 import BookCard from './BookCard';
 import TOCView from './TOCView';
+import { BookState, DEFAULT_BOOK_STATE, useReaderStore } from '@/store/readerStore';
 
 const MIN_SIDEBAR_WIDTH = 0.15;
 const MAX_SIDEBAR_WIDTH = 0.45;
 
 const SideBar: React.FC<{
-  book: Book;
-  tocData: TOCItem[];
-  currentHref: string | null;
+  bookKey: string;
   width: string;
   isVisible: boolean;
   isPinned: boolean;
@@ -29,9 +27,7 @@ const SideBar: React.FC<{
   onResize: (newWidth: string) => void;
   onGoToLibrary: () => void;
 }> = ({
-  book,
-  tocData,
-  currentHref,
+  bookKey,
   width,
   isPinned,
   isVisible,
@@ -41,8 +37,17 @@ const SideBar: React.FC<{
   onGoToLibrary,
 }) => {
   const [activeTab, setActiveTab] = useState('toc');
+  const { books } = useReaderStore();
+  const [bookState, setBookState] = useState<BookState | null>(null);
+  const [currentHref, setCurrentHref] = useState<string | null>(null);
 
-  useEffect(() => {}, [isPinned, isVisible]);
+  useEffect(() => {
+    if (!books) return;
+    const bookState = books[bookKey] || DEFAULT_BOOK_STATE;
+    const { config } = bookState;
+    setBookState(bookState);
+    setCurrentHref(config?.href || null);
+  }, [bookKey]);
 
   const handleClickOverlay = () => {
     onSetVisibility(false);
@@ -68,6 +73,12 @@ const SideBar: React.FC<{
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
   };
+
+  if (!bookState || !bookState.book || !bookState.bookDoc) {
+    return null;
+  }
+
+  const { book, bookDoc } = bookState;
 
   return (
     isVisible && (
@@ -103,8 +114,8 @@ const SideBar: React.FC<{
             <BookCard cover={book.coverImageUrl!} title={book.title} author={book.author} />
           </div>
           <div className='sidebar-content overflow-y-auto'>
-            {activeTab === 'toc' && (
-              <TOCView toc={tocData} bookId={book.hash} currentHref={currentHref} />
+            {activeTab === 'toc' && bookDoc!.toc && (
+              <TOCView toc={bookDoc!.toc} bookKey={bookKey} currentHref={currentHref} />
             )}
             {activeTab === 'bookmarks' && <div>Bookmarks</div>}
             {activeTab === 'annotations' && <div>Annotations</div>}

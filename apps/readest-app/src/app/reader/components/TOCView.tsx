@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { md5 } from 'js-md5';
 import { TOCItem } from '@/libs/document';
 import { useReaderStore } from '@/store/readerStore';
 import { useFoliateEvents } from '../hooks/useFoliateEvents';
@@ -19,6 +20,8 @@ const findParentPath = (toc: TOCItem[], href: string): TOCItem[] => {
   return [];
 };
 
+const getHrefMd5 = (href: string) => md5(JSON.stringify(href));
+
 const createExpanderIcon = (isExpanded: boolean) => {
   return (
     <svg
@@ -34,15 +37,15 @@ const createExpanderIcon = (isExpanded: boolean) => {
 };
 
 const TOCItemView: React.FC<{
-  bookId: string;
+  bookKey: string;
   item: TOCItem;
   depth: number;
   setCurrentHref: (href: string) => void;
   currentHref: string | null;
   expandedItems: string[];
-}> = ({ bookId, item, depth, setCurrentHref, currentHref, expandedItems }) => {
+}> = ({ bookKey, item, depth, setCurrentHref, currentHref, expandedItems }) => {
   const [isExpanded, setIsExpanded] = useState(expandedItems.includes(item.href || ''));
-  const { foliateView } = useReaderStore();
+  const { getFoliateView } = useReaderStore();
 
   const handleToggleExpand = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -53,7 +56,7 @@ const TOCItemView: React.FC<{
   const handleClickItem = (event: React.MouseEvent) => {
     event.preventDefault();
     if (item.href) {
-      foliateView?.goTo(item.href);
+      getFoliateView(bookKey)?.goTo(item.href);
       setCurrentHref(item.href);
     }
   };
@@ -73,7 +76,7 @@ const TOCItemView: React.FC<{
         style={{ paddingInlineStart: `${(depth + 1) * 12}px` }}
         aria-expanded={isExpanded ? 'true' : 'false'}
         aria-selected={isActive ? 'true' : 'false'}
-        data-href={item.href}
+        data-href={item.href ? getHrefMd5(item.href) : undefined}
         className={`flex w-full cursor-pointer items-center rounded-md py-2 ${
           isActive ? 'bg-gray-300 hover:bg-gray-400' : 'hover:bg-gray-300'
         }`}
@@ -98,7 +101,7 @@ const TOCItemView: React.FC<{
         <ol role='group'>
           {item.subitems.map((subitem) => (
             <TOCItemView
-              bookId={bookId}
+              bookKey={bookKey}
               key={subitem.label}
               item={subitem}
               depth={depth + 1}
@@ -114,13 +117,13 @@ const TOCItemView: React.FC<{
 };
 
 const TOCView: React.FC<{
-  bookId: string;
+  bookKey: string;
   toc: TOCItem[];
   currentHref: string | null;
-}> = ({ bookId, toc, currentHref: href }) => {
+}> = ({ bookKey, toc, currentHref: href }) => {
   const [currentHref, setCurrentHref] = useState<string | null>(href);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const { foliateView } = useReaderStore();
+  const { getFoliateView } = useReaderStore();
   const tocRef = useRef<HTMLUListElement | null>(null);
 
   const tocRelocateHandler = (event: Event) => {
@@ -131,7 +134,12 @@ const TOCView: React.FC<{
     }
   };
 
-  useFoliateEvents(foliateView, bookId, { onRelocate: tocRelocateHandler });
+  const foliateView = getFoliateView(bookKey);
+  useFoliateEvents(bookKey, foliateView, { onRelocate: tocRelocateHandler });
+
+  useEffect(() => {
+    setCurrentHref(href);
+  }, [href]);
 
   const expandParents = (toc: TOCItem[], href: string) => {
     const parentPath = findParentPath(toc, href).map((item) => item.href);
@@ -139,7 +147,8 @@ const TOCView: React.FC<{
   };
 
   useEffect(() => {
-    const currentItem = tocRef.current?.querySelector(`[data-href="${currentHref}"]`);
+    const hrefMd5 = currentHref ? getHrefMd5(currentHref) : '';
+    const currentItem = tocRef.current?.querySelector(`[data-href="${hrefMd5}"]`);
     if (currentItem) {
       const rect = currentItem.getBoundingClientRect();
       const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
@@ -160,7 +169,7 @@ const TOCView: React.FC<{
           {toc &&
             toc.map((item) => (
               <TOCItemView
-                bookId={bookId}
+                bookKey={bookKey}
                 key={item.label}
                 item={item}
                 depth={0}

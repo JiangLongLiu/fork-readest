@@ -8,8 +8,8 @@ type FoliateEventHandler = {
 };
 
 export const useFoliateEvents = (
+  bookKey: string,
   view: FoliateView | null,
-  bookId: string,
   handlers?: FoliateEventHandler,
 ) => {
   const setProgress = useReaderStore((state) => state.setProgress);
@@ -22,7 +22,7 @@ export const useFoliateEvents = (
   const defaultRelocateHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;
     // console.log('relocate:', detail);
-    setProgress(bookId, detail.fraction, detail.cfi, detail.tocItem?.href, detail.location);
+    setProgress(bookKey, detail.fraction, detail.cfi, detail.tocItem?.href, detail.location);
   };
 
   const onLoad = handlers?.onLoad || defaultLoadHandler;

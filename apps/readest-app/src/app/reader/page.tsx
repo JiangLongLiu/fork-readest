@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useEffect, Suspense } from 'react';
+import { useEffect, Suspense, useRef } from 'react';
 
 import { useEnv } from '@/context/EnvContext';
 import { useReaderStore } from '@/store/readerStore';
@@ -12,8 +12,11 @@ import { DEFAULT_READSETTINGS } from '@/services/constants';
 const ReaderPage = () => {
   const { envConfig } = useEnv();
   const { settings, setLibrary, setSettings } = useReaderStore();
+  const isInitiating = useRef(false);
 
   useEffect(() => {
+    if (isInitiating.current) return;
+    isInitiating.current = true;
     const initLibrary = async () => {
       const appService = await envConfig.getAppService();
       const settings = await appService.loadSettings();
@@ -21,11 +24,12 @@ const ReaderPage = () => {
         settings.globalReadSettings = DEFAULT_READSETTINGS;
       }
       setSettings(settings);
+      console.log('initializing library in reader');
       setLibrary(await appService.loadLibraryBooks());
     };
 
     initLibrary();
-  }, [envConfig, setSettings, setLibrary]);
+  }, []);
 
   return (
     settings.globalReadSettings && (

@@ -1,16 +1,8 @@
-'use client';
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useFoliateEvents } from '../hooks/useFoliateEvents';
 import { BookDoc } from '@/libs/document';
 import { BookConfig } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
-
-type FoliateViewerProps = {
-  bookId: string;
-  bookConfig: BookConfig;
-  bookDoc: BookDoc;
-};
 
 const getCSS = (spacing: number, justify: boolean, hyphenate: boolean) => `
     @namespace epub "http://www.idpf.org/2007/ops";
@@ -63,11 +55,17 @@ export interface FoliateView extends HTMLElement {
   };
 }
 
-const FoliateViewer: React.FC<FoliateViewerProps> = ({ bookId, bookConfig, bookDoc }) => {
+const FoliateViewer: React.FC<{
+  bookKey: string;
+  bookDoc: BookDoc;
+  bookConfig: BookConfig;
+}> = ({ bookKey, bookDoc, bookConfig }) => {
   const viewRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<FoliateView | null>(null);
   const isViewCreated = useRef(false);
   const { setFoliateView } = useReaderStore();
+
+  useFoliateEvents(bookKey, view);
 
   useEffect(() => {
     if (isViewCreated.current) return;
@@ -78,7 +76,8 @@ const FoliateViewer: React.FC<FoliateViewerProps> = ({ bookId, bookConfig, bookD
       document.body.append(view);
       viewRef.current?.appendChild(view);
       setView(view);
-      setFoliateView(view);
+      setFoliateView(bookKey, view);
+
       await view.open(bookDoc);
       if ('setStyles' in view.renderer) {
         view.renderer.setStyles(getCSS(2.4, true, true));
@@ -95,8 +94,6 @@ const FoliateViewer: React.FC<FoliateViewerProps> = ({ bookId, bookConfig, bookD
     isViewCreated.current = true;
   }, [bookDoc]);
 
-  useFoliateEvents(view, bookId);
-
   const handleTap = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const { clientX } = event;
     const width = window.innerWidth;
@@ -110,7 +107,7 @@ const FoliateViewer: React.FC<FoliateViewerProps> = ({ bookId, bookConfig, bookD
     }
   };
 
-  return <div ref={viewRef} onClick={handleTap} />;
+  return <div className='foliate-viewer h-[100%] w-[100%]' ref={viewRef} onClick={handleTap} />;
 };
 
 export default FoliateViewer;

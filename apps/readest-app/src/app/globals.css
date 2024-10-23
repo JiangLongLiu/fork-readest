@@ -29,6 +29,14 @@ body {
 foliate-view {
   display: block;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   border: none;
+}
+
+.foliate-viewer {
+  transition: transform 0.3s ease;
+}
+
+.header-bar-anim:hover + .foliate-viewer {
+  transform: scale(1.02);
 }
