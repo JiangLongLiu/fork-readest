@@ -21,8 +21,15 @@ export const useFoliateEvents = (
 
   const defaultRelocateHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;
-    // console.log('relocate:', detail);
-    setProgress(bookKey, detail.fraction, detail.cfi, detail.tocItem?.href, detail.location);
+    console.log('relocate:', detail);
+    setProgress(
+      bookKey,
+      detail.fraction,
+      detail.cfi,
+      detail.tocItem?.href,
+      detail.section,
+      detail.location,
+    );
   };
 
   const onLoad = handlers?.onLoad || defaultLoadHandler;

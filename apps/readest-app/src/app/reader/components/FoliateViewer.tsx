@@ -48,6 +48,8 @@ export interface FoliateView extends HTMLElement {
   init: (options: { lastLocation: string }) => void;
   goTo: (href: string) => void;
   goToFraction: (fraction: number) => void;
+  goLeft: () => void;
+  goRight: () => void;
   renderer: {
     setStyles: (css: string) => void;
     next: () => Promise<void>;

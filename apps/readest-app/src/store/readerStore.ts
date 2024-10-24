@@ -30,6 +30,7 @@ interface ReaderStore {
     progress: number,
     location: string,
     href: string,
+    section: PageInfo,
     pageinfo: PageInfo,
   ) => void;
   setFoliateView: (key: string, view: FoliateView) => void;
@@ -137,6 +138,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     progress: number,
     location: string,
     href: string,
+    section: PageInfo,
     pageinfo: PageInfo,
   ) =>
     set((state) => {
@@ -153,6 +155,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
               href,
               progress,
               location,
+              section,
               pageinfo,
             },
           },

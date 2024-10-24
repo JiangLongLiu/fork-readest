@@ -110,10 +110,10 @@ const SideBar: React.FC<{
               </button>
             </div>
           </div>
-          <div className='border-b px-3 shadow-sm'>
+          <div className='border-b px-3'>
             <BookCard cover={book.coverImageUrl!} title={book.title} author={book.author} />
           </div>
-          <div className='sidebar-content overflow-y-auto'>
+          <div className='sidebar-content overflow-y-auto border-b shadow-inner'>
             {activeTab === 'toc' && bookDoc!.toc && (
               <TOCView toc={bookDoc!.toc} bookKey={bookKey} currentHref={currentHref} />
             )}

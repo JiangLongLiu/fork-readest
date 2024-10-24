@@ -14,7 +14,7 @@ export interface Book {
 
 export interface PageInfo {
   current: number;
-  next: number;
+  next?: number;
   total: number;
 }
 
@@ -34,6 +34,7 @@ export interface BookConfig {
   progress?: number;
   location?: string;
   href?: string;
+  section?: PageInfo;
   pageinfo?: PageInfo;
   bookmarks?: BookNote[];
   annotations?: BookNote[];
