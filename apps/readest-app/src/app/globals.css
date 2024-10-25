@@ -33,10 +33,7 @@ foliate-view {
   border: none;
 }
 
-.foliate-viewer {
-  transition: transform 0.3s ease;
-}
-
-.header-bar-anim:hover + .foliate-viewer {
+.hover-bar-anim:hover ~ .foliate-viewer {
   transform: scale(1.02);
+  transition: transform 0.3s ease;
 }

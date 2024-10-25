@@ -1,4 +1,3 @@
-import { Book } from '@/types/book';
 import React, { useState, useEffect } from 'react';
 import {
   MdSearch,
