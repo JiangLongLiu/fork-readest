@@ -2,7 +2,7 @@ import * as React from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
-import { Book, BooksGroup } from '../types/book';
+import { Book, BooksGroup } from '@/types/book';
 import { FaPlus } from 'react-icons/fa';
 
 type BookshelfItem = Book | BooksGroup;
@@ -59,7 +59,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, onImportBooks }) =>
       {/* Books Grid */}
       <div className='grid grid-cols-3 gap-6 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8'>
         {bookshelfItems.map((item, index) => (
-          <div key={`library-item-${index}`} className='flex h-full flex-col'>
+          <div key={`library-item-${index}`} className='hover:bg-base-200 flex h-full flex-col'>
             <div className='flex-grow'>
               {'format' in item ? (
                 <div className='bookItem cursor-pointer' onClick={() => handleBookClick(item.hash)}>
