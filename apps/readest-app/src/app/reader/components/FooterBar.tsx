@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import clsx from 'clsx';
 import { RiArrowLeftWideLine, RiArrowRightWideLine } from 'react-icons/ri';
 
@@ -9,6 +9,7 @@ interface FooterBarProps {
   progress: number | undefined;
   isHoveredAnim: boolean;
   hoveredBookKey: string;
+  sideBarBookKey: string;
   setHoveredBookKey: (key: string) => void;
 }
 
@@ -17,6 +18,7 @@ const FooterBar: React.FC<FooterBarProps> = ({
   progress,
   isHoveredAnim,
   hoveredBookKey,
+  sideBarBookKey,
   setHoveredBookKey,
 }) => {
   const { getFoliateView } = useReaderStore();
@@ -36,6 +38,23 @@ const FooterBar: React.FC<FooterBarProps> = ({
     const foliateView = getFoliateView(bookKey);
     foliateView?.goRight();
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (sideBarBookKey === bookKey) {
+        if (e.key === 'ArrowLeft') {
+          handleGoPrev();
+        } else if (e.key === 'ArrowRight') {
+          handleGoNext();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [sideBarBookKey, bookKey]);
 
   return (
     <div

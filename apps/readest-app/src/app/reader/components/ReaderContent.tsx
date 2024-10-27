@@ -13,6 +13,7 @@ import SideBar from './SideBar';
 import PageInfo from './PageInfo';
 import HeaderBar from './HeaderBar';
 import FooterBar from './FooterBar';
+import SectionInfo from './SectionInfo';
 
 const ReaderContent = () => {
   const router = useRouter();
@@ -137,7 +138,7 @@ const ReaderContent = () => {
           const key = getKey(ids[index]!, index);
           const { book, config, bookDoc } = bookState;
           if (!book || !config || !bookDoc) return null;
-          const { section, pageinfo, progress } = config;
+          const { section, pageinfo, progress, chapter } = config;
           return (
             <div key={key} className='relative h-full w-full overflow-hidden'>
               <HeaderBar
@@ -152,12 +153,14 @@ const ReaderContent = () => {
                 setHoveredBookKey={setHoveredBookKey}
               />
               <FoliateViewer bookKey={key} bookDoc={bookDoc!} bookConfig={config!} />
+              <SectionInfo chapter={chapter} />
               <PageInfo bookFormat={book.format} section={section} pageinfo={pageinfo} />
               <FooterBar
                 bookKey={key}
                 progress={progress}
                 isHoveredAnim={false}
                 hoveredBookKey={hoveredBookKey}
+                sideBarBookKey={sideBarBookKey}
                 setHoveredBookKey={setHoveredBookKey}
               />
             </div>

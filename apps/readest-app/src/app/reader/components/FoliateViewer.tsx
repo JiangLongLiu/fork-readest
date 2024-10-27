@@ -85,7 +85,7 @@ const FoliateViewer: React.FC<{
       if ('setStyles' in view.renderer) {
         view.renderer.setStyles(getCSS(2.4, true, true));
       }
-      view.renderer.setAttribute('margin', '35px');
+      view.renderer.setAttribute('margin', '44px');
       view.renderer.setAttribute('gap', '4%');
       const lastLocation = bookConfig.location;
       if (lastLocation) {

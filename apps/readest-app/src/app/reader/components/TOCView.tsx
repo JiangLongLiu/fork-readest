@@ -61,6 +61,8 @@ const TOCItemView: React.FC<{
     }
   };
 
+  useEffect(() => {}, [currentHref]);
+
   const isActive = currentHref === item.href;
 
   useEffect(() => {

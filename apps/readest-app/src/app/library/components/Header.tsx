@@ -1,15 +1,33 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { PiPlus } from 'react-icons/pi';
-import { MdSelectAll } from 'react-icons/md';
+import { PiSelectionAllDuotone } from 'react-icons/pi';
+
 import WindowButtons from '@/components/WindowButtons';
 
 interface LibraryHeaderProps {
+  isSelectMode: boolean;
   onImportBooks: () => void;
   onToggleSelectMode: () => void;
 }
 
-const LibraryHeader: React.FC<LibraryHeaderProps> = ({ onImportBooks, onToggleSelectMode }) => {
+const LibraryHeader: React.FC<LibraryHeaderProps> = ({
+  isSelectMode,
+  onImportBooks,
+  onToggleSelectMode,
+}) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.shiftKey) {
+        onToggleSelectMode();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onToggleSelectMode]);
+
   return (
     <div
       id='titlebar'
@@ -42,7 +60,10 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({ onImportBooks, onToggleSe
             </span>
             <button onClick={onToggleSelectMode} aria-label='Select Multiple Books' className='h-6'>
               <div className='lg:tooltip lg:tooltip-bottom cursor-pointer' data-tip='Select books'>
-                <MdSelectAll role='button' className='h-6 w-6' />
+                <PiSelectionAllDuotone
+                  role='button'
+                  className={`h-6 w-6 ${isSelectMode ? 'fill-gray-400' : 'fill-gray-500'}`}
+                />
               </div>
             </button>
           </div>

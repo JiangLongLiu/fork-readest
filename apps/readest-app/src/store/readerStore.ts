@@ -30,6 +30,7 @@ interface ReaderStore {
     progress: number,
     location: string,
     href: string,
+    chapter: string,
     section: PageInfo,
     pageinfo: PageInfo,
   ) => void;
@@ -149,6 +150,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     progress: number,
     location: string,
     href: string,
+    chapter: string,
     section: PageInfo,
     pageinfo: PageInfo,
   ) =>
@@ -164,6 +166,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
               ...book.config,
               lastUpdated: Date.now(),
               href,
+              chapter,
               progress,
               location,
               section,

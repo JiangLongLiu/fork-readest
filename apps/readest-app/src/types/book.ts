@@ -34,6 +34,7 @@ export interface BookConfig {
   progress?: number;
   location?: string;
   href?: string;
+  chapter?: string;
   section?: PageInfo;
   pageinfo?: PageInfo;
   bookmarks?: BookNote[];

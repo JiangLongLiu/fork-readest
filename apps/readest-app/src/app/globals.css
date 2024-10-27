@@ -37,9 +37,20 @@ foliate-view {
   border: none;
 }
 
+@keyframes scaleUpAndDown {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .hover-bar-anim:hover ~ .foliate-viewer {
-  transform: scale(1.02);
-  transition: transform 0.3s ease;
+  animation: scaleUpAndDown 0.3s ease forwards;
 }
 
 .window-button {
