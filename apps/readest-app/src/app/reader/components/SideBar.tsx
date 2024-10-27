@@ -82,7 +82,7 @@ const SideBar: React.FC<{
   return (
     isVisible && (
       <div
-        className='sidebar-container bg-base-200 z-20 h-full select-none'
+        className='sidebar-container bg-base-200 rounded-window-left z-20 h-full select-none'
         style={{
           width: `${width}`,
           minWidth: `${MIN_SIDEBAR_WIDTH * 100}%`,
@@ -91,7 +91,7 @@ const SideBar: React.FC<{
         }}
       >
         <div className={'sidebar h-full'}>
-          <div className='flex h-10 items-center justify-between pl-1.5 pr-3'>
+          <div className='flex h-11 items-center justify-between pl-1.5 pr-3'>
             <div className='flex items-center'>
               <button className='btn btn-ghost h-8 min-h-8 w-8 p-0' onClick={onGoToLibrary}>
                 <GiBookshelf size={20} className='fill-base-content' />

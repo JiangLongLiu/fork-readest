@@ -73,13 +73,13 @@ const LibraryPage = () => {
   };
 
   return (
-    <div className='min-h-screen select-none bg-gray-100'>
+    <div className='rounded-window min-h-screen select-none bg-gray-100'>
       <LibraryHeader
         onImportBooks={handleImportBooks}
         onToggleSelectMode={handleToggleSelectMode}
       />
-      <div className='min-h-screen pt-10'>
-        <div className='hero-content p-4'>
+      <div className='min-h-screen pt-12'>
+        <div className='hero-content px-2 py-4'>
           <Spinner loading={loading} />
           <Bookshelf
             libraryBooks={libraryBooks}

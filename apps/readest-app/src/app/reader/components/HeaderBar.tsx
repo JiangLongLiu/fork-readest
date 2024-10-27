@@ -2,6 +2,8 @@ import React from 'react';
 import clsx from 'clsx';
 import { VscLayoutSidebarLeft, VscLayoutSidebarLeftOff } from 'react-icons/vsc';
 
+import WindowButtons from '@/components/WindowButtons';
+
 interface HeaderBarProps {
   bookKey: string;
   bookTitle: string;
@@ -36,9 +38,10 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
 
   return (
     <div
+      id='titlebar'
       className={clsx(
-        `header-bar absolute top-0 z-10 flex h-10 w-full items-center px-4`,
-        `shadow-xs bg-base-100 transition-opacity duration-300`,
+        `header-bar absolute top-0 z-10 flex h-11 w-full items-center px-4`,
+        `shadow-xs bg-base-100 rounded-window transition-opacity duration-300`,
         isHoveredAnim && 'hover-bar-anim',
         hoveredBookKey === bookKey ? `opacity-100` : `opacity-0`,
       )}
@@ -58,6 +61,9 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
             <VscLayoutSidebarLeftOff size={16} />
           )}
         </button>
+      </div>
+      <div className='absolute right-4 flex h-full items-center'>
+        <WindowButtons />
       </div>
     </div>
   );

@@ -10,7 +10,7 @@
     "beforeBuildCommand": "pnpm build"
   },
   "app": {
-    "withGlobalTauri": true,
+    "macOSPrivateApi": true,
     "windows": [
       {
         "title": "Readest",
@@ -19,7 +19,9 @@
         "resizable": true,
         "fullscreen": false,
         "maximized": true,
-        "decorations": false
+        "decorations": false,
+        "transparent": true,
+        "shadow": false
       }
     ],
     "security": {
