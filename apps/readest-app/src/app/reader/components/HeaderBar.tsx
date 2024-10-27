@@ -38,7 +38,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
     <div
       className={clsx(
         `header-bar absolute top-0 z-10 flex h-10 w-full items-center px-4`,
-        `shadow-xs bg-gray-100 transition-opacity duration-300`,
+        `shadow-xs bg-base-100 transition-opacity duration-300`,
         isHoveredAnim && 'hover-bar-anim',
         hoveredBookKey === bookKey ? `opacity-100` : `opacity-0`,
       )}
@@ -46,7 +46,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
       onMouseLeave={() => setHoveredBookKey('')}
     >
       <div className='absolute inset-0 flex items-center justify-center'>
-        <h2 className='line-clamp-1 max-w-[90%] px-2 text-center text-xs font-semibold'>
+        <h2 className='line-clamp-1 max-w-[80%] px-2 text-center text-xs font-semibold'>
           {bookTitle}
         </h2>
       </div>

@@ -52,6 +52,7 @@ export interface FoliateView extends HTMLElement {
   goRight: () => void;
   renderer: {
     setStyles: (css: string) => void;
+    setAttribute: (name: string, value: string | number) => void;
     next: () => Promise<void>;
     prev: () => Promise<void>;
   };
@@ -84,6 +85,8 @@ const FoliateViewer: React.FC<{
       if ('setStyles' in view.renderer) {
         view.renderer.setStyles(getCSS(2.4, true, true));
       }
+      view.renderer.setAttribute('margin', '35px');
+      view.renderer.setAttribute('gap', '4%');
       const lastLocation = bookConfig.location;
       if (lastLocation) {
         view.init({ lastLocation });

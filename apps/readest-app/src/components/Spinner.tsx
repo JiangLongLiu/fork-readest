@@ -1,10 +1,8 @@
 import React from 'react';
 
-interface SpinnerProps {
+const Spinner: React.FC<{
   loading: boolean;
-}
-
-const Spinner: React.FC<SpinnerProps> = ({ loading }) => {
+}> = ({ loading }) => {
   if (!loading) return null;
 
   return (

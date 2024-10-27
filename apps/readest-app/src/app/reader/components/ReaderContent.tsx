@@ -17,7 +17,7 @@ import FooterBar from './FooterBar';
 const ReaderContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const ids = searchParams.getAll('id') || [];
+  const ids = (searchParams.get('ids') || '').split(',');
 
   const { envConfig } = useEnv();
   const { books, settings, initBookState, saveConfig, saveSettings } = useReaderStore();
@@ -151,15 +151,15 @@ const ReaderContent = () => {
                 setSideBarBookKey={setSideBarBookKey}
                 setHoveredBookKey={setHoveredBookKey}
               />
+              <FoliateViewer bookKey={key} bookDoc={bookDoc!} bookConfig={config!} />
+              <PageInfo bookFormat={book.format} section={section} pageinfo={pageinfo} />
               <FooterBar
                 bookKey={key}
                 progress={progress}
-                isHoveredAnim={ids.length > 1}
+                isHoveredAnim={false}
                 hoveredBookKey={hoveredBookKey}
                 setHoveredBookKey={setHoveredBookKey}
               />
-              <FoliateViewer bookKey={key} bookDoc={bookDoc!} bookConfig={config!} />
-              <PageInfo bookFormat={book.format} section={section} pageinfo={pageinfo} />;
             </div>
           );
         })}

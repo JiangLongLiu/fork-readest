@@ -36,6 +36,7 @@ interface ReaderStore {
   setFoliateView: (key: string, view: FoliateView) => void;
   getFoliateView: (key: string) => FoliateView | null;
 
+  deleteBook: (envConfig: EnvConfigType, book: Book) => void;
   saveConfig: (envConfig: EnvConfigType, book: Book, config: BookConfig) => void;
   saveSettings: (envConfig: EnvConfigType, settings: SystemSettings) => void;
 
@@ -68,6 +69,16 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
 
   getFoliateView: (key: string) => get().foliateViews[key] || null,
 
+  deleteBook: async (envConfig: EnvConfigType, book: Book) => {
+    const appService = await envConfig.getAppService();
+    const { library } = get();
+    const bookIndex = library.findIndex((b) => b.hash === book.hash);
+    if (bookIndex !== -1) {
+      library.splice(bookIndex, 1);
+    }
+    set({ library });
+    appService.saveLibraryBooks(library);
+  },
   saveConfig: async (envConfig: EnvConfigType, book: Book, config: BookConfig) => {
     const appService = await envConfig.getAppService();
     const { library } = get();

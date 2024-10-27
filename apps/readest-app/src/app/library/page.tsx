@@ -7,7 +7,7 @@ import { useEnv } from '@/context/EnvContext';
 import { useReaderStore } from '@/store/readerStore';
 
 import Spinner from '@/components/Spinner';
-import SearchBar from '@/app/library/components/SearchBar';
+import LibraryHeader from '@/app/library/components/Header';
 import Bookshelf from '@/app/library/components/Bookshelf';
 
 const LibraryPage = () => {
@@ -15,6 +15,7 @@ const LibraryPage = () => {
   const { library: libraryBooks, setLibrary } = useReaderStore();
   const [loading, setLoading] = useState(true);
   const isInitiating = useRef(false);
+  const [isSelectMode, setIsSelectMode] = useState(false);
 
   React.useEffect(() => {
     if (isInitiating.current) return;
@@ -67,13 +68,24 @@ const LibraryPage = () => {
     importBooks(files);
   };
 
+  const handleToggleSelectMode = () => {
+    setIsSelectMode(!isSelectMode);
+  };
+
   return (
-    <div className='min-h-screen bg-gray-100'>
-      <SearchBar onImportBooks={handleImportBooks} />
-      <div className='min-h-screen p-2 pt-16'>
-        <div className='hero-content'>
+    <div className='min-h-screen select-none bg-gray-100'>
+      <LibraryHeader
+        onImportBooks={handleImportBooks}
+        onToggleSelectMode={handleToggleSelectMode}
+      />
+      <div className='min-h-screen pt-10'>
+        <div className='hero-content p-4'>
           <Spinner loading={loading} />
-          <Bookshelf libraryBooks={libraryBooks} onImportBooks={handleImportBooks} />
+          <Bookshelf
+            libraryBooks={libraryBooks}
+            isSelectMode={isSelectMode}
+            onImportBooks={handleImportBooks}
+          />
         </div>
         {!loading && libraryBooks.length === 0 && (
           <div className='hero min-h-screen'>

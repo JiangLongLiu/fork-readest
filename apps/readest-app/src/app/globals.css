@@ -37,3 +37,9 @@ foliate-view {
   transform: scale(1.02);
   transition: transform 0.3s ease;
 }
+
+.window-button {
+  @apply inline-flex h-6 w-6 items-center justify-center rounded-full;
+  @apply transition duration-200 ease-in-out transform hover:scale-105;
+  @apply bg-base-300 hover:bg-gray-300;
+}

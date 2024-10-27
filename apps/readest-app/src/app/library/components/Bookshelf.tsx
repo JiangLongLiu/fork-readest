@@ -1,22 +1,19 @@
 import * as React from 'react';
-import Image from 'next/image';
+import { FaPlus } from 'react-icons/fa';
+import { MdDelete, MdOpenInNew } from 'react-icons/md';
+import { MdCheckCircle, MdCheckCircleOutline } from 'react-icons/md';
+
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 import { Book, BooksGroup } from '@/types/book';
-import { FaPlus } from 'react-icons/fa';
+import Alert from '@/components/Alert';
+import { useReaderStore } from '@/store/readerStore';
+import { useEnv } from '@/context/EnvContext';
 
 type BookshelfItem = Book | BooksGroup;
 
 const UNGROUPED_NAME = 'ungrouped';
-
-// const MOCK_BOOKS: Book[] = Array.from({ length: 14 }, (_v, k) => ({
-//   hash: `book-${k}`,
-//   format: 'EPUB',
-//   title: `Book ${k}`,
-//   author: `Author ${k}`,
-//   lastUpdated: Date.now() - 1000000 * k,
-//   coverImageUrl: `https://placehold.co/800?text=Book+${k}&font=roboto`,
-// }));
 
 const generateBookshelfItems = (books: Book[]): BookshelfItem[] => {
   const groups: BooksGroup[] = books.reduce((acc: BooksGroup[], book: Book) => {
@@ -42,27 +39,70 @@ const generateBookshelfItems = (books: Book[]): BookshelfItem[] => {
 
 interface BookshelfProps {
   libraryBooks: Book[];
+  isSelectMode: boolean;
   onImportBooks: () => void;
 }
 
-const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, onImportBooks }) => {
+const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImportBooks }) => {
   const router = useRouter();
+  const { envConfig } = useEnv();
+  const { deleteBook } = useReaderStore();
+  const [selectedBooks, setSelectedBooks] = React.useState<string[]>([]);
+  const [showDeleteAlert, setShowDeleteAlert] = React.useState(false);
+
+  React.useEffect(() => {
+    setSelectedBooks([]);
+  }, [isSelectMode]);
 
   const bookshelfItems = generateBookshelfItems(libraryBooks);
 
   const handleBookClick = (id: string) => {
-    router.push(`/reader?id=${id}`);
+    if (isSelectMode) {
+      toggleSelection(id);
+    } else {
+      router.push(`/reader?ids=${id}`);
+    }
+  };
+
+  const toggleSelection = (id: string) => {
+    setSelectedBooks((prev) =>
+      prev.includes(id) ? prev.filter((bookId) => bookId !== id) : [...prev, id],
+    );
+  };
+
+  const openSelectedBooks = () => {
+    router.push(`/reader?ids=${selectedBooks.join(',')}`);
+  };
+
+  const confirmDelete = () => {
+    for (const selectedBook of selectedBooks) {
+      const book = libraryBooks.find((b) => b.hash === selectedBook);
+      if (book) {
+        deleteBook(envConfig, book);
+      }
+    }
+    setSelectedBooks([]);
+    setShowDeleteAlert(false);
+  };
+
+  const deleteSelectedBooks = () => {
+    setShowDeleteAlert(true);
   };
 
   return (
     <div className='bookshelf'>
-      {/* Books Grid */}
-      <div className='grid grid-cols-3 gap-6 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8'>
+      <div className='grid grid-cols-3 gap-0 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8'>
         {bookshelfItems.map((item, index) => (
-          <div key={`library-item-${index}`} className='hover:bg-base-200 flex h-full flex-col'>
+          <div
+            key={`library-item-${index}`}
+            className='flex h-full flex-col rounded-md p-4 hover:bg-gray-200'
+          >
             <div className='flex-grow'>
               {'format' in item ? (
-                <div className='bookItem cursor-pointer' onClick={() => handleBookClick(item.hash)}>
+                <div
+                  className='book-item cursor-pointer'
+                  onClick={() => handleBookClick(item.hash)}
+                >
                   <div key={(item as Book).hash} className='card bg-base-100 shadow-md'>
                     <div className='relative aspect-[28/41]'>
                       <Image
@@ -71,6 +111,21 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, onImportBooks }) =>
                         fill={true}
                         className='object-cover'
                       />
+                      {selectedBooks.includes(item.hash) && (
+                        <div className='absolute inset-0 bg-black opacity-30 transition-opacity duration-300'></div>
+                      )}
+                      {isSelectMode && (
+                        <div className='absolute bottom-1 right-1'>
+                          {selectedBooks.includes(item.hash) ? (
+                            <MdCheckCircle size={20} className='fill-blue-500' />
+                          ) : (
+                            <MdCheckCircleOutline
+                              size={20}
+                              className='fill-gray-300 drop-shadow-sm'
+                            />
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className='card-body p-0 pt-2'>
@@ -103,7 +158,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, onImportBooks }) =>
 
         {bookshelfItems.length > 0 && (
           <div
-            className='border-1 flex aspect-[28/41] items-center justify-center bg-white'
+            className='border-1 m-4 flex aspect-[28/41] items-center justify-center bg-white hover:bg-gray-200'
             role='button'
             onClick={onImportBooks}
           >
@@ -111,6 +166,26 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, onImportBooks }) =>
           </div>
         )}
       </div>
+      {selectedBooks.length > 0 && (
+        <div className='fixed bottom-4 left-1/2 flex -translate-x-1/2 transform space-x-4 rounded-lg bg-gray-800 p-4 text-white shadow-lg'>
+          <button onClick={openSelectedBooks} className='flex items-center space-x-2'>
+            <MdOpenInNew />
+            <span>Open</span>
+          </button>
+          <button onClick={deleteSelectedBooks} className='flex items-center space-x-2'>
+            <MdDelete className='fill-red-500' />
+            <span className='text-red-500'>Delete</span>
+          </button>
+        </div>
+      )}
+      {showDeleteAlert && (
+        <Alert
+          title='Confirm Deletion'
+          message='Are you sure to delete the selected books?'
+          onClickCancel={() => setShowDeleteAlert(false)}
+          onClickConfirm={confirmDelete}
+        />
+      )}
     </div>
   );
 };

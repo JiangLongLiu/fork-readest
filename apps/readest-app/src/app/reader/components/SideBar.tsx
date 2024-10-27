@@ -82,7 +82,7 @@ const SideBar: React.FC<{
   return (
     isVisible && (
       <div
-        className='sidebar-container z-20 h-full bg-gray-200'
+        className='sidebar-container bg-base-200 z-20 h-full select-none'
         style={{
           width: `${width}`,
           minWidth: `${MIN_SIDEBAR_WIDTH * 100}%`,
@@ -94,16 +94,16 @@ const SideBar: React.FC<{
           <div className='flex h-10 items-center justify-between pl-1.5 pr-3'>
             <div className='flex items-center'>
               <button className='btn btn-ghost h-8 min-h-8 w-8 p-0' onClick={onGoToLibrary}>
-                <GiBookshelf size={20} className='text-gray-600' />
+                <GiBookshelf size={20} className='fill-base-content' />
               </button>
             </div>
             <div className='flex size-[30%] min-w-20 items-center justify-between'>
               <button className='btn btn-ghost left-0 h-8 min-h-8 w-8 p-0'>
-                <MdSearch size={20} className='text-gray-600' />
+                <MdSearch size={20} className='fill-base-content' />
               </button>
               <button
                 onClick={onTogglePin}
-                className={`${isPinned ? 'bg-gray-400' : 'bg-gray-300'} btn btn-ghost btn-circle right-0 h-6 min-h-6 w-6`}
+                className={`${isPinned ? 'bg-gray-300' : 'bg-base-300'} btn btn-ghost btn-circle right-0 h-6 min-h-6 w-6`}
               >
                 {isPinned ? <MdPushPin size={14} /> : <MdOutlinePushPin size={14} />}
               </button>
@@ -119,28 +119,28 @@ const SideBar: React.FC<{
             {activeTab === 'bookmarks' && <div>Bookmarks</div>}
             {activeTab === 'annotations' && <div>Annotations</div>}
           </div>
-          <div className='bottom-tab absolute bottom-0 flex w-full bg-gray-200'>
+          <div className='bottom-tab absolute bottom-0 flex w-full'>
             <button
-              className={`m-1.5 flex-1 rounded-md p-2 ${activeTab === 'toc' ? 'bg-gray-300' : ''}`}
+              className={`m-1.5 flex-1 rounded-md p-2 ${activeTab === 'toc' ? 'bg-base-300' : ''}`}
               onClick={() => setActiveTab('toc')}
             >
               <MdToc size={20} className='mx-auto' />
             </button>
             <button
-              className={`m-1.5 flex-1 rounded-md p-2 ${activeTab === 'annotations' ? 'bg-gray-300' : ''}`}
+              className={`m-1.5 flex-1 rounded-md p-2 ${activeTab === 'annotations' ? 'bg-base-300' : ''}`}
               onClick={() => setActiveTab('annotations')}
             >
               <MdEditNote size={20} className='mx-auto' />
             </button>
             <button
-              className={`m-1.5 flex-1 rounded-md p-2 ${activeTab === 'bookmarks' ? 'bg-gray-300' : ''}`}
+              className={`m-1.5 flex-1 rounded-md p-2 ${activeTab === 'bookmarks' ? 'bg-base-300' : ''}`}
               onClick={() => setActiveTab('bookmarks')}
             >
               <MdBookmarkBorder size={20} className='mx-auto' />
             </button>
           </div>
           <div
-            className='drag-bar bg-base-300 absolute right-0 top-0 h-full w-0.5 cursor-col-resize'
+            className='drag-bar absolute right-0 top-0 h-full w-0.5 cursor-col-resize'
             onMouseDown={handleMouseDown}
           ></div>
         </div>
