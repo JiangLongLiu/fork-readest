@@ -6,11 +6,8 @@ interface SectionInfoProps {
 
 const SectionInfo: React.FC<SectionInfoProps> = ({ chapter }) => {
   return (
-    <div className='pageinfo absolute left-[4%] right-0 top-0 flex h-9 items-end'>
-      <h2
-        className='text-center font-sans font-extralight text-slate-500'
-        style={{ fontSize: '10px' }}
-      >
+    <div className='pageinfo absolute left-[4%] right-0 top-0 flex h-8 items-end'>
+      <h2 className='text-center font-sans font-light text-slate-500' style={{ fontSize: '10px' }}>
         {chapter || ''}
       </h2>
     </div>
