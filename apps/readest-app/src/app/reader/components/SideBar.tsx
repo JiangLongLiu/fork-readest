@@ -112,14 +112,14 @@ const SideBar: React.FC<{
           <div className='border-b px-3'>
             <BookCard cover={book.coverImageUrl!} title={book.title} author={book.author} />
           </div>
-          <div className='sidebar-content overflow-y-auto border-b shadow-inner'>
+          <div className='sidebar-content overflow-y-auto shadow-inner'>
             {activeTab === 'toc' && bookDoc!.toc && (
               <TOCView toc={bookDoc!.toc} bookKey={bookKey} currentHref={currentHref} />
             )}
             {activeTab === 'bookmarks' && <div>Bookmarks</div>}
             {activeTab === 'annotations' && <div>Annotations</div>}
           </div>
-          <div className='bottom-tab absolute bottom-0 flex w-full'>
+          <div className='bottom-tab absolute bottom-0 flex w-full border-t'>
             <button
               className={`m-1.5 flex-1 rounded-md p-2 ${activeTab === 'toc' ? 'bg-base-300' : ''}`}
               onClick={() => setActiveTab('toc')}

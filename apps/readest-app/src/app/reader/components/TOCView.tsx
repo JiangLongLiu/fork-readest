@@ -166,7 +166,7 @@ const TOCView: React.FC<{
 
   return (
     <div className='relative'>
-      <div className='max-h-[calc(100vh-173px)] overflow-y-auto rounded border'>
+      <div className='max-h-[calc(100vh-173px)] overflow-y-auto rounded'>
         <ul role='tree' ref={tocRef} className='overflow-y-auto px-2'>
           {toc &&
             toc.map((item) => (
