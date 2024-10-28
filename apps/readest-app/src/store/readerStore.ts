@@ -76,6 +76,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     const bookIndex = library.findIndex((b) => b.hash === book.hash);
     if (bookIndex !== -1) {
       library.splice(bookIndex, 1);
+      appService.deleteBook(book);
     }
     set({ library });
     appService.saveLibraryBooks(library);

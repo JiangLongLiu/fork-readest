@@ -12,7 +12,7 @@ import {
 } from '@tauri-apps/plugin-fs';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { open, message } from '@tauri-apps/plugin-dialog';
-import { join, documentDir, appDataDir } from '@tauri-apps/api/path';
+import { join, appDataDir } from '@tauri-apps/api/path';
 import { type as osType } from '@tauri-apps/plugin-os';
 
 import { Book } from '@/types/book';
@@ -23,19 +23,6 @@ import { BaseAppService } from './appService';
 import { LOCAL_BOOKS_SUBDIR } from './constants';
 
 export const isMobile = ['android', 'ios'].includes(osType());
-
-import { getCurrentWindow } from '@tauri-apps/api/window';
-
-export const initTitlebar = () => {
-  const appWindow = getCurrentWindow();
-  document
-    .getElementById('titlebar-minimize')!
-    .addEventListener('click', () => appWindow.minimize());
-  document
-    .getElementById('titlebar-maximize')!
-    .addEventListener('click', () => appWindow.toggleMaximize());
-  document.getElementById('titlebar-close')!.addEventListener('click', () => appWindow.close());
-};
 
 export const resolvePath = (
   fp: string,
@@ -52,7 +39,7 @@ export const resolvePath = (
       return { baseDir: BaseDirectory.AppLog, fp, base };
     case 'Books':
       return {
-        baseDir: isMobile ? BaseDirectory.AppData : BaseDirectory.Document,
+        baseDir: BaseDirectory.AppData,
         fp: `${LOCAL_BOOKS_SUBDIR}/${fp}`,
         base,
       };
@@ -129,33 +116,12 @@ export class NativeAppService extends BaseAppService {
   fs = nativeFileSystem;
   isAppDataSandbox = isMobile;
 
-  resolvePath(fp: string, base: BaseDir): { baseDir: number; base: BaseDir; fp: string } {
-    switch (base) {
-      case 'Settings':
-        return { baseDir: BaseDirectory.AppConfig, fp, base };
-      case 'Data':
-        return { baseDir: BaseDirectory.AppData, fp, base };
-      case 'Cache':
-        return { baseDir: BaseDirectory.AppCache, fp, base };
-      case 'Log':
-        return { baseDir: BaseDirectory.AppLog, fp, base };
-      case 'Books':
-        return {
-          baseDir: BaseDirectory.Document,
-          fp: `${LOCAL_BOOKS_SUBDIR}/${fp}`,
-          base,
-        };
-      default:
-        return {
-          baseDir: BaseDirectory.Temp,
-          fp,
-          base,
-        };
-    }
+  override resolvePath(fp: string, base: BaseDir): { baseDir: number; base: BaseDir; fp: string } {
+    return resolvePath(fp, base);
   }
 
   async getInitBooksDir(): Promise<string> {
-    return join(isMobile ? await appDataDir() : await documentDir(), LOCAL_BOOKS_SUBDIR);
+    return join(await appDataDir(), LOCAL_BOOKS_SUBDIR);
   }
 
   async selectDirectory(title: string): Promise<string> {

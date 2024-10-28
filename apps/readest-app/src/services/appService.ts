@@ -15,7 +15,7 @@ import {
 import { RemoteFile } from '@/utils/file';
 import { partialMD5 } from '@/utils/md5';
 import { BookDoc, DocumentLoader } from '@/libs/document';
-import { DEFAULT_READSETTINGS } from './constants';
+import { DEFAULT_READSETTINGS, SYSTEM_SETTINGS_VERSION } from './constants';
 
 export abstract class BaseAppService implements AppService {
   localBooksDir: string = '';
@@ -42,11 +42,14 @@ export abstract class BaseAppService implements AppService {
       await this.fs.exists(fp, base);
       const txt = await this.fs.readFile(fp, base, 'text');
       settings = JSON.parse(txt as string);
-      if (this.isAppDataSandbox) {
+      const version = settings.version ?? 0;
+      if (this.isAppDataSandbox || version < SYSTEM_SETTINGS_VERSION) {
         settings.localBooksDir = await this.getInitBooksDir();
+        settings.version = SYSTEM_SETTINGS_VERSION;
       }
     } catch {
       settings = {
+        version: SYSTEM_SETTINGS_VERSION,
         localBooksDir: await this.getInitBooksDir(),
         globalReadSettings: DEFAULT_READSETTINGS,
       };
@@ -138,6 +141,14 @@ export abstract class BaseAppService implements AppService {
     }
 
     return books;
+  }
+
+  async deleteBook(book: Book): Promise<void> {
+    for (const fp of [getFilename(book), getCoverFilename(book)]) {
+      if (await this.fs.exists(fp, 'Books')) {
+        await this.fs.removeFile(fp, 'Books');
+      }
+    }
   }
 
   async loadBookContent(book: Book): Promise<BookContent> {

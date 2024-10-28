@@ -7,15 +7,6 @@
     "core:default",
     "fs:default",
     {
-      "identifier": "fs:scope-document-recursive",
-      "allow": [
-        {
-          "path": "$DOCUMENT/**/*"
-        }
-      ],
-      "deny": []
-    },
-    {
       "identifier": "fs:scope-appdata-recursive",
       "allow": [
         {

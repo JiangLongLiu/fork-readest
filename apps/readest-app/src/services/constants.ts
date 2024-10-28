@@ -11,5 +11,7 @@ export const DEFAULT_READSETTINGS: ReadSettings = {
   lineSpacing: 1.5,
 
   sideBarWidth: '20%',
-  isSideBarPinned: false,
+  isSideBarPinned: true,
 };
+
+export const SYSTEM_SETTINGS_VERSION = 1;
