@@ -49,10 +49,15 @@ const ReaderContent = () => {
         return getKey(ids[nextIndex]!, nextIndex);
       });
       e.preventDefault();
+    } else if (e.key === 't') {
+      setSideBarVisibility((prev) => !prev);
     }
-    if (e.key === 'ArrowLeft') {
+  };
+
+  const handleKeyboardPagination = (e: KeyboardEvent) => {
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'h') {
       getFoliateView(sideBarBookKey)?.goLeft();
-    } else if (e.key === 'ArrowRight') {
+    } else if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === 'l') {
       getFoliateView(sideBarBookKey)?.goRight();
     }
   };
@@ -72,8 +77,10 @@ const ReaderContent = () => {
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyboardPagination);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keydown', handleKeyboardPagination);
     };
   }, [sideBarBookKey]);
 

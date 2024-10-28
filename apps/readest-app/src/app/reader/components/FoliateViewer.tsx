@@ -84,9 +84,18 @@ const FoliateViewer: React.FC<{
     );
   };
 
+  const handleKeyboardPagination = (e: KeyboardEvent) => {
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'h') {
+      view?.goLeft();
+    } else if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === 'l') {
+      view?.goRight();
+    }
+  };
+
   const docLoadHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;
-    if (handleKeyDown) detail.doc?.addEventListener('keydown', handleKeyDown);
+    detail.doc?.addEventListener('keydown', handleKeyDown);
+    detail.doc?.addEventListener('keydown', handleKeyboardPagination);
   };
 
   useFoliateEvents(view, { onLoad: docLoadHandler, onRelocate: progressRelocateHandler });
