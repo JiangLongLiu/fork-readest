@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 import { useEnv } from '@/context/EnvContext';
@@ -22,6 +22,7 @@ const ReaderContent = () => {
 
   const { envConfig } = useEnv();
   const { books, settings, initBookState, saveConfig, saveSettings } = useReaderStore();
+  const { getFoliateView } = useReaderStore();
 
   const [sideBarWidth, setSideBarWidth] = useState(
     settings.globalReadSettings.sideBarWidth ?? '25%',
@@ -36,7 +37,27 @@ const ReaderContent = () => {
   const [sideBarBookKey, setSideBarBookKey] = useState(getKey(ids[0] ?? '', 0));
   const [hoveredBookKey, setHoveredBookKey] = useState('');
 
-  React.useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (
+      (e.ctrlKey && e.key === 'Tab') ||
+      (e.altKey && e.key === 'Tab') ||
+      (e.metaKey && e.key === 'Tab')
+    ) {
+      setSideBarBookKey((prevKey) => {
+        const index = ids.findIndex((id) => prevKey.startsWith(id));
+        const nextIndex = (index + 1) % ids.length;
+        return getKey(ids[nextIndex]!, nextIndex);
+      });
+      e.preventDefault();
+    }
+    if (e.key === 'ArrowLeft') {
+      getFoliateView(sideBarBookKey)?.goLeft();
+    } else if (e.key === 'ArrowRight') {
+      getFoliateView(sideBarBookKey)?.goRight();
+    }
+  };
+
+  useEffect(() => {
     if (ids.length === 0) return;
     const uniqueIds = new Set<string>();
     ids.forEach((id, index) => {
@@ -48,6 +69,13 @@ const ReaderContent = () => {
       initBookState(envConfig, id, key, isPrimary);
     });
   }, [ids, settings]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [sideBarBookKey]);
 
   const handleSideBarResize = (newWidth: string) => {
     setSideBarWidth(newWidth);
@@ -152,7 +180,12 @@ const ReaderContent = () => {
                 setSideBarBookKey={setSideBarBookKey}
                 setHoveredBookKey={setHoveredBookKey}
               />
-              <FoliateViewer bookKey={key} bookDoc={bookDoc!} bookConfig={config!} />
+              <FoliateViewer
+                bookKey={key}
+                bookDoc={bookDoc!}
+                bookConfig={config!}
+                handleKeyDown={handleKeyDown}
+              />
               <SectionInfo chapter={chapter} />
               <PageInfo bookFormat={book.format} section={section} pageinfo={pageinfo} />
               <FooterBar
@@ -160,7 +193,6 @@ const ReaderContent = () => {
                 progress={progress}
                 isHoveredAnim={false}
                 hoveredBookKey={hoveredBookKey}
-                sideBarBookKey={sideBarBookKey}
                 setHoveredBookKey={setHoveredBookKey}
               />
             </div>

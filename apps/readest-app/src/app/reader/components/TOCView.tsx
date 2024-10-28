@@ -136,8 +136,7 @@ const TOCView: React.FC<{
     }
   };
 
-  const foliateView = getFoliateView(bookKey);
-  useFoliateEvents(bookKey, foliateView, { onRelocate: tocRelocateHandler });
+  useFoliateEvents(getFoliateView(bookKey), { onRelocate: tocRelocateHandler });
 
   useEffect(() => {
     setCurrentHref(href);

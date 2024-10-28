@@ -62,13 +62,34 @@ const FoliateViewer: React.FC<{
   bookKey: string;
   bookDoc: BookDoc;
   bookConfig: BookConfig;
-}> = ({ bookKey, bookDoc, bookConfig }) => {
+  handleKeyDown: (event: KeyboardEvent) => void;
+}> = ({ bookKey, bookDoc, bookConfig, handleKeyDown }) => {
   const viewRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<FoliateView | null>(null);
   const isViewCreated = useRef(false);
   const { setFoliateView } = useReaderStore();
+  const setProgress = useReaderStore((state) => state.setProgress);
 
-  useFoliateEvents(bookKey, view);
+  const progressRelocateHandler = (event: Event) => {
+    const detail = (event as CustomEvent).detail;
+    // console.log('relocate:', detail);
+    setProgress(
+      bookKey,
+      detail.fraction,
+      detail.cfi,
+      detail.tocItem?.href,
+      detail.tocItem?.label,
+      detail.section,
+      detail.location,
+    );
+  };
+
+  const docLoadHandler = (event: Event) => {
+    const detail = (event as CustomEvent).detail;
+    if (handleKeyDown) detail.doc?.addEventListener('keydown', handleKeyDown);
+  };
+
+  useFoliateEvents(view, { onLoad: docLoadHandler, onRelocate: progressRelocateHandler });
 
   useEffect(() => {
     if (isViewCreated.current) return;

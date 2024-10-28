@@ -49,7 +49,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
       onMouseLeave={() => setHoveredBookKey('')}
     >
       <div className='absolute inset-0 flex items-center justify-center'>
-        <h2 className='line-clamp-1 max-w-[80%] px-2 text-center text-xs font-semibold'>
+        <h2 className='line-clamp-1 max-w-[70%] px-2 text-center text-xs font-semibold'>
           {bookTitle}
         </h2>
       </div>
