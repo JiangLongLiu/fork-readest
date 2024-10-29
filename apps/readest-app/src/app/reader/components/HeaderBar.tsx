@@ -1,8 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import clsx from 'clsx';
 import { VscLayoutSidebarLeft, VscLayoutSidebarLeftOff } from 'react-icons/vsc';
+import { PiDotsThreeVerticalBold } from 'react-icons/pi';
 
 import WindowButtons from '@/components/WindowButtons';
+import Dropdown from '@/components/Dropdown';
+import ViewMenu from './ViewMenu';
 
 interface HeaderBarProps {
   bookKey: string;
@@ -30,6 +33,8 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   onCloseBook,
 }) => {
   const headerRef = useRef<HTMLDivElement>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const toggleSideBar = () => {
     if (!isSideBarVisible) {
       setSideBarVisibility(true);
@@ -46,7 +51,8 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
         `header-bar absolute top-0 z-10 flex h-11 w-full items-center px-4`,
         `shadow-xs bg-base-100 rounded-window transition-opacity duration-300`,
         isHoveredAnim && 'hover-bar-anim',
-        hoveredBookKey === bookKey ? `opacity-100` : `opacity-0`,
+        hoveredBookKey === bookKey || isDropdownOpen ? `opacity-100` : `opacity-0`,
+        isDropdownOpen && 'header-bar-pinned',
       )}
       onMouseEnter={() => setHoveredBookKey(bookKey)}
       onMouseLeave={() => setHoveredBookKey('')}
@@ -66,6 +72,15 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
       </div>
 
       <div className='ml-auto flex h-full items-center space-x-2'>
+        <Dropdown
+          className='dropdown-bottom dropdown-end'
+          buttonClassName='btn btn-ghost h-8 min-h-8 w-8 p-0'
+          toggleButton={<PiDotsThreeVerticalBold size={16} />}
+          onToggle={setIsDropdownOpen}
+        >
+          <ViewMenu />
+        </Dropdown>
+
         <WindowButtons
           className='window-buttons flex h-full items-center'
           headerRef={headerRef}
