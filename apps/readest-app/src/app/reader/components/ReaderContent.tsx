@@ -179,7 +179,7 @@ const ReaderContent = () => {
               <HeaderBar
                 bookKey={key}
                 bookTitle={book?.title}
-                isHoveredAnim={ids.length > 1}
+                isHoveredAnim={ids.length > 2}
                 hoveredBookKey={hoveredBookKey}
                 isSideBarVisible={isSideBarVisible}
                 sideBarBookKey={sideBarBookKey}
