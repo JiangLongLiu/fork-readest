@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import {
-  MdSearch,
   MdOutlinePushPin,
   MdPushPin,
   MdToc,
   MdEditNote,
   MdBookmarkBorder,
+  MdOutlineMenu,
 } from 'react-icons/md';
 import { GiBookshelf } from 'react-icons/gi';
+import { CiSearch } from 'react-icons/ci';
 
+import { BookState, DEFAULT_BOOK_STATE, useReaderStore } from '@/store/readerStore';
+import Dropdown from '@/components/Dropdown';
 import BookCard from './BookCard';
 import TOCView from './TOCView';
-import { BookState, DEFAULT_BOOK_STATE, useReaderStore } from '@/store/readerStore';
+import BookMenu from './BookMenu';
 
 const MIN_SIDEBAR_WIDTH = 0.15;
 const MAX_SIDEBAR_WIDTH = 0.45;
@@ -84,7 +87,7 @@ const SideBar: React.FC<{
     <div
       className={clsx(
         'sidebar-container bg-base-200 rounded-window-left z-20 h-full select-none',
-        !isPinned && 'shadow-',
+        !isPinned && 'shadow-2xl',
       )}
       style={{
         width: `${width}`,
@@ -94,16 +97,23 @@ const SideBar: React.FC<{
       }}
     >
       <div className={'sidebar h-full'}>
-        <div className='flex h-11 items-center justify-between pl-1.5 pr-3'>
+        <div className='sidebar-header flex h-11 items-center justify-between pl-1.5 pr-3'>
           <div className='flex items-center'>
             <button className='btn btn-ghost h-8 min-h-8 w-8 p-0' onClick={onGoToLibrary}>
               <GiBookshelf size={20} className='fill-base-content' />
             </button>
           </div>
-          <div className='flex size-[30%] min-w-20 items-center justify-between'>
+          <div className='flex size-[50%] min-w-20 items-center justify-between'>
             <button className='btn btn-ghost left-0 h-8 min-h-8 w-8 p-0'>
-              <MdSearch size={20} className='fill-base-content' />
+              <CiSearch size={20} className='fill-base-content' />
             </button>
+            <Dropdown
+              className='dropdown-bottom flex justify-center'
+              buttonClassName='btn btn-ghost h-8 min-h-8 w-8 p-0'
+              toggleButton={<MdOutlineMenu size={20} />}
+            >
+              <BookMenu bookId={book.hash} />
+            </Dropdown>
             <button
               onClick={onTogglePin}
               className={`${isPinned ? 'bg-gray-300' : 'bg-base-300'} btn btn-ghost btn-circle right-0 h-6 min-h-6 w-6`}

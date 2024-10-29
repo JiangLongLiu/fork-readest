@@ -72,3 +72,59 @@ foliate-view {
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
 }
+
+.dropdown-content {
+  position: relative;
+  background-color: white;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  border-radius: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  @apply text-gray-700;
+}
+
+.dropdown-content::before,
+.dropdown-content::after {
+  content: '';
+  position: absolute;
+  top: -12px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+}
+
+.dropdown-content::before {
+  border-bottom: 12px solid white;
+  z-index: 1;
+}
+
+.dropdown-content::after {
+  top: -14px;
+  border-bottom: 13px solid rgba(0, 0, 0, 0.02);
+  z-index: 0;
+}
+
+.dropdown-left::before,
+.dropdown-left::after {
+  left: 20px;
+  transform: translateX(0);
+}
+
+.dropdown-center::before,
+.dropdown-center::after {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.dropdown-right::before,
+.dropdown-right::after {
+  right: 20px;
+  transform: translateX(0);
+}
+
+.dropdown-content.no-triangle::before,
+.dropdown-content.no-triangle::after {
+  display: none;
+}
