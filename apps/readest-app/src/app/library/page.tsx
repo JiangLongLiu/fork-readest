@@ -7,7 +7,7 @@ import { useEnv } from '@/context/EnvContext';
 import { useReaderStore } from '@/store/readerStore';
 
 import Spinner from '@/components/Spinner';
-import LibraryHeader from '@/app/library/components/Header';
+import LibraryHeader from '@/app/library/components/LibraryHeader';
 import Bookshelf from '@/app/library/components/Bookshelf';
 
 const LibraryPage = () => {

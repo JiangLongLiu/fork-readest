@@ -43,7 +43,7 @@ const ReaderContent = () => {
       (e.altKey && e.key === 'Tab') ||
       (e.metaKey && e.key === 'Tab')
     ) {
-      setSideBarBookKey((prevKey) => {
+      setSideBarBookKey((prevKey: string) => {
         const index = ids.findIndex((id) => prevKey.startsWith(id));
         const nextIndex = (index + 1) % ids.length;
         return getKey(ids[nextIndex]!, nextIndex);
@@ -97,15 +97,41 @@ const ReaderContent = () => {
     settings.globalReadSettings.isSideBarPinned = !isSideBarPinned;
   };
 
-  const handleCloseBook = () => {
-    bookStates.forEach((bookState) => {
-      const { book, config, isPrimary } = bookState;
-      if (isPrimary && book && config) {
-        saveConfig(envConfig, book, config);
-      }
+  const closeBook = (bookKey: string) => {
+    const bookState = books[bookKey];
+    if (!bookState) return;
+    const { book, config, isPrimary } = bookState;
+    if (isPrimary && book && config) {
+      saveConfig(envConfig, book, config);
+    }
+  };
+
+  const handleCloseBooks = () => {
+    ids.forEach((id, index) => {
+      const key = getKey(id, index);
+      closeBook(key);
     });
     saveSettings(envConfig, settings);
     router.back();
+  };
+
+  const handleCloseBook = (bookKey: string) => {
+    closeBook(bookKey);
+    setSideBarBookKey((prevKey: string) => {
+      if (prevKey === bookKey) {
+        const index = ids.findIndex((id) => prevKey.startsWith(id));
+        const nextIndex = (index + 1) % ids.length;
+        return getKey(ids[nextIndex]!, nextIndex);
+      }
+      return prevKey;
+    });
+    const newIds = ids.filter((id, index) => getKey(id, index) !== bookKey);
+    if (newIds.length > 0) {
+      router.replace(`/reader?ids=${newIds.join(',')}`);
+    } else {
+      saveSettings(envConfig, settings);
+      router.back();
+    }
   };
 
   const getGridTemplate = () => {
@@ -157,7 +183,7 @@ const ReaderContent = () => {
         isPinned={isSideBarPinned}
         onResize={handleSideBarResize}
         onTogglePin={handleSideBarTogglePin}
-        onGoToLibrary={handleCloseBook}
+        onGoToLibrary={handleCloseBooks}
         onSetVisibility={(visibility: boolean) => setSideBarVisibility(visibility)}
       />
 
@@ -186,6 +212,7 @@ const ReaderContent = () => {
                 setSideBarVisibility={setSideBarVisibility}
                 setSideBarBookKey={setSideBarBookKey}
                 setHoveredBookKey={setHoveredBookKey}
+                onCloseBook={handleCloseBook}
               />
               <FoliateViewer
                 bookKey={key}

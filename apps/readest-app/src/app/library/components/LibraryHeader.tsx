@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { PiPlus } from 'react-icons/pi';
 import { PiSelectionAllDuotone } from 'react-icons/pi';
@@ -16,6 +16,7 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
   onImportBooks,
   onToggleSelectMode,
 }) => {
+  const headerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.shiftKey) {
@@ -28,9 +29,24 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
     };
   }, [onToggleSelectMode]);
 
+  const handleMinimize = async () => {
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
+    getCurrentWindow().minimize();
+  };
+
+  const handleToggleMaximize = async () => {
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
+    getCurrentWindow().toggleMaximize();
+  };
+
+  const handleClose = async () => {
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
+    getCurrentWindow().close();
+  };
+
   return (
     <div
-      id='titlebar'
+      ref={headerRef}
       className='titlebar rounded-window fixed top-0 z-10 w-full bg-gray-100 px-6 py-4'
     >
       <div className='flex items-center justify-between'>
@@ -68,7 +84,12 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
             </button>
           </div>
         </div>
-        <WindowButtons />
+        <WindowButtons
+          headerRef={headerRef}
+          onMinimize={handleMinimize}
+          onToggleMaximize={handleToggleMaximize}
+          onClose={handleClose}
+        />
       </div>
     </div>
   );

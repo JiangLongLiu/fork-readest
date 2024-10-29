@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import clsx from 'clsx';
 import { VscLayoutSidebarLeft, VscLayoutSidebarLeftOff } from 'react-icons/vsc';
 
@@ -14,6 +14,7 @@ interface HeaderBarProps {
   setSideBarVisibility: (visibility: boolean) => void;
   setSideBarBookKey: (key: string) => void;
   setHoveredBookKey: (key: string) => void;
+  onCloseBook: (bookKey: string) => void;
 }
 
 const HeaderBar: React.FC<HeaderBarProps> = ({
@@ -26,7 +27,9 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   setSideBarVisibility,
   setSideBarBookKey,
   setHoveredBookKey,
+  onCloseBook,
 }) => {
+  const headerRef = useRef<HTMLDivElement>(null);
   const toggleSideBar = () => {
     if (!isSideBarVisible) {
       setSideBarVisibility(true);
@@ -38,7 +41,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
 
   return (
     <div
-      id='titlebar'
+      ref={headerRef}
       className={clsx(
         `header-bar absolute top-0 z-10 flex h-11 w-full items-center px-4`,
         `shadow-xs bg-base-100 rounded-window transition-opacity duration-300`,
@@ -48,13 +51,8 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
       onMouseEnter={() => setHoveredBookKey(bookKey)}
       onMouseLeave={() => setHoveredBookKey('')}
     >
-      <div className='absolute inset-0 flex items-center justify-center'>
-        <h2 className='line-clamp-1 max-w-[70%] px-2 text-center text-xs font-semibold'>
-          {bookTitle}
-        </h2>
-      </div>
-      <div className='absolute left-4 flex h-full items-center p-2'>
-        <button onClick={toggleSideBar}>
+      <div className='sidebar-toggler mr-auto flex h-full items-center'>
+        <button onClick={toggleSideBar} className='p-2'>
           {sideBarBookKey === bookKey && isSideBarVisible ? (
             <VscLayoutSidebarLeft size={16} />
           ) : (
@@ -62,8 +60,19 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
           )}
         </button>
       </div>
-      <div className='absolute right-4 flex h-full items-center'>
-        <WindowButtons />
+
+      <div className='header-title flex flex-1 items-center justify-center'>
+        <h2 className='line-clamp-1 max-w-[80%] text-center text-xs font-semibold'>{bookTitle}</h2>
+      </div>
+
+      <div className='ml-auto flex h-full items-center space-x-2'>
+        <WindowButtons
+          className='window-buttons flex h-full items-center'
+          headerRef={headerRef}
+          showMinimize={false}
+          showMaximize={false}
+          onClose={() => onCloseBook(bookKey)}
+        />
       </div>
     </div>
   );
