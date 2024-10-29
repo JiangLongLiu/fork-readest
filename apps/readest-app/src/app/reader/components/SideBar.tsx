@@ -29,6 +29,7 @@ const SideBar: React.FC<{
   onTogglePin: () => void;
   onResize: (newWidth: string) => void;
   onGoToLibrary: () => void;
+  onOpenSplitView: () => void;
 }> = ({
   bookKey,
   width,
@@ -38,6 +39,7 @@ const SideBar: React.FC<{
   onSetVisibility,
   onResize,
   onGoToLibrary,
+  onOpenSplitView,
 }) => {
   const [activeTab, setActiveTab] = useState('toc');
   const { books } = useReaderStore();
@@ -112,7 +114,7 @@ const SideBar: React.FC<{
               buttonClassName='btn btn-ghost h-8 min-h-8 w-8 p-0'
               toggleButton={<MdOutlineMenu size={20} />}
             >
-              <BookMenu bookId={book.hash} />
+              <BookMenu openSplitView={onOpenSplitView} />
             </Dropdown>
             <button
               onClick={onTogglePin}

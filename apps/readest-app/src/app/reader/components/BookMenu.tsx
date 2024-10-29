@@ -1,46 +1,41 @@
 import React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 
 interface BookMenuProps {
-  bookId: string;
+  openSplitView: () => void;
   toggleDropdown?: () => void;
 }
 
-const BookMenu: React.FC<BookMenuProps> = ({ bookId, toggleDropdown }) => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const openSplitView = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    const ids = (params.get('ids') || '').split(',');
-    const updatedIds = [...ids, bookId].join(',');
-    params.set('ids', updatedIds);
-    router.push(`?${params.toString()}`);
+const BookMenu: React.FC<BookMenuProps> = ({ openSplitView, toggleDropdown }) => {
+  const handleOpenSplitView = () => {
+    openSplitView();
     toggleDropdown?.();
   };
-  const reloadPage = () => {
+  const handleReloadPage = () => {
     window.location.reload();
     toggleDropdown?.();
   };
   const showAboutReadest = () => {
     toggleDropdown?.();
   };
+
   return (
     <div
       tabIndex={0}
       className='book-menu dropdown-content dropdown-center z-20 mt-3 w-56 border bg-white shadow-2xl'
     >
       <button
-        className='flex w-full items-center rounded-md p-2 hover:bg-gray-100'
-        onClick={openSplitView}
+        className='flex w-full items-center justify-between rounded-md p-2 hover:bg-gray-100'
+        onClick={handleOpenSplitView}
       >
         <span className='ml-2'>Split View</span>
+        <span className='text-sm text-gray-400'>Shift+S</span>
       </button>
       <button
-        className='flex w-full items-center rounded-md p-2 hover:bg-gray-100'
-        onClick={reloadPage}
+        className='flex w-full items-center justify-between rounded-md p-2 hover:bg-gray-100'
+        onClick={handleReloadPage}
       >
         <span className='ml-2'>Reload Page</span>
+        <span className='text-sm text-gray-400'>Shift+R</span>
       </button>
       <hr className='my-1' />
       <button

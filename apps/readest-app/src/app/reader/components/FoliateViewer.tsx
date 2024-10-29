@@ -62,8 +62,7 @@ const FoliateViewer: React.FC<{
   bookKey: string;
   bookDoc: BookDoc;
   bookConfig: BookConfig;
-  handleKeyDown: (event: KeyboardEvent) => void;
-}> = ({ bookKey, bookDoc, bookConfig, handleKeyDown }) => {
+}> = ({ bookKey, bookDoc, bookConfig }) => {
   const viewRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<FoliateView | null>(null);
   const isViewCreated = useRef(false);
@@ -84,18 +83,29 @@ const FoliateViewer: React.FC<{
     );
   };
 
-  const handleKeyboardPagination = (e: KeyboardEvent) => {
-    if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'h') {
-      view?.goLeft();
-    } else if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === 'l') {
-      view?.goRight();
-    }
+  const handleKeydown = (event: KeyboardEvent) => {
+    window.postMessage(
+      {
+        type: 'iframe-keydown',
+        key: event.key,
+        code: event.code,
+        ctrlKey: event.ctrlKey,
+        shiftKey: event.shiftKey,
+        altKey: event.altKey,
+        metaKey: event.metaKey,
+      },
+      '*',
+    );
   };
 
   const docLoadHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;
-    detail.doc?.addEventListener('keydown', handleKeyDown);
-    detail.doc?.addEventListener('keydown', handleKeyboardPagination);
+    if (detail.doc) {
+      if (!detail.doc.isKeydownListenerAdded) {
+        detail.doc?.addEventListener('keydown', handleKeydown);
+        detail.doc.isKeydownListenerAdded = true;
+      }
+    }
   };
 
   useFoliateEvents(view, { onLoad: docLoadHandler, onRelocate: progressRelocateHandler });

@@ -14,6 +14,7 @@ import PageInfo from './PageInfo';
 import HeaderBar from './HeaderBar';
 import FooterBar from './FooterBar';
 import SectionInfo from './SectionInfo';
+import useShortcuts from '@/hooks/useShortcuts';
 
 const ReaderContent = () => {
   const router = useRouter();
@@ -37,31 +38,6 @@ const ReaderContent = () => {
   const [sideBarBookKey, setSideBarBookKey] = useState(getKey(ids[0] ?? '', 0));
   const [hoveredBookKey, setHoveredBookKey] = useState('');
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (
-      (e.ctrlKey && e.key === 'Tab') ||
-      (e.altKey && e.key === 'Tab') ||
-      (e.metaKey && e.key === 'Tab')
-    ) {
-      setSideBarBookKey((prevKey: string) => {
-        const index = ids.findIndex((id) => prevKey.startsWith(id));
-        const nextIndex = (index + 1) % ids.length;
-        return getKey(ids[nextIndex]!, nextIndex);
-      });
-      e.preventDefault();
-    } else if (e.key === 't') {
-      setSideBarVisibility((prev) => !prev);
-    }
-  };
-
-  const handleKeyboardPagination = (e: KeyboardEvent) => {
-    if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'h') {
-      getFoliateView(sideBarBookKey)?.goLeft();
-    } else if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === 'l') {
-      getFoliateView(sideBarBookKey)?.goRight();
-    }
-  };
-
   useEffect(() => {
     if (ids.length === 0) return;
     const uniqueIds = new Set<string>();
@@ -75,14 +51,51 @@ const ReaderContent = () => {
     });
   }, [ids, settings]);
 
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keydown', handleKeyboardPagination);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keydown', handleKeyboardPagination);
-    };
-  }, [sideBarBookKey]);
+  const switchSidebar = () => {
+    setSideBarBookKey((prevKey: string) => {
+      const bookKeys = ids.map((id, index) => getKey(id, index));
+      const index = bookKeys.findIndex((key) => prevKey === key);
+      const nextIndex = (index + 1) % bookKeys.length;
+      return bookKeys[nextIndex]!;
+    });
+  };
+
+  const toggleSidebar = () => {
+    setSideBarVisibility((prev) => !prev);
+  };
+
+  const openSplitView = () => {
+    console.log('open split view');
+    const params = new URLSearchParams(searchParams.toString());
+    const sideBarBookId = sideBarBookKey.split('-')[0];
+    const updatedIds = [...ids, sideBarBookId].join(',');
+    params.set('ids', updatedIds);
+    router.push(`?${params.toString()}`);
+  };
+
+  const goLeft = () => {
+    getFoliateView(sideBarBookKey)?.goLeft();
+  };
+
+  const goRight = () => {
+    getFoliateView(sideBarBookKey)?.goRight();
+  };
+
+  const reloadPage = () => {
+    window.location.reload();
+  };
+
+  useShortcuts(
+    {
+      onOpenSplitView: openSplitView,
+      onSwitchSidebar: switchSidebar,
+      onToggleSidebar: toggleSidebar,
+      onReloadPage: reloadPage,
+      onGoLeft: goLeft,
+      onGoRight: goRight,
+    },
+    [sideBarBookKey, searchParams],
+  );
 
   const handleSideBarResize = (newWidth: string) => {
     setSideBarWidth(newWidth);
@@ -112,7 +125,7 @@ const ReaderContent = () => {
       closeBook(key);
     });
     saveSettings(envConfig, settings);
-    router.back();
+    router.replace('/library');
   };
 
   const handleCloseBook = (bookKey: string) => {
@@ -184,6 +197,7 @@ const ReaderContent = () => {
         onResize={handleSideBarResize}
         onTogglePin={handleSideBarTogglePin}
         onGoToLibrary={handleCloseBooks}
+        onOpenSplitView={openSplitView}
         onSetVisibility={(visibility: boolean) => setSideBarVisibility(visibility)}
       />
 
@@ -214,12 +228,7 @@ const ReaderContent = () => {
                 setHoveredBookKey={setHoveredBookKey}
                 onCloseBook={handleCloseBook}
               />
-              <FoliateViewer
-                bookKey={key}
-                bookDoc={bookDoc!}
-                bookConfig={config!}
-                handleKeyDown={handleKeyDown}
-              />
+              <FoliateViewer bookKey={key} bookDoc={bookDoc!} bookConfig={config!} />
               <SectionInfo chapter={chapter} />
               <PageInfo bookFormat={book.format} section={section} pageinfo={pageinfo} />
               <FooterBar
