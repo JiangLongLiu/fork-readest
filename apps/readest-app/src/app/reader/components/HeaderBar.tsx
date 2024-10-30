@@ -49,7 +49,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
       ref={headerRef}
       className={clsx(
         `header-bar absolute top-0 z-10 flex h-11 w-full items-center px-4`,
-        `shadow-xs bg-base-100 rounded-window transition-opacity duration-300`,
+        `shadow-xs bg-base-100 rounded-window-top-right transition-opacity duration-300`,
         isHoveredAnim && 'hover-bar-anim',
         hoveredBookKey === bookKey || isDropdownOpen ? `opacity-100` : `opacity-0`,
         isDropdownOpen && 'header-bar-pinned',
@@ -78,7 +78,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
           toggleButton={<PiDotsThreeVerticalBold size={16} />}
           onToggle={setIsDropdownOpen}
         >
-          <ViewMenu />
+          <ViewMenu bookKey={bookKey} />
         </Dropdown>
 
         <WindowButtons

@@ -41,7 +41,7 @@ const FooterBar: React.FC<FooterBarProps> = ({
     <div
       className={clsx(
         'footer-bar absolute bottom-0 z-10 flex h-12 w-full items-center px-4',
-        'shadow-xs bg-base-100 rounded-window transition-opacity duration-300',
+        'shadow-xs bg-base-100 rounded-window-bottom-right transition-opacity duration-300',
         isHoveredAnim && 'hover-bar-anim',
         hoveredBookKey === bookKey ? `opacity-100` : `opacity-0`,
       )}

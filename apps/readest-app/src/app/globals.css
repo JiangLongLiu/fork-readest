@@ -62,14 +62,16 @@ foliate-view {
 .rounded-window {
   border-radius: 10px;
 }
-
-.rounded-window-left {
+.rounded-window-top-left {
   border-top-left-radius: 10px;
+}
+.rounded-window-bottom-left {
   border-bottom-left-radius: 10px;
 }
-
-.rounded-window-right {
+.rounded-window-top-right {
   border-top-right-radius: 10px;
+}
+.rounded-window-bottom-right {
   border-bottom-right-radius: 10px;
 }
 

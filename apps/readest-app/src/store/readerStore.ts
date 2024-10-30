@@ -34,14 +34,21 @@ interface ReaderStore {
     section: PageInfo,
     pageinfo: PageInfo,
   ) => void;
+  setConfig: (key: string, config: BookConfig) => void;
   setFoliateView: (key: string, view: FoliateView) => void;
   getFoliateView: (key: string) => FoliateView | null;
 
   deleteBook: (envConfig: EnvConfigType, book: Book) => void;
-  saveConfig: (envConfig: EnvConfigType, book: Book, config: BookConfig) => void;
+  saveConfig: (
+    envConfig: EnvConfigType,
+    book: Book,
+    config: BookConfig,
+    settings: SystemSettings,
+  ) => void;
   saveSettings: (envConfig: EnvConfigType, settings: SystemSettings) => void;
-
   initBookState: (envConfig: EnvConfigType, id: string, key: string, isPrimary?: boolean) => void;
+
+  closeBook: (key: string) => void;
   addBookmark: (key: string, bookmark: BookNote) => void;
 }
 
@@ -64,6 +71,25 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
 
   setLibrary: (books: Book[]) => set({ library: books }),
   setSettings: (settings: SystemSettings) => set({ settings }),
+  setConfig: (key: string, config: BookConfig) => {
+    set((state) => {
+      const book = state.books[key];
+      if (!book) return state;
+      return {
+        books: {
+          ...state.books,
+          [key]: {
+            ...book,
+            config: {
+              ...book.config,
+              ...config,
+              lastUpdated: Date.now(),
+            },
+          },
+        },
+      };
+    });
+  },
 
   setFoliateView: (key: string, view) =>
     set((state) => ({ foliateViews: { ...state.foliateViews, [key]: view } })),
@@ -81,7 +107,12 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     set({ library });
     appService.saveLibraryBooks(library);
   },
-  saveConfig: async (envConfig: EnvConfigType, book: Book, config: BookConfig) => {
+  saveConfig: async (
+    envConfig: EnvConfigType,
+    book: Book,
+    config: BookConfig,
+    settings: SystemSettings,
+  ) => {
     const appService = await envConfig.getAppService();
     const { library } = get();
     const bookIndex = library.findIndex((b) => b.hash === book.hash);
@@ -91,7 +122,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     }
     set({ library });
     config.lastUpdated = Date.now();
-    appService.saveBookConfig(book, config);
+    appService.saveBookConfig(book, config, settings);
     appService.saveLibraryBooks(library);
   },
   saveSettings: async (envConfig: EnvConfigType, settings: SystemSettings) => {
@@ -99,6 +130,13 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     await appService.saveSettings(settings);
   },
 
+  closeBook: (key: string) => {
+    set((state) => {
+      const books = { ...state.books };
+      delete books[key];
+      return { books };
+    });
+  },
   initBookState: async (envConfig: EnvConfigType, id: string, key: string, isPrimary = true) => {
     set((state) => ({
       books: {
@@ -109,12 +147,12 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
 
     try {
       const appService = await envConfig.getAppService();
-      const library = await appService.loadLibraryBooks();
+      const { library, settings } = get();
       const book = library.find((b) => b.hash === id);
       if (!book) {
         throw new Error('Book not found');
       }
-      const content = (await appService.loadBookContent(book)) as BookContent;
+      const content = (await appService.loadBookContent(book, settings)) as BookContent;
       const { file, config } = content;
       const { book: bookDoc } = await new DocumentLoader(file).open();
 

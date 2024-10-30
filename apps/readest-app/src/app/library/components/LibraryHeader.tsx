@@ -45,10 +45,7 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
   };
 
   return (
-    <div
-      ref={headerRef}
-      className='titlebar rounded-window fixed top-0 z-10 w-full bg-gray-100 px-6 py-4'
-    >
+    <div ref={headerRef} className='titlebar fixed top-2 z-10 w-full bg-gray-100 px-6 py-4'>
       <div className='flex items-center justify-between'>
         <div className='sm:w relative flex w-full items-center'>
           <span className='absolute left-4 text-gray-500'>

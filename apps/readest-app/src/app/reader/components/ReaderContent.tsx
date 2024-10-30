@@ -22,14 +22,12 @@ const ReaderContent = () => {
   const ids = (searchParams.get('ids') || '').split(',');
 
   const { envConfig } = useEnv();
-  const { books, settings, initBookState, saveConfig, saveSettings } = useReaderStore();
-  const { getFoliateView } = useReaderStore();
+  const { books, settings } = useReaderStore();
+  const { initBookState, closeBook, saveConfig, saveSettings, getFoliateView } = useReaderStore();
 
-  const [sideBarWidth, setSideBarWidth] = useState(
-    settings.globalReadSettings.sideBarWidth ?? '25%',
-  );
+  const [sideBarWidth, setSideBarWidth] = useState(settings.globalReadSettings.sideBarWidth);
   const [isSideBarPinned, setIsSideBarPinned] = useState(
-    settings.globalReadSettings.isSideBarPinned ?? true,
+    settings.globalReadSettings.isSideBarPinned,
   );
   const [isSideBarVisible, setSideBarVisibility] = useState(isSideBarPinned);
 
@@ -41,22 +39,27 @@ const ReaderContent = () => {
   useEffect(() => {
     if (ids.length === 0) return;
     const uniqueIds = new Set<string>();
+    console.log('fetching books', ids);
     ids.forEach((id, index) => {
       const isPrimary = !uniqueIds.has(id);
       uniqueIds.add(id);
       const key = getKey(id, index);
       if (books[key]) return;
-      console.log('fetching book', key);
+      console.log('initing state', key);
       initBookState(envConfig, id, key, isPrimary);
     });
-  }, [ids, settings]);
+  }, [searchParams]);
+
+  const getNextBookKey = (bookKey: string) => {
+    const bookKeys = ids.map((id, index) => getKey(id, index));
+    const index = bookKeys.findIndex((key) => key === bookKey);
+    const nextIndex = (index + 1) % bookKeys.length;
+    return bookKeys[nextIndex]!;
+  };
 
   const switchSidebar = () => {
     setSideBarBookKey((prevKey: string) => {
-      const bookKeys = ids.map((id, index) => getKey(id, index));
-      const index = bookKeys.findIndex((key) => prevKey === key);
-      const nextIndex = (index + 1) % bookKeys.length;
-      return bookKeys[nextIndex]!;
+      return getNextBookKey(prevKey);
     });
   };
 
@@ -65,7 +68,6 @@ const ReaderContent = () => {
   };
 
   const openSplitView = () => {
-    console.log('open split view');
     const params = new URLSearchParams(searchParams.toString());
     const sideBarBookId = sideBarBookKey.split('-')[0];
     const updatedIds = [...ids, sideBarBookId].join(',');
@@ -110,40 +112,41 @@ const ReaderContent = () => {
     settings.globalReadSettings.isSideBarPinned = !isSideBarPinned;
   };
 
-  const closeBook = (bookKey: string) => {
+  const saveConfigAndCloseBook = (bookKey: string) => {
+    getFoliateView(bookKey)?.close();
+    getFoliateView(bookKey)?.remove();
     const bookState = books[bookKey];
     if (!bookState) return;
     const { book, config, isPrimary } = bookState;
     if (isPrimary && book && config) {
-      saveConfig(envConfig, book, config);
+      saveConfig(envConfig, book, config, settings);
     }
+    closeBook(bookKey);
+  };
+
+  const saveSettingsAndGoToLibrary = () => {
+    saveSettings(envConfig, settings);
+    router.replace('/library');
   };
 
   const handleCloseBooks = () => {
     ids.forEach((id, index) => {
       const key = getKey(id, index);
-      closeBook(key);
+      saveConfigAndCloseBook(key);
     });
-    saveSettings(envConfig, settings);
-    router.replace('/library');
+    saveSettingsAndGoToLibrary();
   };
 
   const handleCloseBook = (bookKey: string) => {
-    closeBook(bookKey);
+    saveConfigAndCloseBook(bookKey);
     setSideBarBookKey((prevKey: string) => {
-      if (prevKey === bookKey) {
-        const index = ids.findIndex((id) => prevKey.startsWith(id));
-        const nextIndex = (index + 1) % ids.length;
-        return getKey(ids[nextIndex]!, nextIndex);
-      }
-      return prevKey;
+      return prevKey === bookKey ? getNextBookKey(prevKey) : prevKey;
     });
     const newIds = ids.filter((id, index) => getKey(id, index) !== bookKey);
     if (newIds.length > 0) {
-      router.replace(`/reader?ids=${newIds.join(',')}`);
+      router.push(`/reader?ids=${newIds.join(',')}`);
     } else {
-      saveSettings(envConfig, settings);
-      router.back();
+      saveSettingsAndGoToLibrary();
     }
   };
 
@@ -174,7 +177,7 @@ const ReaderContent = () => {
   const bookState = bookStates[0];
   if (bookStates.length !== ids.length || !bookState || !bookState.book || !bookState.bookDoc) {
     return (
-      <div className={'flex-1'}>
+      <div className={'hero hero-content min-h-screen'}>
         <Spinner loading={true} />
         {bookState?.error && (
           <div className='text-center'>
@@ -214,6 +217,7 @@ const ReaderContent = () => {
           const { book, config, bookDoc } = bookState;
           if (!book || !config || !bookDoc) return null;
           const { section, pageinfo, progress, chapter } = config;
+          const scrolled = config.viewSettings!.scrolled;
           return (
             <div key={key} className='relative h-full w-full overflow-hidden'>
               <HeaderBar
@@ -229,8 +233,10 @@ const ReaderContent = () => {
                 onCloseBook={handleCloseBook}
               />
               <FoliateViewer bookKey={key} bookDoc={bookDoc!} bookConfig={config!} />
-              <SectionInfo chapter={chapter} />
-              <PageInfo bookFormat={book.format} section={section} pageinfo={pageinfo} />
+              {!scrolled && <SectionInfo chapter={chapter} />}
+              {!scrolled && (
+                <PageInfo bookFormat={book.format} section={section} pageinfo={pageinfo} />
+              )}
               <FooterBar
                 bookKey={key}
                 progress={progress}

@@ -2,7 +2,7 @@ import { AppService, ToastType } from '@/types/system';
 
 import { SystemSettings } from '@/types/settings';
 import { FileSystem, BaseDir } from '@/types/system';
-import { Book, BookConfig, BookContent, BookFormat } from '@/types/book';
+import { Book, BookConfig, BookContent, BookFormat, ViewSettings } from '@/types/book';
 import {
   getDir,
   getFilename,
@@ -15,7 +15,13 @@ import {
 import { RemoteFile } from '@/utils/file';
 import { partialMD5 } from '@/utils/md5';
 import { BookDoc, DocumentLoader } from '@/libs/document';
-import { DEFAULT_READSETTINGS, SYSTEM_SETTINGS_VERSION } from './constants';
+import {
+  DEFAULT_BOOK_LAYOUT,
+  DEFAULT_BOOK_STYLE,
+  DEFAULT_BOOK_FONT,
+  DEFAULT_READSETTINGS,
+  SYSTEM_SETTINGS_VERSION,
+} from './constants';
 
 export abstract class BaseAppService implements AppService {
   localBooksDir: string = '';
@@ -47,11 +53,23 @@ export abstract class BaseAppService implements AppService {
         settings.localBooksDir = await this.getInitBooksDir();
         settings.version = SYSTEM_SETTINGS_VERSION;
       }
+      settings.globalReadSettings = { ...DEFAULT_READSETTINGS, ...settings.globalReadSettings };
+      settings.globalViewSettings = {
+        ...DEFAULT_BOOK_LAYOUT,
+        ...DEFAULT_BOOK_STYLE,
+        ...DEFAULT_BOOK_FONT,
+        ...settings.globalViewSettings,
+      };
     } catch {
       settings = {
         version: SYSTEM_SETTINGS_VERSION,
         localBooksDir: await this.getInitBooksDir(),
         globalReadSettings: DEFAULT_READSETTINGS,
+        globalViewSettings: {
+          ...DEFAULT_BOOK_LAYOUT,
+          ...DEFAULT_BOOK_STYLE,
+          ...DEFAULT_BOOK_FONT,
+        },
       };
 
       await this.fs.createDir('', 'Books', true);
@@ -151,22 +169,39 @@ export abstract class BaseAppService implements AppService {
     }
   }
 
-  async loadBookContent(book: Book): Promise<BookContent> {
+  async loadBookContent(book: Book, settings: SystemSettings): Promise<BookContent> {
     const fp = getFilename(book);
     const file = await new RemoteFile(this.fs.getURL(`${this.localBooksDir}/${fp}`), fp).open();
-    return { book, file, config: await this.loadBookConfig(book) };
+    return { book, file, config: await this.loadBookConfig(book, settings) };
   }
 
-  async loadBookConfig(book: Book): Promise<BookConfig> {
+  async loadBookConfig(book: Book, settings: SystemSettings): Promise<BookConfig> {
     try {
       const str = await this.fs.readFile(getConfigFilename(book), 'Books', 'text');
-      return JSON.parse(str as string);
+      const config = JSON.parse(str as string) as BookConfig;
+      const { globalViewSettings } = settings;
+      const { viewSettings } = config;
+      config.viewSettings = { ...globalViewSettings, ...viewSettings };
+      return config;
     } catch {
       return INIT_BOOK_CONFIG;
     }
   }
 
-  async saveBookConfig(book: Book, config: BookConfig) {
+  async saveBookConfig(book: Book, config: BookConfig, settings?: SystemSettings) {
+    if (settings) {
+      const globalViewSettings = settings.globalViewSettings as ViewSettings;
+      const viewSettings = config.viewSettings as Partial<ViewSettings>;
+      config.viewSettings = Object.entries(viewSettings).reduce(
+        (acc: Partial<Record<keyof ViewSettings, unknown>>, [key, value]) => {
+          if (globalViewSettings[key as keyof ViewSettings] !== value) {
+            acc[key as keyof ViewSettings] = value;
+          }
+          return acc;
+        },
+        {} as Partial<Record<keyof ViewSettings, unknown>>,
+      ) as Partial<ViewSettings>;
+    }
     await this.fs.writeFile(getConfigFilename(book), 'Books', JSON.stringify(config));
   }
 

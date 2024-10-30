@@ -88,7 +88,8 @@ const SideBar: React.FC<{
   return isVisible ? (
     <div
       className={clsx(
-        'sidebar-container bg-base-200 rounded-window-left z-20 h-full select-none',
+        'sidebar-container bg-base-200 z-20 h-full select-none',
+        'rounded-window-top-left rounded-window-bottom-left',
         !isPinned && 'shadow-2xl',
       )}
       style={{

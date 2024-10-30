@@ -25,6 +25,11 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
   const parentRef = useRef<HTMLDivElement>(null);
 
   const handleMouseDown = async (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('#exclude-title-bar-mousedown')) {
+      return;
+    }
+
     const { getCurrentWindow } = await import('@tauri-apps/api/window');
     if (e.buttons === 1) {
       if (e.detail === 2) {

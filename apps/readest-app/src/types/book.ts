@@ -29,6 +29,37 @@ export interface BookNote {
   removalTimestamp?: number;
 }
 
+export interface BookLayout {
+  gap: number;
+  scrolled: boolean;
+  maxColumnCount: number;
+  maxInlineSize: number;
+  maxBlockSize: number;
+  animated: boolean;
+}
+
+export interface BookStyle {
+  lineHeight: number;
+  justify: boolean;
+  hyphenate: boolean;
+  invert: boolean;
+  theme: string;
+  overrideFont: boolean;
+  userStylesheet: string;
+}
+
+export interface BookFont {
+  serif: string;
+  sansSerif: string;
+  monospace: string;
+  defaultFont: string;
+  defaultSize: number;
+  minimumSize: number;
+  fontWeight: number;
+}
+
+export interface ViewSettings extends BookLayout, BookStyle, BookFont {}
+
 export interface BookConfig {
   lastUpdated: number;
   progress?: number;
@@ -37,9 +68,12 @@ export interface BookConfig {
   chapter?: string;
   section?: PageInfo;
   pageinfo?: PageInfo;
+
   bookmarks?: BookNote[];
   annotations?: BookNote[];
   removedNotesTimestamps?: Record<string, number>;
+
+  viewSettings?: Partial<ViewSettings>;
 }
 
 export interface BooksGroup {

@@ -7,11 +7,10 @@ import { useEnv } from '@/context/EnvContext';
 import { useReaderStore } from '@/store/readerStore';
 
 import ReaderContent from './components/ReaderContent';
-import { DEFAULT_READSETTINGS } from '@/services/constants';
 
 const ReaderPage = () => {
   const { envConfig } = useEnv();
-  const { settings, setLibrary, setSettings } = useReaderStore();
+  const { library, settings, setLibrary, setSettings } = useReaderStore();
   const isInitiating = useRef(false);
 
   useEffect(() => {
@@ -20,9 +19,6 @@ const ReaderPage = () => {
     const initLibrary = async () => {
       const appService = await envConfig.getAppService();
       const settings = await appService.loadSettings();
-      if (!settings.globalReadSettings) {
-        settings.globalReadSettings = DEFAULT_READSETTINGS;
-      }
       setSettings(settings);
       console.log('initializing library in reader');
       setLibrary(await appService.loadLibraryBooks());
@@ -32,6 +28,7 @@ const ReaderPage = () => {
   }, []);
 
   return (
+    library.length > 0 &&
     settings.globalReadSettings && (
       <div className='min-h-screen select-none'>
         <Suspense>

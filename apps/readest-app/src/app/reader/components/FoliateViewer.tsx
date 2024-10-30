@@ -45,6 +45,7 @@ const getCSS = (spacing: number, justify: boolean, hyphenate: boolean) => `
 
 export interface FoliateView extends HTMLElement {
   open: (book: BookDoc) => Promise<void>;
+  close: () => void;
   init: (options: { lastLocation: string }) => void;
   goTo: (href: string) => void;
   goToFraction: (fraction: number) => void;
@@ -98,12 +99,29 @@ const FoliateViewer: React.FC<{
     );
   };
 
+  const handleMousedown = (event: MouseEvent) => {
+    window.postMessage(
+      {
+        type: 'iframe-mousedown',
+        button: event.button,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        ctrlKey: event.ctrlKey,
+        shiftKey: event.shiftKey,
+        altKey: event.altKey,
+        metaKey: event.metaKey,
+      },
+      '*',
+    );
+  };
+
   const docLoadHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;
     if (detail.doc) {
-      if (!detail.doc.isKeydownListenerAdded) {
-        detail.doc?.addEventListener('keydown', handleKeydown);
-        detail.doc.isKeydownListenerAdded = true;
+      if (!detail.doc.isEventListenersAdded) {
+        detail.doc.addEventListener('keydown', handleKeydown);
+        detail.doc.addEventListener('mousedown', handleMousedown);
+        detail.doc.isEventListenersAdded = true;
       }
     }
   };
@@ -122,11 +140,18 @@ const FoliateViewer: React.FC<{
       setFoliateView(bookKey, view);
 
       await view.open(bookDoc);
+      const viewSettings = bookConfig.viewSettings!;
       if ('setStyles' in view.renderer) {
-        view.renderer.setStyles(getCSS(2.4, true, true));
+        const lineHeight = viewSettings.lineHeight!;
+        const justify = viewSettings.justify!;
+        const hyphenate = viewSettings.hyphenate!;
+        view.renderer.setStyles(getCSS(lineHeight, justify, hyphenate));
       }
+      const isScrolled = viewSettings.scrolled!;
+      const gap = viewSettings.gap!;
+      view.renderer.setAttribute('flow', isScrolled ? 'scrolled' : 'paginated');
       view.renderer.setAttribute('margin', '44px');
-      view.renderer.setAttribute('gap', '4%');
+      view.renderer.setAttribute('gap', `${gap * 100}%`);
       const lastLocation = bookConfig.location;
       if (lastLocation) {
         view.init({ lastLocation });

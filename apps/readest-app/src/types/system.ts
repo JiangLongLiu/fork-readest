@@ -27,9 +27,9 @@ export interface AppService {
   saveSettings(settings: SystemSettings): Promise<void>;
   importBook(file: string | File, books: Book[], overwrite?: boolean): Promise<Book[]>;
   deleteBook(book: Book): Promise<void>;
-  loadBookConfig(book: Book): Promise<BookConfig>;
-  saveBookConfig(book: Book, config: BookConfig): Promise<void>;
-  loadBookContent(book: Book): Promise<BookContent>;
+  loadBookConfig(book: Book, settings: SystemSettings): Promise<BookConfig>;
+  saveBookConfig(book: Book, config: BookConfig, settings?: SystemSettings): Promise<void>;
+  loadBookContent(book: Book, settings: SystemSettings): Promise<BookContent>;
   loadLibraryBooks(): Promise<Book[]>;
   saveLibraryBooks(books: Book[]): Promise<void>;
   getCoverImageUrl(book: Book): string;
