@@ -146,6 +146,11 @@ const FoliateViewer: React.FC<{
         const justify = viewSettings.justify!;
         const hyphenate = viewSettings.hyphenate!;
         view.renderer.setStyles(getCSS(lineHeight, justify, hyphenate));
+        // FIXME: zoom level is not working in paginated mode
+        if (viewSettings.scrolled) {
+          const zoomLevel = viewSettings.zoomLevel!;
+          view.renderer.setStyles(`body { zoom: ${zoomLevel}%; }`);
+        }
       }
       const isScrolled = viewSettings.scrolled!;
       const gap = viewSettings.gap!;
@@ -170,20 +175,7 @@ const FoliateViewer: React.FC<{
     };
   }, []);
 
-  const handleTap = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    const { clientX } = event;
-    const width = window.innerWidth;
-    const leftThreshold = width * 0.5;
-    const rightThreshold = width * 0.5;
-
-    if (clientX < leftThreshold) {
-      view?.renderer.prev();
-    } else if (clientX > rightThreshold) {
-      view?.renderer.next();
-    }
-  };
-
-  return <div className='foliate-viewer h-[100%] w-[100%]' ref={viewRef} onClick={handleTap} />;
+  return <div className='foliate-viewer h-[100%] w-[100%]' ref={viewRef} />;
 };
 
 export default FoliateViewer;

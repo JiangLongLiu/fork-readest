@@ -4,9 +4,10 @@ interface PageInfoProps {
   bookFormat: string;
   section?: { current: number; total: number };
   pageinfo?: { current: number; total: number };
+  gapRight: string;
 }
 
-const PageInfo: React.FC<PageInfoProps> = ({ bookFormat, section, pageinfo }) => {
+const PageInfo: React.FC<PageInfoProps> = ({ bookFormat, section, pageinfo, gapRight }) => {
   const pageInfo =
     bookFormat === 'PDF'
       ? section
@@ -17,10 +18,11 @@ const PageInfo: React.FC<PageInfoProps> = ({ bookFormat, section, pageinfo }) =>
         : '';
 
   return (
-    <div className='pageinfo absolute bottom-0 left-0 right-0 flex h-12 items-center justify-end pr-[4%]'>
-      <h2 className='px-2 text-center font-sans text-xs font-extralight text-slate-500'>
-        {pageInfo}
-      </h2>
+    <div
+      className='pageinfo absolute bottom-0 left-0 right-0 flex h-12 items-center justify-end'
+      style={{ paddingRight: gapRight }}
+    >
+      <h2 className='text-right font-sans text-xs font-extralight text-slate-500'>{pageInfo}</h2>
     </div>
   );
 };

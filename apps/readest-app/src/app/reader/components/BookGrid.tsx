@@ -33,6 +33,7 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, bookStates, onCloseBook }
         const { book, config, bookDoc } = bookState;
         if (!book || !config || !bookDoc) return null;
         const { section, pageinfo, progress, chapter } = config;
+        const marginGap = config.viewSettings ? `${config.viewSettings!.gap! * 100}%` : '';
 
         return (
           <div key={bookKey} className='relative h-full w-full overflow-hidden'>
@@ -43,10 +44,15 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, bookStates, onCloseBook }
               onCloseBook={onCloseBook}
             />
             <FoliateViewer bookKey={bookKey} bookDoc={bookState.bookDoc!} bookConfig={config} />
-            {config.viewSettings?.scrolled ? null : (
+            {config.viewSettings!.scrolled ? null : (
               <>
-                <SectionInfo chapter={chapter} />
-                <PageInfo bookFormat={book.format} section={section} pageinfo={pageinfo} />
+                <SectionInfo chapter={chapter} gapLeft={marginGap} />
+                <PageInfo
+                  bookFormat={book.format}
+                  section={section}
+                  pageinfo={pageinfo}
+                  gapRight={marginGap}
+                />
               </>
             )}
             <FooterBar bookKey={bookKey} progress={progress} isHoveredAnim={false} />

@@ -39,6 +39,7 @@ export interface BookLayout {
 }
 
 export interface BookStyle {
+  zoomLevel: number;
   lineHeight: number;
   justify: boolean;
   hyphenate: boolean;

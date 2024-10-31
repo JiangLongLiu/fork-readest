@@ -30,6 +30,7 @@ export const DEFAULT_BOOK_LAYOUT: BookLayout = {
 };
 
 export const DEFAULT_BOOK_STYLE: BookStyle = {
+  zoomLevel: 100,
   lineHeight: 1.5,
   justify: true,
   hyphenate: true,

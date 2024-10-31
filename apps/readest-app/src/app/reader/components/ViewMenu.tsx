@@ -19,7 +19,7 @@ const ViewMenu: React.FC<ViewMenuProps> = ({ bookKey }) => {
   const [isDarkMode, setDarkMode] = useState(config.viewSettings!.theme === 'dark');
   const [isScrolledMode, setScrolledMode] = useState(config.viewSettings!.scrolled);
   const [isInvertedColors, setInvertedColors] = useState(config.viewSettings!.invert);
-  const [zoomLevel, setZoomLevel] = useState(100);
+  const [zoomLevel, setZoomLevel] = useState(config.viewSettings!.zoomLevel!);
 
   const zoomIn = () => setZoomLevel((prev) => Math.min(prev + 10, 200));
   const zoomOut = () => setZoomLevel((prev) => Math.max(prev - 10, 50));
@@ -43,23 +43,49 @@ const ViewMenu: React.FC<ViewMenuProps> = ({ bookKey }) => {
     document.body.classList.toggle('invert', isInvertedColors);
   }, [isInvertedColors]);
 
+  useEffect(() => {
+    const view = getFoliateView(bookKey);
+    if (!view) return;
+    if ('setStyles' in view.renderer) {
+      // FIXME: zoom level is not working in paginated mode
+      if (!config.viewSettings?.scrolled) return;
+      view.renderer.setStyles(`body { zoom: ${zoomLevel}%; }`);
+      config.viewSettings!.zoomLevel = zoomLevel;
+      setConfig(bookKey, config);
+    }
+  }, [zoomLevel]);
+
   return (
     <div
       id='exclude-title-bar-mousedown'
       tabIndex={0}
       className='view-menu dropdown-content dropdown-right no-triangle z-20 mt-1 w-72 border bg-white shadow-2xl'
     >
-      <div className='flex items-center justify-between rounded-md'>
-        <button onClick={zoomOut} className='rounded-full p-2 hover:bg-gray-100'>
+      <div
+        className={clsx(
+          'flex items-center justify-between rounded-md',
+          !isScrolledMode && 'text-gray-400',
+        )}
+      >
+        <button
+          onClick={zoomOut}
+          className={clsx('rounded-full p-2 hover:bg-gray-100', !isScrolledMode && 'btn-disabled')}
+        >
           <MdZoomOut size={20} />
         </button>
-        <span
-          className='btn btn-ghost h-8 min-h-8 w-[50%] rounded-md p-1 text-center hover:bg-gray-100'
+        <button
+          className={clsx(
+            'h-8 min-h-8 w-[50%] rounded-md p-1 text-center hover:bg-gray-100',
+            !isScrolledMode && 'btn-disabled',
+          )}
           onClick={resetZoom}
         >
           {zoomLevel}%
-        </span>
-        <button onClick={zoomIn} className='rounded-full p-2 hover:bg-gray-100'>
+        </button>
+        <button
+          onClick={zoomIn}
+          className={clsx('rounded-full p-2 hover:bg-gray-100', !isScrolledMode && 'btn-disabled')}
+        >
           <MdZoomIn size={20} />
         </button>
       </div>
