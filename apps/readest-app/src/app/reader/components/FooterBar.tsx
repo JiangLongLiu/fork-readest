@@ -8,18 +8,10 @@ interface FooterBarProps {
   bookKey: string;
   progress: number | undefined;
   isHoveredAnim: boolean;
-  hoveredBookKey: string;
-  setHoveredBookKey: (key: string) => void;
 }
 
-const FooterBar: React.FC<FooterBarProps> = ({
-  bookKey,
-  progress,
-  isHoveredAnim,
-  hoveredBookKey,
-  setHoveredBookKey,
-}) => {
-  const { getFoliateView } = useReaderStore();
+const FooterBar: React.FC<FooterBarProps> = ({ bookKey, progress, isHoveredAnim }) => {
+  const { isSideBarVisible, hoveredBookKey, setHoveredBookKey, getFoliateView } = useReaderStore();
 
   const handleProgressChange = (event: React.ChangeEvent) => {
     const newProgress = parseInt((event.target as HTMLInputElement).value, 10);
@@ -42,6 +34,7 @@ const FooterBar: React.FC<FooterBarProps> = ({
       className={clsx(
         'footer-bar absolute bottom-0 z-10 flex h-12 w-full items-center px-4',
         'shadow-xs bg-base-100 rounded-window-bottom-right transition-opacity duration-300',
+        !isSideBarVisible && 'rounded-window-bottom-left',
         isHoveredAnim && 'hover-bar-anim',
         hoveredBookKey === bookKey ? `opacity-100` : `opacity-0`,
       )}

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { loadShortcuts, ShortcutConfig } from '../helpers/shortcuts';
 
 interface KeyActionHandlers {
-  onSwitchSidebar?: () => void;
-  onToggleSidebar?: () => void;
+  onSwitchSideBar?: () => void;
+  onToggleSideBar?: () => void;
   onOpenSplitView?: () => void;
   onReloadPage?: () => void;
   onGoLeft?: () => void;
@@ -63,7 +63,7 @@ const useShortcuts = (actions: KeyActionHandlers, dependencies: React.Dependency
         isShortcutMatch(shortcut, key, ctrlKey, altKey, metaKey, shiftKey),
       )
     ) {
-      actions.onSwitchSidebar?.();
+      actions.onSwitchSideBar?.();
       return true;
     }
     if (
@@ -71,7 +71,7 @@ const useShortcuts = (actions: KeyActionHandlers, dependencies: React.Dependency
         isShortcutMatch(shortcut, key, ctrlKey, altKey, metaKey, shiftKey),
       )
     ) {
-      actions.onToggleSidebar?.();
+      actions.onToggleSideBar?.();
       return true;
     }
     if (

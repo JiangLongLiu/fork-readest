@@ -131,7 +131,7 @@ const FoliateViewer: React.FC<{
   useEffect(() => {
     if (isViewCreated.current) return;
     const openBook = async () => {
-      console.log('opening book');
+      console.log('Opening book', bookKey);
       await import('foliate-js/view.js');
       const view = document.createElement('foliate-view') as FoliateView;
       document.body.append(view);
@@ -162,7 +162,13 @@ const FoliateViewer: React.FC<{
 
     openBook();
     isViewCreated.current = true;
-  }, [bookDoc]);
+
+    return () => {
+      console.log('Closing book', bookKey);
+      view?.close();
+      view?.remove();
+    };
+  }, []);
 
   const handleTap = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const { clientX } = event;

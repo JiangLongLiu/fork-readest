@@ -20,5 +20,5 @@ export const useFoliateEvents = (view: FoliateView | null, handlers?: FoliateEve
       if (onLoad) view.removeEventListener('load', onLoad);
       if (onRelocate) view.removeEventListener('relocate', onRelocate);
     };
-  }, [view, onLoad, onRelocate, handlers]);
+  }, [view, onLoad, onRelocate]);
 };

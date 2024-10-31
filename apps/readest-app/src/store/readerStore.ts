@@ -19,9 +19,25 @@ export interface BookState {
 
 interface ReaderStore {
   library: Book[];
-  books: Record<string, BookState>;
   settings: SystemSettings;
+
+  books: Record<string, BookState>;
   foliateViews: Record<string, FoliateView>;
+  bookDocCache: Record<string, BookDoc>;
+
+  hoveredBookKey: string | null;
+  sideBarBookKey: string | null;
+  setHoveredBookKey: (key: string) => void;
+  setSideBarBookKey: (key: string) => void;
+
+  sideBarWidth: string;
+  isSideBarVisible: boolean;
+  isSideBarPinned: boolean;
+  setSideBarWidth: (width: string) => void;
+  toggleSideBar: () => void;
+  toggleSideBarPin: () => void;
+  setSideBarVisibility: (visible: boolean) => void;
+  setSideBarPin: (pinned: boolean) => void;
 
   setLibrary: (books: Book[]) => void;
   setSettings: (settings: SystemSettings) => void;
@@ -36,7 +52,7 @@ interface ReaderStore {
   ) => void;
   setConfig: (key: string, config: BookConfig) => void;
   setFoliateView: (key: string, view: FoliateView) => void;
-  getFoliateView: (key: string) => FoliateView | null;
+  getFoliateView: (key: string | null) => FoliateView | null;
 
   deleteBook: (envConfig: EnvConfigType, book: Book) => void;
   saveConfig: (
@@ -48,7 +64,7 @@ interface ReaderStore {
   saveSettings: (envConfig: EnvConfigType, settings: SystemSettings) => void;
   initBookState: (envConfig: EnvConfigType, id: string, key: string, isPrimary?: boolean) => void;
 
-  closeBook: (key: string) => void;
+  clearBookState: (key: string) => void;
   addBookmark: (key: string, bookmark: BookNote) => void;
 }
 
@@ -65,9 +81,25 @@ export const DEFAULT_BOOK_STATE = {
 
 export const useReaderStore = create<ReaderStore>((set, get) => ({
   library: [],
-  books: {},
   settings: {} as SystemSettings,
+
+  books: {},
   foliateViews: {},
+  bookDocCache: {},
+
+  hoveredBookKey: null,
+  sideBarBookKey: null,
+  setHoveredBookKey: (key: string) => set({ hoveredBookKey: key }),
+  setSideBarBookKey: (key: string) => set({ sideBarBookKey: key }),
+
+  sideBarWidth: '',
+  isSideBarVisible: false,
+  isSideBarPinned: false,
+  setSideBarWidth: (width: string) => set({ sideBarWidth: width }),
+  toggleSideBar: () => set((state) => ({ isSideBarVisible: !state.isSideBarVisible })),
+  toggleSideBarPin: () => set((state) => ({ isSideBarPinned: !state.isSideBarPinned })),
+  setSideBarVisibility: (visible: boolean) => set({ isSideBarVisible: visible }),
+  setSideBarPin: (pinned: boolean) => set({ isSideBarPinned: pinned }),
 
   setLibrary: (books: Book[]) => set({ library: books }),
   setSettings: (settings: SystemSettings) => set({ settings }),
@@ -94,7 +126,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
   setFoliateView: (key: string, view) =>
     set((state) => ({ foliateViews: { ...state.foliateViews, [key]: view } })),
 
-  getFoliateView: (key: string) => get().foliateViews[key] || null,
+  getFoliateView: (key: string | null) => (key && get().foliateViews[key]) || null,
 
   deleteBook: async (envConfig: EnvConfigType, book: Book) => {
     const appService = await envConfig.getAppService();
@@ -130,7 +162,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     await appService.saveSettings(settings);
   },
 
-  closeBook: (key: string) => {
+  clearBookState: (key: string) => {
     set((state) => {
       const books = { ...state.books };
       delete books[key];
@@ -138,6 +170,8 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     });
   },
   initBookState: async (envConfig: EnvConfigType, id: string, key: string, isPrimary = true) => {
+    const cache = get().bookDocCache || {};
+
     set((state) => ({
       books: {
         ...state.books,
@@ -154,7 +188,21 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
       }
       const content = (await appService.loadBookContent(book, settings)) as BookContent;
       const { file, config } = content;
-      const { book: bookDoc } = await new DocumentLoader(file).open();
+      let bookDoc: BookDoc;
+      if (cache[id]) {
+        console.log('Using cached bookDoc for book', key);
+        bookDoc = cache[id];
+      } else {
+        console.log('Loading book', key);
+        const { book: loadedBookDoc } = await new DocumentLoader(file).open();
+        bookDoc = loadedBookDoc as BookDoc;
+        set((state) => ({
+          bookDocCache: {
+            ...state.bookDocCache,
+            [id]: bookDoc,
+          },
+        }));
+      }
 
       set((state) => ({
         books: {

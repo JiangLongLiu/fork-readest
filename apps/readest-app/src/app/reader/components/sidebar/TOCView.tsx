@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { md5 } from 'js-md5';
 import { TOCItem } from '@/libs/document';
 import { useReaderStore } from '@/store/readerStore';
-import { useFoliateEvents } from '../hooks/useFoliateEvents';
+import { useFoliateEvents } from '../../hooks/useFoliateEvents';
 
 const findParentPath = (toc: TOCItem[], href: string): TOCItem[] => {
   for (const item of toc) {
@@ -60,8 +60,6 @@ const TOCItemView: React.FC<{
       setCurrentHref(item.href);
     }
   };
-
-  useEffect(() => {}, [currentHref]);
 
   const isActive = currentHref === item.href;
 

@@ -32,7 +32,7 @@ const ReaderPage = () => {
     settings.globalReadSettings && (
       <div className='min-h-screen select-none'>
         <Suspense>
-          <ReaderContent />
+          <ReaderContent settings={settings} />
         </Suspense>
       </div>
     )
