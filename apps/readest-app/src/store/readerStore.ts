@@ -39,6 +39,11 @@ interface ReaderStore {
   setSideBarVisibility: (visible: boolean) => void;
   setSideBarPin: (pinned: boolean) => void;
 
+  isFontLayoutSettingsDialogOpen: boolean;
+  isFontLayoutSettingsGlobal: boolean;
+  setFontLayoutSettingsDialogOpen: (open: boolean) => void;
+  setFontLayoutSettingsGlobal: (global: boolean) => void;
+
   setLibrary: (books: Book[]) => void;
   setSettings: (settings: SystemSettings) => void;
   setProgress: (
@@ -100,6 +105,11 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
   toggleSideBarPin: () => set((state) => ({ isSideBarPinned: !state.isSideBarPinned })),
   setSideBarVisibility: (visible: boolean) => set({ isSideBarVisible: visible }),
   setSideBarPin: (pinned: boolean) => set({ isSideBarPinned: pinned }),
+
+  isFontLayoutSettingsDialogOpen: false,
+  isFontLayoutSettingsGlobal: true,
+  setFontLayoutSettingsDialogOpen: (open: boolean) => set({ isFontLayoutSettingsDialogOpen: open }),
+  setFontLayoutSettingsGlobal: (global: boolean) => set({ isFontLayoutSettingsGlobal: global }),
 
   setLibrary: (books: Book[]) => set({ library: books }),
   setSettings: (settings: SystemSettings) => set({ settings }),

@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 
 interface WindowButtonsProps {
   className?: string;
-  headerRef: React.RefObject<HTMLDivElement>;
+  headerRef?: React.RefObject<HTMLDivElement>;
   showMinimize?: boolean;
   showMaximize?: boolean;
   showClose?: boolean;
@@ -41,7 +41,7 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
   };
 
   useEffect(() => {
-    const headerElement = headerRef.current;
+    const headerElement = headerRef?.current;
     headerElement?.addEventListener('mousedown', handleMouseDown);
 
     return () => {

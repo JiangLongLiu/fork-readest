@@ -58,19 +58,19 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
           />
           <div className='absolute right-4 flex items-center space-x-4 text-gray-500'>
             <span className='mx-2 h-5 w-[1px] bg-gray-300'></span>
-            <span className='dropdown dropdown-end h-5 cursor-pointer text-gray-500'>
+            <div className='dropdown dropdown-bottom flex h-5 cursor-pointer justify-center text-gray-500'>
               <div className='lg:tooltip lg:tooltip-bottom' data-tip='Add books'>
-                <PiPlus tabIndex={0} className='h-5 w-5' role='button' />
+                <PiPlus tabIndex={-1} className='h-5 w-5' />
               </div>
               <ul
-                tabIndex={0}
-                className='dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow'
+                tabIndex={-1}
+                className='dropdown-content dropdown-center menu bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow'
               >
                 <li>
                   <button onClick={onImportBooks}>From Local File</button>
                 </li>
               </ul>
-            </span>
+            </div>
             <button onClick={onToggleSelectMode} aria-label='Select Multiple Books' className='h-6'>
               <div className='lg:tooltip lg:tooltip-bottom cursor-pointer' data-tip='Select books'>
                 <PiSelectionAllDuotone

@@ -7,6 +7,7 @@ import PageInfo from './PageInfo';
 import FooterBar from './FooterBar';
 import SectionInfo from './SectionInfo';
 import getGridTemplate from '@/utils/grid';
+import SettingsDialog from './settings/SettingsDialog';
 
 interface BookGridProps {
   bookKeys: string[];
@@ -16,6 +17,7 @@ interface BookGridProps {
 
 const BookGrid: React.FC<BookGridProps> = ({ bookKeys, bookStates, onCloseBook }) => {
   const { isSideBarPinned, isSideBarVisible, sideBarWidth } = useReaderStore();
+  const { isFontLayoutSettingsDialogOpen, setFontLayoutSettingsDialogOpen } = useReaderStore();
   const gridWidth = isSideBarPinned && isSideBarVisible ? `calc(100% - ${sideBarWidth})` : '100%';
   const gridTemplate = getGridTemplate(bookKeys.length, window.innerWidth / window.innerHeight);
 
@@ -42,6 +44,7 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, bookStates, onCloseBook }
               bookTitle={book.title}
               isHoveredAnim={bookStates.length > 2}
               onCloseBook={onCloseBook}
+              onSetSettingsDialogOpen={setFontLayoutSettingsDialogOpen}
             />
             <FoliateViewer bookKey={bookKey} bookDoc={bookState.bookDoc!} bookConfig={config} />
             {config.viewSettings!.scrolled ? null : (
@@ -56,6 +59,7 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, bookStates, onCloseBook }
               </>
             )}
             <FooterBar bookKey={bookKey} progress={progress} isHoveredAnim={false} />
+            {isFontLayoutSettingsDialogOpen && <SettingsDialog bookKey={bookKey} config={config} />}
           </div>
         );
       })}

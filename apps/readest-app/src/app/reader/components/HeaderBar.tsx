@@ -13,6 +13,7 @@ interface HeaderBarProps {
   bookTitle: string;
   isHoveredAnim: boolean;
   onCloseBook: (bookKey: string) => void;
+  onSetSettingsDialogOpen: (open: boolean) => void;
 }
 
 const HeaderBar: React.FC<HeaderBarProps> = ({
@@ -20,6 +21,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   bookTitle,
   isHoveredAnim,
   onCloseBook,
+  onSetSettingsDialogOpen,
 }) => {
   const headerRef = useRef<HTMLDivElement>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -61,14 +63,14 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
         <h2 className='line-clamp-1 max-w-[80%] text-center text-xs font-semibold'>{bookTitle}</h2>
       </div>
 
-      <div className='ml-auto flex h-full items-center space-x-2'>
+      <div className='flex h-full items-center space-x-2'>
         <Dropdown
           className='dropdown-bottom dropdown-end'
           buttonClassName='btn btn-ghost h-8 min-h-8 w-8 p-0'
           toggleButton={<PiDotsThreeVerticalBold size={16} />}
           onToggle={setIsDropdownOpen}
         >
-          <ViewMenu bookKey={bookKey} />
+          <ViewMenu bookKey={bookKey} onSetSettingsDialogOpen={onSetSettingsDialogOpen} />
         </Dropdown>
 
         <WindowButtons

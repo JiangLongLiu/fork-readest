@@ -37,7 +37,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   };
 
   const handleClickOutside = (event: MouseEvent | Event) => {
-    if (event instanceof KeyboardEvent) {
+    if (event instanceof MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         closeDropdown();
       }

@@ -9,9 +9,14 @@ import { useReaderStore } from '@/store/readerStore';
 interface ViewMenuProps {
   bookKey: string;
   toggleDropdown?: () => void;
+  onSetSettingsDialogOpen: (open: boolean) => void;
 }
 
-const ViewMenu: React.FC<ViewMenuProps> = ({ bookKey }) => {
+const ViewMenu: React.FC<ViewMenuProps> = ({
+  bookKey,
+  toggleDropdown,
+  onSetSettingsDialogOpen,
+}) => {
   const { books, setConfig, getFoliateView } = useReaderStore();
   const bookState = books[bookKey]!;
   const config = bookState.config!;
@@ -29,7 +34,8 @@ const ViewMenu: React.FC<ViewMenuProps> = ({ bookKey }) => {
   const toggleInvertedColors = () => setInvertedColors(!isInvertedColors);
 
   const openFontLayoutMenu = () => {
-    // open font layout menu
+    toggleDropdown?.();
+    onSetSettingsDialogOpen(true);
   };
 
   useEffect(() => {

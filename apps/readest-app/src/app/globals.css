@@ -81,10 +81,6 @@ foliate-view {
   padding: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   border-radius: 14px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 14px;
-  font-weight: 300;
-  @apply text-gray-700;
 }
 
 .dropdown-content::before,
@@ -111,7 +107,7 @@ foliate-view {
 
 .dropdown-left::before,
 .dropdown-left::after {
-  left: 20px;
+  left: 16px;
   transform: translateX(0);
 }
 
@@ -123,7 +119,7 @@ foliate-view {
 
 .dropdown-right::before,
 .dropdown-right::after {
-  right: 20px;
+  right: 16px;
   transform: translateX(0);
 }
 
@@ -131,3 +127,24 @@ foliate-view {
 .dropdown-content.no-triangle::after {
   display: none;
 }
+
+.modal, .dropdown-content {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  @apply text-gray-700;
+}
+
+.config-item {
+  @apply flex h-14 items-center justify-between p-4;
+  @apply hover:bg-gray-50;
+}
+
+.config-item-top {
+  @apply rounded-t-2xl;
+}
+
+.config-item-bottom {
+  @apply rounded-b-2xl;
+}
+
