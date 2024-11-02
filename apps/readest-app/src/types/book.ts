@@ -30,7 +30,8 @@ export interface BookNote {
 }
 
 export interface BookLayout {
-  gap: number;
+  marginPx: number;
+  gapPercent: number;
   scrolled: boolean;
   maxColumnCount: number;
   maxInlineSize: number;
@@ -41,8 +42,8 @@ export interface BookLayout {
 export interface BookStyle {
   zoomLevel: number;
   lineHeight: number;
-  justify: boolean;
-  hyphenate: boolean;
+  fullJustification: boolean;
+  hyphenation: boolean;
   invert: boolean;
   theme: string;
   overrideFont: boolean;
@@ -50,12 +51,12 @@ export interface BookStyle {
 }
 
 export interface BookFont {
-  serif: string;
-  sansSerif: string;
-  monospace: string;
+  serifFont: string;
+  sansSerifFont: string;
+  monospaceFont: string;
   defaultFont: string;
-  defaultSize: number;
-  minimumSize: number;
+  defaultFontSize: number;
+  minimumFontSize: number;
   fontWeight: number;
 }
 

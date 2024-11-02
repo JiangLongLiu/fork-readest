@@ -107,7 +107,7 @@ foliate-view {
 
 .dropdown-left::before,
 .dropdown-left::after {
-  left: 16px;
+  left: 20px;
   transform: translateX(0);
 }
 
@@ -119,7 +119,7 @@ foliate-view {
 
 .dropdown-right::before,
 .dropdown-right::after {
-  right: 16px;
+  right: 20px;
   transform: translateX(0);
 }
 
@@ -128,7 +128,7 @@ foliate-view {
   display: none;
 }
 
-.modal, .dropdown-content {
+.dropdown-content, .settings-content {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 14px;
   font-weight: 400;

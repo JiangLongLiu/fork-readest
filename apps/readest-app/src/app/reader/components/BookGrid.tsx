@@ -35,7 +35,7 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, bookStates, onCloseBook }
         const { book, config, bookDoc } = bookState;
         if (!book || !config || !bookDoc) return null;
         const { section, pageinfo, progress, chapter } = config;
-        const marginGap = config.viewSettings ? `${config.viewSettings!.gap! * 100}%` : '';
+        const marginGap = config.viewSettings ? `${config.viewSettings!.gapPercent!}%` : '';
 
         return (
           <div key={bookKey} className='relative h-full w-full overflow-hidden'>

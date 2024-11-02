@@ -5,7 +5,7 @@ interface DropdownProps {
   className?: string;
   buttonClassName?: string;
   toggleButton: React.ReactNode;
-  children: ReactElement<{ toggleDropdown: () => void }>;
+  children: ReactElement<{ setIsDropdownOpen: (isOpen: boolean) => void }>;
   onToggle?: (isOpen: boolean) => void;
 }
 
@@ -25,25 +25,25 @@ const Dropdown: React.FC<DropdownProps> = ({
     onToggle?.(newIsOpen);
   };
 
-  const closeDropdown = () => {
-    setIsOpen(false);
-    onToggle?.(false);
+  const setIsDropdownOpen = (isOpen: boolean) => {
+    setIsOpen(isOpen);
+    onToggle?.(isOpen);
   };
 
   const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
     if (!dropdownRef.current?.contains(event.relatedTarget as Node)) {
-      closeDropdown();
+      setIsDropdownOpen(false);
     }
   };
 
   const handleClickOutside = (event: MouseEvent | Event) => {
     if (event instanceof MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        closeDropdown();
+        setIsDropdownOpen(false);
       }
     } else if (event instanceof MessageEvent) {
       if (event.data && event.data.type === 'iframe-mousedown') {
-        closeDropdown();
+        setIsDropdownOpen(false);
       }
     }
   };
@@ -58,7 +58,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   }, []);
 
   const childrenWithToggle = isValidElement(children)
-    ? React.cloneElement(children, { toggleDropdown })
+    ? React.cloneElement(children, { setIsDropdownOpen })
     : children;
 
   return (

@@ -37,6 +37,11 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
     }
   };
 
+  const handleToggleDropdown = (isOpen: boolean) => {
+    setIsDropdownOpen(isOpen);
+    if (!isOpen) setHoveredBookKey('');
+  };
+
   return (
     <div
       ref={headerRef}
@@ -68,7 +73,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
           className='dropdown-bottom dropdown-end'
           buttonClassName='btn btn-ghost h-8 min-h-8 w-8 p-0'
           toggleButton={<PiDotsThreeVerticalBold size={16} />}
-          onToggle={setIsDropdownOpen}
+          onToggle={handleToggleDropdown}
         >
           <ViewMenu bookKey={bookKey} onSetSettingsDialogOpen={onSetSettingsDialogOpen} />
         </Dropdown>

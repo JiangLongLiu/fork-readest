@@ -1,8 +1,11 @@
 import clsx from 'clsx';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import NumberInput from './NumberInput';
 import FontDropdown from './FontDropDown';
+import { MONOSPACE_FONTS, SANS_SERIF_FONTS, SERIF_FONTS } from '@/services/constants';
+import { useReaderStore } from '@/store/readerStore';
+import { getStyles } from '@/utils/style';
 
 interface FontFaceProps {
   className?: string;
@@ -14,26 +17,107 @@ interface FontFaceProps {
 }
 
 const fontFamilyOptions = ['Serif', 'Sans-serif'];
-const serifFonts = [
-  'Literata',
-  'Vollkorn',
-  'Aleo',
-  'Crimson Text',
-  'Merriweather',
-  'Georgia',
-  'Times New Roman',
-];
-const sansSerifFonts = ['Roboto', 'Open Sans', 'Noto Sans', 'Poppins', 'Helvetica', 'Arial'];
-const monospaceFonts = ['Fira Code', 'Lucida Console', 'Consolas', 'Courier New'];
 
-const FontPanel: React.FC = () => {
-  const [defaultFontSize, setDefaultFontSize] = useState(18);
-  const [minFontSize, setMinFontSize] = useState(1);
-  const [overridePublisherFont, setOverridePublisherFont] = useState(true);
-  const [defaultFont, setDefaultFont] = useState('Serif');
-  const [serifFont, setSerifFont] = useState('Georgia');
-  const [sansSerifFont, setSansSerifFont] = useState('Roboto');
-  const [monospaceFont, setMonospaceFont] = useState('Consolas');
+const handleFontFaceFont = (option: string, family: string) => {
+  return `'${option}', ${family}`;
+};
+
+const FontFace = ({ className, family, label, options, selected, onSelect }: FontFaceProps) => (
+  <div className={clsx('config-item', className)}>
+    <span className='text-gray-700'>{label}</span>
+    <FontDropdown
+      family={family}
+      options={options}
+      selected={selected}
+      onSelect={onSelect}
+      onGetFontFamily={handleFontFaceFont}
+    />
+  </div>
+);
+
+const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
+  const { books, settings, setSettings, setConfig, getFoliateView } = useReaderStore();
+  const { isFontLayoutSettingsGlobal } = useReaderStore();
+  const bookState = books[bookKey]!;
+  const config = bookState.config!;
+
+  const [defaultFontSize, setDefaultFontSize] = useState(config.viewSettings!.defaultFontSize!);
+  const [minFontSize, setMinFontSize] = useState(config.viewSettings!.minimumFontSize!);
+  const [overrideFont, setOverrideFont] = useState(config.viewSettings!.overrideFont!);
+  const [defaultFont, setDefaultFont] = useState(config.viewSettings!.defaultFont!);
+  const [serifFont, setSerifFont] = useState(config.viewSettings!.serifFont!);
+  const [sansSerifFont, setSansSerifFont] = useState(config.viewSettings!.sansSerifFont!);
+  const [monospaceFont, setMonospaceFont] = useState(config.viewSettings!.monospaceFont!);
+
+  useEffect(() => {
+    config.viewSettings!.defaultFont = defaultFont;
+    setConfig(bookKey, config);
+    if (isFontLayoutSettingsGlobal) {
+      settings.globalViewSettings.defaultFont = defaultFont;
+      setSettings(settings);
+    }
+    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+  }, [defaultFont]);
+
+  useEffect(() => {
+    config.viewSettings!.defaultFontSize = defaultFontSize;
+    setConfig(bookKey, config);
+    if (isFontLayoutSettingsGlobal) {
+      settings.globalViewSettings.defaultFontSize = defaultFontSize;
+      setSettings(settings);
+    }
+    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+  }, [defaultFontSize]);
+
+  useEffect(() => {
+    config.viewSettings!.minimumFontSize = minFontSize;
+    setConfig(bookKey, config);
+    if (isFontLayoutSettingsGlobal) {
+      settings.globalViewSettings.minimumFontSize = minFontSize;
+      setSettings(settings);
+    }
+    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+  }, [minFontSize]);
+
+  useEffect(() => {
+    config.viewSettings!.serifFont = serifFont;
+    setConfig(bookKey, config);
+    if (isFontLayoutSettingsGlobal) {
+      settings.globalViewSettings.serifFont = serifFont;
+      setSettings(settings);
+    }
+    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+  }, [serifFont]);
+
+  useEffect(() => {
+    config.viewSettings!.sansSerifFont = sansSerifFont;
+    setConfig(bookKey, config);
+    if (isFontLayoutSettingsGlobal) {
+      settings.globalViewSettings.sansSerifFont = sansSerifFont;
+      setSettings(settings);
+    }
+    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+  }, [sansSerifFont]);
+
+  useEffect(() => {
+    config.viewSettings!.monospaceFont = monospaceFont;
+    setConfig(bookKey, config);
+    if (isFontLayoutSettingsGlobal) {
+      settings.globalViewSettings.monospaceFont = monospaceFont;
+      setSettings(settings);
+    }
+    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+  }, [monospaceFont]);
+
+  useEffect(() => {
+    config.viewSettings!.overrideFont = overrideFont;
+    setConfig(bookKey, config);
+    if (isFontLayoutSettingsGlobal) {
+      settings.globalViewSettings.overrideFont = overrideFont;
+      setSettings(settings);
+    }
+    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+  }, [overrideFont]);
 
   const handleFontFamilyFont = (option: string) => {
     switch (option) {
@@ -47,23 +131,6 @@ const FontPanel: React.FC = () => {
         return '';
     }
   };
-
-  const handleFontFaceFont = (option: string, family: string) => {
-    return `'${option}', ${family}`;
-  };
-
-  const FontFace = ({ className, family, label, options, selected, onSelect }: FontFaceProps) => (
-    <div className={clsx('config-item', className)}>
-      <span className='text-gray-700'>{label}</span>
-      <FontDropdown
-        family={family}
-        options={options}
-        selected={selected}
-        onSelect={onSelect}
-        onGetFontFamily={handleFontFaceFont}
-      />
-    </div>
-  );
 
   return (
     <div className='my-4 w-full space-y-6'>
@@ -110,8 +177,8 @@ const FontPanel: React.FC = () => {
               <input
                 type='checkbox'
                 className='toggle'
-                checked={overridePublisherFont}
-                onChange={() => setOverridePublisherFont(!overridePublisherFont)}
+                checked={overrideFont}
+                onChange={() => setOverrideFont(!overrideFont)}
               />
             </div>
           </div>
@@ -126,14 +193,14 @@ const FontPanel: React.FC = () => {
               className='config-item-top'
               family='serif'
               label='Serif Font'
-              options={serifFonts}
+              options={SERIF_FONTS}
               selected={serifFont}
               onSelect={setSerifFont}
             />
             <FontFace
               family='sans-serif'
               label='Sans-Serif Font'
-              options={sansSerifFonts}
+              options={SANS_SERIF_FONTS}
               selected={sansSerifFont}
               onSelect={setSansSerifFont}
             />
@@ -141,7 +208,7 @@ const FontPanel: React.FC = () => {
               className='config-item-bottom'
               family='monospace'
               label='Monospace Font'
-              options={monospaceFonts}
+              options={MONOSPACE_FONTS}
               selected={monospaceFont}
               onSelect={setMonospaceFont}
             />

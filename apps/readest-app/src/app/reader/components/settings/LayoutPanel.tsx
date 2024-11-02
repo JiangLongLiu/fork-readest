@@ -1,14 +1,94 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import NumberInput from './NumberInput';
+import { useReaderStore } from '@/store/readerStore';
+import { getStyles } from '@/utils/style';
 
-const LayoutPanel: React.FC = () => {
-  const [lineHeight, setLineHeight] = useState(1.5);
-  const [fullJustification, setFullJustification] = useState(true);
-  const [hyphenation, setHyphenation] = useState(true);
-  const [margins, setMargins] = useState(0.05);
-  const [maxNumberOfColumns, setMaxNumberOfColumns] = useState(2);
-  const [maxInlineSize, setMaxInlineSize] = useState(720);
-  const [maxBlockSize, setMaxBlockSize] = useState(1440);
+const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
+  const { books, settings, setSettings, setConfig, getFoliateView } = useReaderStore();
+  const { isFontLayoutSettingsGlobal } = useReaderStore();
+  const bookState = books[bookKey]!;
+  const config = bookState.config!;
+
+  const [lineHeight, setLineHeight] = useState(config.viewSettings!.lineHeight!);
+  const [fullJustification, setFullJustification] = useState(
+    config.viewSettings!.fullJustification!,
+  );
+  const [hyphenation, setHyphenation] = useState(config.viewSettings!.hyphenation!);
+  const [marginPx, setMarginPx] = useState(config.viewSettings!.marginPx!);
+  const [gapPercent, setGapPercent] = useState(config.viewSettings!.gapPercent!);
+  const [maxColumnCount, setMaxColumnCount] = useState(config.viewSettings!.maxColumnCount!);
+  const [maxInlineSize, setMaxInlineSize] = useState(config.viewSettings!.maxInlineSize!);
+  const [maxBlockSize, setMaxBlockSize] = useState(config.viewSettings!.maxBlockSize!);
+
+  useEffect(() => {
+    config.viewSettings!.lineHeight = lineHeight;
+    setConfig(bookKey, config);
+    if (isFontLayoutSettingsGlobal) {
+      settings.globalViewSettings.lineHeight = lineHeight;
+      setSettings(settings);
+    }
+    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+  }, [lineHeight]);
+
+  useEffect(() => {
+    config.viewSettings!.fullJustification = fullJustification;
+    setConfig(bookKey, config);
+    if (isFontLayoutSettingsGlobal) {
+      settings.globalViewSettings.fullJustification = fullJustification;
+      setSettings(settings);
+    }
+    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+  }, [fullJustification]);
+
+  useEffect(() => {
+    config.viewSettings!.hyphenation = hyphenation;
+    setConfig(bookKey, config);
+    if (isFontLayoutSettingsGlobal) {
+      settings.globalViewSettings.hyphenation = hyphenation;
+      setSettings(settings);
+    }
+    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+  }, [hyphenation]);
+
+  useEffect(() => {
+    config.viewSettings!.marginPx = marginPx;
+    setConfig(bookKey, config);
+    if (isFontLayoutSettingsGlobal) {
+      settings.globalViewSettings.marginPx = marginPx;
+      setSettings(settings);
+    }
+    getFoliateView(bookKey)?.renderer.setAttribute('margin', `${marginPx}px`);
+  }, [marginPx]);
+
+  useEffect(() => {
+    config.viewSettings!.gapPercent = gapPercent;
+    setConfig(bookKey, config);
+    if (isFontLayoutSettingsGlobal) {
+      settings.globalViewSettings.gapPercent = gapPercent;
+      setSettings(settings);
+    }
+    getFoliateView(bookKey)?.renderer.setAttribute('gap', `${gapPercent}%`);
+  }, [gapPercent]);
+
+  useEffect(() => {
+    config.viewSettings!.maxColumnCount = maxColumnCount;
+    setConfig(bookKey, config);
+    if (isFontLayoutSettingsGlobal) {
+      settings.globalViewSettings.maxColumnCount = maxColumnCount;
+      setSettings(settings);
+    }
+    getFoliateView(bookKey)?.renderer.setAttribute('max-column-count', maxColumnCount);
+  }, [maxColumnCount]);
+
+  useEffect(() => {
+    config.viewSettings!.maxInlineSize = maxInlineSize;
+    setConfig(bookKey, config);
+    if (isFontLayoutSettingsGlobal) {
+      settings.globalViewSettings.maxInlineSize = maxInlineSize;
+      setSettings(settings);
+    }
+    getFoliateView(bookKey)?.renderer.setAttribute('max-inline-size', `${maxInlineSize}px`);
+  }, [maxInlineSize]);
 
   return (
     <div className='my-4 w-full space-y-6'>
@@ -21,8 +101,9 @@ const LayoutPanel: React.FC = () => {
               label='Line Height'
               value={lineHeight}
               onChange={setLineHeight}
-              min={1}
-              max={120}
+              min={1.0}
+              max={3.0}
+              step={0.1}
             />
             <div className='config-item config-item-bottom'>
               <span className='text-gray-700'>Full Justification</span>
@@ -52,17 +133,24 @@ const LayoutPanel: React.FC = () => {
           <div className='divide-y'>
             <NumberInput
               className='config-item-top'
-              label='Margins'
-              value={margins}
-              onChange={setMargins}
+              label='Margins (px)'
+              value={marginPx}
+              onChange={setMarginPx}
               min={0}
-              max={0.3}
-              step={0.01}
+              max={88}
+              step={4}
+            />
+            <NumberInput
+              label='Gaps (%)'
+              value={gapPercent}
+              onChange={setGapPercent}
+              min={0}
+              max={30}
             />
             <NumberInput
               label='Maximum Number of Columns'
-              value={maxNumberOfColumns}
-              onChange={setMaxNumberOfColumns}
+              value={maxColumnCount}
+              onChange={setMaxColumnCount}
               min={1}
               max={2}
             />

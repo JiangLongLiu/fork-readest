@@ -3,45 +3,7 @@ import { useFoliateEvents } from '../hooks/useFoliateEvents';
 import { BookDoc } from '@/libs/document';
 import { BookConfig } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
-
-const getCSS = (spacing: number, justify: boolean, hyphenate: boolean) => `
-    @namespace epub "http://www.idpf.org/2007/ops";
-    html {
-        color-scheme: light dark;
-    }
-    /* https://github.com/whatwg/html/issues/5426 */
-    @media (prefers-color-scheme: dark) {
-        a:link {
-            color: lightblue;
-        }
-    }
-    p, li, blockquote, dd {
-        line-height: ${spacing};
-        text-align: ${justify ? 'justify' : 'start'};
-        -webkit-hyphens: ${hyphenate ? 'auto' : 'manual'};
-        hyphens: ${hyphenate ? 'auto' : 'manual'};
-        -webkit-hyphenate-limit-before: 3;
-        -webkit-hyphenate-limit-after: 2;
-        -webkit-hyphenate-limit-lines: 2;
-        hanging-punctuation: allow-end last;
-        widows: 2;
-    }
-    /* prevent the above from overriding the align attribute */
-    [align="left"] { text-align: left; }
-    [align="right"] { text-align: right; }
-    [align="center"] { text-align: center; }
-    [align="justify"] { text-align: justify; }
-
-    pre {
-        white-space: pre-wrap !important;
-    }
-    aside[epub|type~="endnote"],
-    aside[epub|type~="footnote"],
-    aside[epub|type~="note"],
-    aside[epub|type~="rearnote"] {
-        display: none;
-    }
-`;
+import { getStyles } from '@/utils/style';
 
 export interface FoliateView extends HTMLElement {
   open: (book: BookDoc) => Promise<void>;
@@ -52,8 +14,9 @@ export interface FoliateView extends HTMLElement {
   goLeft: () => void;
   goRight: () => void;
   renderer: {
-    setStyles: (css: string) => void;
+    setStyles?: (css: string) => void;
     setAttribute: (name: string, value: string | number) => void;
+    removeAttribute: (name: string) => void;
     next: () => Promise<void>;
     prev: () => Promise<void>;
   };
@@ -141,22 +104,27 @@ const FoliateViewer: React.FC<{
 
       await view.open(bookDoc);
       const viewSettings = bookConfig.viewSettings!;
-      if ('setStyles' in view.renderer) {
-        const lineHeight = viewSettings.lineHeight!;
-        const justify = viewSettings.justify!;
-        const hyphenate = viewSettings.hyphenate!;
-        view.renderer.setStyles(getCSS(lineHeight, justify, hyphenate));
-        // FIXME: zoom level is not working in paginated mode
-        if (viewSettings.scrolled) {
-          const zoomLevel = viewSettings.zoomLevel!;
-          view.renderer.setStyles(`body { zoom: ${zoomLevel}%; }`);
-        }
-      }
+      view.renderer.setStyles?.(getStyles(bookConfig));
       const isScrolled = viewSettings.scrolled!;
-      const gap = viewSettings.gap!;
+      const marginPx = viewSettings.marginPx!;
+      const gapPercent = viewSettings.gapPercent!;
+      const animated = viewSettings.animated!;
+      const maxColumnCount = viewSettings.maxColumnCount!;
+      const maxInlineSize = viewSettings.maxInlineSize!;
+      const maxBlockSize = viewSettings.maxBlockSize!;
+      if (animated) {
+        view.renderer.setAttribute('animated', '');
+      } else {
+        view.renderer.removeAttribute('animated');
+      }
+      view.renderer.setAttribute('animated', animated ? 'animated' : '');
       view.renderer.setAttribute('flow', isScrolled ? 'scrolled' : 'paginated');
-      view.renderer.setAttribute('margin', '44px');
-      view.renderer.setAttribute('gap', `${gap * 100}%`);
+      view.renderer.setAttribute('margin', `${marginPx}px`);
+      view.renderer.setAttribute('gap', `${gapPercent}%`);
+      view.renderer.setAttribute('max-column-count', maxColumnCount);
+      view.renderer.setAttribute('max-inline-size', `${maxInlineSize}px`);
+      view.renderer.setAttribute('max-block-size', `${maxBlockSize}px`);
+
       const lastLocation = bookConfig.location;
       if (lastLocation) {
         view.init({ lastLocation });

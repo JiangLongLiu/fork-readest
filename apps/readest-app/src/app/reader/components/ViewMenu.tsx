@@ -5,16 +5,17 @@ import { BiMoon, BiSun } from 'react-icons/bi';
 import { MdZoomOut, MdZoomIn, MdCheck } from 'react-icons/md';
 
 import { useReaderStore } from '@/store/readerStore';
+import { getStyles } from '@/utils/style';
 
 interface ViewMenuProps {
   bookKey: string;
-  toggleDropdown?: () => void;
+  setIsDropdownOpen?: (open: boolean) => void;
   onSetSettingsDialogOpen: (open: boolean) => void;
 }
 
 const ViewMenu: React.FC<ViewMenuProps> = ({
   bookKey,
-  toggleDropdown,
+  setIsDropdownOpen,
   onSetSettingsDialogOpen,
 }) => {
   const { books, setConfig, getFoliateView } = useReaderStore();
@@ -34,7 +35,7 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
   const toggleInvertedColors = () => setInvertedColors(!isInvertedColors);
 
   const openFontLayoutMenu = () => {
-    toggleDropdown?.();
+    setIsDropdownOpen?.(false);
     onSetSettingsDialogOpen(true);
   };
 
@@ -52,13 +53,12 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
   useEffect(() => {
     const view = getFoliateView(bookKey);
     if (!view) return;
-    if ('setStyles' in view.renderer) {
-      // FIXME: zoom level is not working in paginated mode
-      if (!config.viewSettings?.scrolled) return;
-      view.renderer.setStyles(`body { zoom: ${zoomLevel}%; }`);
-      config.viewSettings!.zoomLevel = zoomLevel;
-      setConfig(bookKey, config);
+    // FIXME: zoom level is not working in paginated mode
+    if (config.viewSettings?.scrolled) {
+      view.renderer.setStyles?.(getStyles(config));
     }
+    config.viewSettings!.zoomLevel = zoomLevel;
+    setConfig(bookKey, config);
   }, [zoomLevel]);
 
   return (

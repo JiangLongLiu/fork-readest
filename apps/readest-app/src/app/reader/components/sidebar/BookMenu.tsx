@@ -2,20 +2,20 @@ import React from 'react';
 
 interface BookMenuProps {
   openSplitView: () => void;
-  toggleDropdown?: () => void;
+  setIsDropdownOpen?: (isOpen: boolean) => void;
 }
 
-const BookMenu: React.FC<BookMenuProps> = ({ openSplitView, toggleDropdown }) => {
+const BookMenu: React.FC<BookMenuProps> = ({ openSplitView, setIsDropdownOpen }) => {
   const handleOpenSplitView = () => {
     openSplitView();
-    toggleDropdown?.();
+    setIsDropdownOpen?.(false);
   };
   const handleReloadPage = () => {
     window.location.reload();
-    toggleDropdown?.();
+    setIsDropdownOpen?.(false);
   };
   const showAboutReadest = () => {
-    toggleDropdown?.();
+    setIsDropdownOpen?.(false);
   };
 
   return (

@@ -11,17 +11,18 @@ export const DEFAULT_READSETTINGS: ReadSettings = {
 };
 
 export const DEFAULT_BOOK_FONT: BookFont = {
-  serif: 'Serif 12',
-  sansSerif: 'Sans 12',
-  monospace: 'Monospace 12',
-  defaultFont: 'serif',
-  defaultSize: 16,
-  minimumSize: 8,
+  serifFont: 'Literata',
+  sansSerifFont: 'Roboto',
+  monospaceFont: 'Consolas',
+  defaultFont: 'Serif',
+  defaultFontSize: 16,
+  minimumFontSize: 8,
   fontWeight: 400,
 };
 
 export const DEFAULT_BOOK_LAYOUT: BookLayout = {
-  gap: 0.05,
+  marginPx: 44,
+  gapPercent: 5,
   scrolled: false,
   maxColumnCount: 2,
   maxInlineSize: 720,
@@ -32,8 +33,8 @@ export const DEFAULT_BOOK_LAYOUT: BookLayout = {
 export const DEFAULT_BOOK_STYLE: BookStyle = {
   zoomLevel: 100,
   lineHeight: 1.6,
-  justify: true,
-  hyphenate: true,
+  fullJustification: true,
+  hyphenation: true,
   invert: false,
   theme: 'light',
   overrideFont: false,
@@ -41,3 +42,24 @@ export const DEFAULT_BOOK_STYLE: BookStyle = {
 };
 
 export const SYSTEM_SETTINGS_VERSION = 1;
+
+export const SERIF_FONTS = [
+  'Literata',
+  'Vollkorn',
+  'Aleo',
+  'Crimson Text',
+  'Merriweather',
+  'Georgia',
+  'Times New Roman',
+];
+
+export const SANS_SERIF_FONTS = [
+  'Roboto',
+  'Open Sans',
+  'Noto Sans',
+  'Poppins',
+  'Helvetica',
+  'Arial',
+];
+
+export const MONOSPACE_FONTS = ['Fira Code', 'Lucida Console', 'Consolas', 'Courier New'];

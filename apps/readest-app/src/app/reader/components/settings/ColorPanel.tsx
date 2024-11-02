@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const ColorPanel: React.FC = () => {
+const ColorPanel: React.FC<{ bookKey: string }> = () => {
   const [selectedTheme, setSelectedTheme] = useState('Default');
   const themes = [
     'Default',
@@ -16,8 +16,7 @@ const ColorPanel: React.FC = () => {
 
   return (
     <div>
-      <h2 className='text-lg font-bold'>Color Settings</h2>
-      {/* Theme Selection */}
+      <h2 className='mb-2 font-medium'>Color Settings</h2>
       <div className='mt-4 grid grid-cols-3 gap-2'>
         {themes.map((theme) => (
           <button
