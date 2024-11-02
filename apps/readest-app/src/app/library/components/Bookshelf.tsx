@@ -49,6 +49,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
   const { deleteBook } = useReaderStore();
   const [selectedBooks, setSelectedBooks] = React.useState<string[]>([]);
   const [showDeleteAlert, setShowDeleteAlert] = React.useState(false);
+  const [clickedImage, setClickedImage] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     setSelectedBooks([]);
@@ -60,6 +61,8 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
     if (isSelectMode) {
       toggleSelection(id);
     } else {
+      setClickedImage(id);
+      setTimeout(() => setClickedImage(null), 300);
       router.push(`/reader?ids=${id}`);
     }
   };
@@ -111,7 +114,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
                         fill={true}
                         className='object-cover'
                       />
-                      {selectedBooks.includes(item.hash) && (
+                      {(selectedBooks.includes(item.hash) || clickedImage === item.hash) && (
                         <div className='absolute inset-0 bg-black opacity-30 transition-opacity duration-300'></div>
                       )}
                       {isSelectMode && (
