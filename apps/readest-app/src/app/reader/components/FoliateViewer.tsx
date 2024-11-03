@@ -48,6 +48,9 @@ const FoliateViewer: React.FC<{
   };
 
   const handleKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Backspace') {
+      event.preventDefault();
+    }
     window.postMessage(
       {
         type: 'iframe-keydown',
@@ -82,9 +85,12 @@ const FoliateViewer: React.FC<{
     const detail = (event as CustomEvent).detail;
     if (detail.doc) {
       if (!detail.doc.isEventListenersAdded) {
+        detail.doc.isEventListenersAdded = true;
         detail.doc.addEventListener('keydown', handleKeydown);
         detail.doc.addEventListener('mousedown', handleMousedown);
-        detail.doc.isEventListenersAdded = true;
+        detail.doc.addEventListener('contextmenu', (e: MouseEvent) => {
+          e.preventDefault();
+        });
       }
     }
   };

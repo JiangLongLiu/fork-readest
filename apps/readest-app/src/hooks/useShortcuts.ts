@@ -14,6 +14,14 @@ const useShortcuts = (actions: KeyActionHandlers, dependencies: React.Dependency
   const [shortcuts, setShortcuts] = useState<ShortcutConfig>(loadShortcuts);
 
   useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') {
+      document.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+      });
+    }
+  }, []);
+
+  useEffect(() => {
     const handleShortcutUpdate = () => {
       setShortcuts(loadShortcuts());
     };
@@ -58,6 +66,8 @@ const useShortcuts = (actions: KeyActionHandlers, dependencies: React.Dependency
     metaKey: boolean,
     shiftKey: boolean,
   ) => {
+    // FIXME: This is a temporary fix to disable Back button navigation
+    if (key === 'backspace') return true;
     if (
       shortcuts.switchSidebar.some((shortcut) =>
         isShortcutMatch(shortcut, key, ctrlKey, altKey, metaKey, shiftKey),
