@@ -10,8 +10,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
   },
-  "files": [
-  ],
+  "files": [],
   "references": [
     {
       "path": "./packages"

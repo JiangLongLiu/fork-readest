@@ -4,6 +4,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { EnvProvider } from '@/context/EnvContext';
 import { CSPostHogProvider } from '@/context/PHContext';
 import './globals.css';
+import './fonts.css';
 
 export const metadata: Metadata = {
   title: 'Readest',

@@ -1,6 +1,8 @@
 import { MONOSPACE_FONTS, SANS_SERIF_FONTS, SERIF_FONTS } from '@/services/constants';
 import { BookConfig } from '@/types/book';
 
+import fontfacesCSS from '!!raw-loader!../app/fonts.css';
+
 const getFontStyles = (
   serif: string,
   sansSerif: string,
@@ -92,5 +94,5 @@ export const getStyles = (config: BookConfig) => {
     viewSettings.overrideFont!,
   );
   const userStylesheet = viewSettings.userStylesheet!;
-  return `${layoutStyles}\n${fontStyles}\n${userStylesheet}`;
+  return `${layoutStyles}\n${fontStyles}\n${fontfacesCSS}\n${userStylesheet}`;
 };

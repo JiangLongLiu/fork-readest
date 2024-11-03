@@ -44,22 +44,14 @@ export const DEFAULT_BOOK_STYLE: BookStyle = {
 export const SYSTEM_SETTINGS_VERSION = 1;
 
 export const SERIF_FONTS = [
+  'Bitter',
   'Literata',
-  'Vollkorn',
-  'Aleo',
-  'Crimson Text',
   'Merriweather',
+  'Vollkorn',
   'Georgia',
   'Times New Roman',
 ];
 
-export const SANS_SERIF_FONTS = [
-  'Roboto',
-  'Open Sans',
-  'Noto Sans',
-  'Poppins',
-  'Helvetica',
-  'Arial',
-];
+export const SANS_SERIF_FONTS = ['Roboto', 'Noto Sans', 'Open Sans', 'Helvetica', 'Arial'];
 
 export const MONOSPACE_FONTS = ['Fira Code', 'Lucida Console', 'Consolas', 'Courier New'];
