@@ -88,9 +88,6 @@ const FoliateViewer: React.FC<{
         detail.doc.isEventListenersAdded = true;
         detail.doc.addEventListener('keydown', handleKeydown);
         detail.doc.addEventListener('mousedown', handleMousedown);
-        detail.doc.addEventListener('contextmenu', (e: MouseEvent) => {
-          e.preventDefault();
-        });
       }
     }
   };

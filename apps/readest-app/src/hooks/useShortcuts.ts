@@ -14,14 +14,6 @@ const useShortcuts = (actions: KeyActionHandlers, dependencies: React.Dependency
   const [shortcuts, setShortcuts] = useState<ShortcutConfig>(loadShortcuts);
 
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'development') {
-      document.addEventListener('contextmenu', (event) => {
-        event.preventDefault();
-      });
-    }
-  }, []);
-
-  useEffect(() => {
     const handleShortcutUpdate = () => {
       setShortcuts(loadShortcuts());
     };
