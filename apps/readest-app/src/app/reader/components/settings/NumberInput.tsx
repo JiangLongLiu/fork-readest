@@ -30,10 +30,10 @@ const NumberInput: React.FC<NumberInputProps> = ({
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value === '' ? 0 : parseInt(e.target.value);
+    const newValue = e.target.value === '' ? 0 : parseFloat(e.target.value);
+    setLocalValue(newValue);
     if (!isNaN(newValue)) {
       const roundedValue = Math.round(newValue * 10) / 10;
-      setLocalValue(roundedValue);
       onChange(Math.max(min, Math.min(max, roundedValue)));
     }
   };
@@ -70,7 +70,7 @@ const NumberInput: React.FC<NumberInputProps> = ({
           onKeyDown={handleInput}
           onKeyUp={handleInput}
           onBlur={handleOnBlur}
-          className='input input-ghost settings-content w-20 max-w-xs rounded px-3 py-1 text-right'
+          className='input input-ghost settings-content w-20 max-w-xs rounded border-0 bg-transparent px-3 py-1 text-right !outline-none'
           onFocus={(e) => e.target.select()}
         />
         <button

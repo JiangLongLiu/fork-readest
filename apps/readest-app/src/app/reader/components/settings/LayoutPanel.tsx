@@ -92,7 +92,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
 
   return (
     <div className='my-4 w-full space-y-6'>
-      <div className='cell-font-size w-full'>
+      <div className='w-full'>
         <h2 className='mb-2 font-medium'>Paragraph</h2>
         <div className='card bg-base-100 border shadow'>
           <div className='divide-y'>
@@ -127,7 +127,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
         </div>
       </div>
 
-      <div className='cell-font-family w-full'>
+      <div className='w-full'>
         <h2 className='mb-2 font-medium'>Page</h2>
         <div className='card bg-base-100 border shadow'>
           <div className='divide-y'>

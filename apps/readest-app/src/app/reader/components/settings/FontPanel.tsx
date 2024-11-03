@@ -134,7 +134,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
 
   return (
     <div className='my-4 w-full space-y-6'>
-      <div className='cell-font-size w-full'>
+      <div className='w-full'>
         <h2 className='mb-2 font-medium'>Font Size</h2>
         <div className='card bg-base-100 border shadow'>
           <div className='divide-y'>
@@ -143,7 +143,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
               label='Default Font Size'
               value={defaultFontSize}
               onChange={setDefaultFontSize}
-              min={1}
+              min={minFontSize}
               max={120}
             />
             <NumberInput
@@ -158,7 +158,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
         </div>
       </div>
 
-      <div className='cell-font-family w-full'>
+      <div className='w-full'>
         <h2 className='mb-2 font-medium'>Font Family</h2>
         <div className='card bg-base-100 border shadow'>
           <div className='divide-y'>
@@ -185,7 +185,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
         </div>
       </div>
 
-      <div className='cell-font-family w-full'>
+      <div className='w-full'>
         <h2 className='mb-2 font-medium'>Font Face</h2>
         <div className='card bg-base-100 border shadow'>
           <div className='divide-y'>
