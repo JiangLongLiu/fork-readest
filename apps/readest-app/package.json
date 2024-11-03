@@ -28,6 +28,7 @@
     "foliate-js": "workspace:*",
     "js-md5": "^0.8.3",
     "next": "15.0.1",
+    "posthog-js": "^1.180.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-icons": "^5.3.0",

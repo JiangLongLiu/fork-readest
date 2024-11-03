@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { Metadata } from 'next';
 import { AuthProvider } from '@/context/AuthContext';
 import { EnvProvider } from '@/context/EnvContext';
+import { CSPostHogProvider } from '@/context/PHContext';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -15,11 +16,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1' />
       </head>
-      <body>
-        <EnvProvider>
-          <AuthProvider>{children}</AuthProvider>
-        </EnvProvider>
-      </body>
+      <CSPostHogProvider>
+        <body>
+          <EnvProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </EnvProvider>
+        </body>
+      </CSPostHogProvider>
     </html>
   );
 }
