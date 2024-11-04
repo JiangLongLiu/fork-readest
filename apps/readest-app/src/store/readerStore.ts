@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 
-import { BookNote, BookContent, Book, BookConfig, PageInfo } from '@/types/book';
+import { BookNote, BookContent, Book, BookConfig, PageInfo, BookProgress } from '@/types/book';
 import { EnvConfigType } from '@/services/environment';
 import { SystemSettings } from '@/types/settings';
 import { FoliateView } from '@/app/reader/components/FoliateViewer';
-import { BookDoc, DocumentLoader } from '@/libs/document';
+import { BookDoc, DocumentLoader, TOCItem } from '@/libs/document';
 
 export interface BookState {
   key: string;
@@ -13,6 +13,7 @@ export interface BookState {
   book?: Book | null;
   file?: File | null;
   config?: BookConfig | null;
+  progress?: BookProgress | null;
   bookDoc?: BookDoc | null;
   isPrimary?: boolean;
 }
@@ -51,12 +52,11 @@ interface ReaderStore {
   setSettings: (settings: SystemSettings) => void;
   setProgress: (
     key: string,
-    progress: number,
     location: string,
-    href: string,
-    chapter: string,
+    tocItem: TOCItem,
     section: PageInfo,
     pageinfo: PageInfo,
+    range: Range,
   ) => void;
   setConfig: (key: string, config: BookConfig) => void;
   setFoliateView: (key: string, view: FoliateView) => void;
@@ -83,6 +83,7 @@ export const DEFAULT_BOOK_STATE = {
   file: null,
   book: null,
   config: null,
+  progress: null,
   bookDoc: null,
   isPrimary: true,
 };
@@ -210,6 +211,18 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
         console.log('Loading book', key);
         const { book: loadedBookDoc } = await new DocumentLoader(file).open();
         bookDoc = loadedBookDoc as BookDoc;
+        const updateTocID = (items: TOCItem[], index = 0): number => {
+          items.forEach((item) => {
+            if (item.id === undefined) {
+              item.id = index++;
+            }
+            if (item.subitems) {
+              index = updateTocID(item.subitems, index);
+            }
+          });
+          return index;
+        };
+        updateTocID(bookDoc.toc);
         set((state) => ({
           bookDocCache: {
             ...state.bookDocCache,
@@ -228,6 +241,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
             book,
             file,
             config,
+            progress: {} as BookProgress,
             bookDoc,
             isPrimary,
           },
@@ -248,12 +262,11 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
 
   setProgress: (
     key: string,
-    progress: number,
     location: string,
-    href: string,
-    chapter: string,
+    tocItem: TOCItem,
     section: PageInfo,
     pageinfo: PageInfo,
+    range: Range,
   ) =>
     set((state) => {
       const book = state.books[key];
@@ -266,12 +279,23 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
             config: {
               ...book.config,
               lastUpdated: Date.now(),
-              href,
-              chapter,
-              progress,
+              href: tocItem.href,
+              chapter: tocItem.label,
+              progress: [pageinfo.current, pageinfo.total],
               location,
               section,
               pageinfo,
+            },
+            progress: {
+              ...book.progress,
+              progress: [pageinfo.current, pageinfo.total],
+              location,
+              tocHref: tocItem.href,
+              tocLabel: tocItem.label,
+              tocId: tocItem.id,
+              section,
+              pageinfo,
+              range,
             },
           },
         },

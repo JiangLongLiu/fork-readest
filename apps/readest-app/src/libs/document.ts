@@ -33,8 +33,9 @@ Map.groupBy ??= (iterable, callbackfn) => {
 export type DocumentFile = File;
 
 export interface TOCItem {
+  id: number;
   label: string;
-  href?: string;
+  href: string;
   subitems?: TOCItem[];
 }
 

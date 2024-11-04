@@ -35,9 +35,9 @@ const SideBar: React.FC<{
   useEffect(() => {
     if (!books || !sideBarBookKey) return;
     const bookState = books[sideBarBookKey] || DEFAULT_BOOK_STATE;
-    const { config } = bookState;
+    const { progress } = bookState;
     setBookState(bookState);
-    setCurrentHref(config?.href || null);
+    setCurrentHref(progress?.tocHref || null);
   }, [books, sideBarBookKey]);
 
   const handleClickOverlay = () => {

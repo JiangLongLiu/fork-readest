@@ -1,6 +1,8 @@
 import React from 'react';
-import TOCView from './TOCView';
+
 import { BookDoc } from '@/libs/document';
+import TOCView from './TOCView';
+import BookmarkView from './BookmarkView';
 
 const SidebarContent: React.FC<{
   activeTab: string;
@@ -8,12 +10,12 @@ const SidebarContent: React.FC<{
   currentHref: string | null;
   sideBarBookKey: string;
 }> = ({ activeTab, bookDoc, currentHref, sideBarBookKey }) => (
-  <div className='sidebar-content overflow-y-auto shadow-inner'>
+  <div className='sidebar-content overflow-y-auto font-sans text-sm font-light shadow-inner'>
     {activeTab === 'toc' && bookDoc.toc && (
       <TOCView toc={bookDoc.toc} bookKey={sideBarBookKey} currentHref={currentHref} />
     )}
     {activeTab === 'annotations' && <div>Annotations</div>}
-    {activeTab === 'bookmarks' && <div>Bookmarks</div>}
+    {activeTab === 'bookmarks' && <BookmarkView toc={bookDoc.toc} bookKey={sideBarBookKey} />}
   </div>
 );
 

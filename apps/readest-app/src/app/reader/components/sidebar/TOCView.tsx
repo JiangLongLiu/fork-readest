@@ -3,22 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { md5 } from 'js-md5';
 import { TOCItem } from '@/libs/document';
 import { useReaderStore } from '@/store/readerStore';
+import { findParentPath } from '@/utils/toc';
 import { useFoliateEvents } from '../../hooks/useFoliateEvents';
-
-const findParentPath = (toc: TOCItem[], href: string): TOCItem[] => {
-  for (const item of toc) {
-    if (item.href === href) {
-      return [item];
-    }
-    if (item.subitems) {
-      const path = findParentPath(item.subitems, href);
-      if (path.length) {
-        return [item, ...path];
-      }
-    }
-  }
-  return [];
-};
 
 const getHrefMd5 = (href: string) => md5(JSON.stringify(href));
 
@@ -87,7 +73,7 @@ const TOCItemView: React.FC<{
           </span>
         )}
         <span
-          className='ml-2 truncate text-ellipsis font-sans text-sm font-light'
+          className='ml-2 truncate text-ellipsis'
           style={{
             maxWidth: 'calc(100% - 24px)',
             whiteSpace: 'nowrap',
@@ -163,7 +149,7 @@ const TOCView: React.FC<{
 
   return (
     <div className='relative'>
-      <div className='max-h-[calc(100vh-173px)] overflow-y-auto rounded'>
+      <div className='max-h-[calc(100vh-173px)] overflow-y-auto rounded pt-2'>
         <ul role='tree' ref={tocRef} className='overflow-y-auto px-2'>
           {toc &&
             toc.map((item) => (

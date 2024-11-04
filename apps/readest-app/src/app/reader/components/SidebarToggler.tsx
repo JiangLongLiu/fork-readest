@@ -1,5 +1,5 @@
 import React from 'react';
-import { VscLayoutSidebarLeft, VscLayoutSidebarLeftOff } from 'react-icons/vsc';
+import { TbLayoutSidebar, TbLayoutSidebarFilled } from 'react-icons/tb';
 
 import { useReaderStore } from '@/store/readerStore';
 
@@ -20,9 +20,9 @@ const SidebarToggler: React.FC<SidebarTogglerProps> = ({ bookKey }) => {
   return (
     <button onClick={handleToggleSidebar} className='p-2'>
       {sideBarBookKey == bookKey && isSideBarVisible ? (
-        <VscLayoutSidebarLeft size={16} />
+        <TbLayoutSidebarFilled size={20} />
       ) : (
-        <VscLayoutSidebarLeftOff size={16} />
+        <TbLayoutSidebar size={20} />
       )}
     </button>
   );

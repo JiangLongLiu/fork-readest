@@ -1,6 +1,7 @@
 import React from 'react';
 import { GiBookshelf } from 'react-icons/gi';
-import { CiSearch } from 'react-icons/ci';
+import { FiSearch } from 'react-icons/fi';
+
 import { MdOutlineMenu, MdOutlinePushPin, MdPushPin } from 'react-icons/md';
 import Dropdown from '@/components/Dropdown';
 import BookMenu from './BookMenu';
@@ -19,7 +20,7 @@ const SidebarHeader: React.FC<{
     </div>
     <div className='flex size-[50%] min-w-20 items-center justify-between'>
       <button className='btn btn-ghost left-0 h-8 min-h-8 w-8 p-0'>
-        <CiSearch size={20} className='fill-base-content' />
+        <FiSearch size={18} />
       </button>
       <Dropdown
         className='dropdown-bottom flex justify-center'

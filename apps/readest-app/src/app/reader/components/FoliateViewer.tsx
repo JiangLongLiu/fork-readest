@@ -36,15 +36,7 @@ const FoliateViewer: React.FC<{
   const progressRelocateHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;
     // console.log('relocate:', detail);
-    setProgress(
-      bookKey,
-      detail.fraction,
-      detail.cfi,
-      detail.tocItem?.href,
-      detail.tocItem?.label,
-      detail.section,
-      detail.location,
-    );
+    setProgress(bookKey, detail.cfi, detail.tocItem, detail.section, detail.location, detail.range);
   };
 
   const handleKeydown = (event: KeyboardEvent) => {

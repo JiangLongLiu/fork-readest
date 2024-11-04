@@ -33,6 +33,7 @@ export interface PageInfo {
 export interface BookNote {
   type: BookNoteType;
   cfi: string;
+  href: string;
   text?: string;
   style?: string;
   customStyle?: string;
@@ -74,14 +75,20 @@ export interface BookFont {
 
 export interface ViewSettings extends BookLayout, BookStyle, BookFont {}
 
+export interface BookProgress {
+  location: string;
+  tocHref: string;
+  tocLabel: string;
+  tocId: number;
+  section: PageInfo;
+  pageinfo: PageInfo;
+  range: Range;
+}
+
 export interface BookConfig {
   lastUpdated: number;
-  progress?: number;
+  progress?: [number, number];
   location?: string;
-  href?: string;
-  chapter?: string;
-  section?: PageInfo;
-  pageinfo?: PageInfo;
 
   bookmarks?: BookNote[];
   annotations?: BookNote[];

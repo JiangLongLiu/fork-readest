@@ -35,9 +35,9 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, bookStates, onCloseBook }
       {bookStates.map((bookState, index) => {
         const bookKey = bookKeys[index]!;
         const isBookmarked = bookmarkRibbons[bookKey];
-        const { book, config, bookDoc } = bookState;
-        if (!book || !config || !bookDoc) return null;
-        const { section, pageinfo, progress, chapter } = config;
+        const { book, config, progress, bookDoc } = bookState;
+        if (!book || !config || !progress || !bookDoc) return null;
+        const { section, pageinfo, tocLabel: chapter } = progress;
         const marginGap = config.viewSettings ? `${config.viewSettings!.gapPercent!}%` : '';
 
         return (
@@ -62,7 +62,7 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, bookStates, onCloseBook }
                 />
               </>
             )}
-            <FooterBar bookKey={bookKey} progress={progress} isHoveredAnim={false} />
+            <FooterBar bookKey={bookKey} pageinfo={pageinfo} isHoveredAnim={false} />
             {isFontLayoutSettingsDialogOpen && <SettingsDialog bookKey={bookKey} config={config} />}
           </div>
         );

@@ -13,17 +13,23 @@ const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
   const { books, updateBookmarks, setBookmarkRibbonVisibility } = useReaderStore();
   const bookState = books[bookKey]!;
   const config = bookState.config!;
+  const progress = bookState.progress!;
 
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   const toggleBookmark = () => {
-    const { location: cfi, bookmarks = [] } = config;
+    const { bookmarks = [] } = config;
+    const { location: cfi, tocHref: href, range } = progress;
     if (!cfi) return;
     if (!isBookmarked) {
       setIsBookmarked(true);
+      const text = range?.startContainer.textContent?.slice(0, 128) || '';
+      const truncatedText = text.length === 128 ? text + '...' : text;
       const bookmark: BookNote = {
         type: 'bookmark',
         cfi,
+        href,
+        text: truncatedText,
         note: '',
         created: Date.now(),
       };

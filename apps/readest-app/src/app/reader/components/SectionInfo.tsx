@@ -12,9 +12,7 @@ const SectionInfo: React.FC<SectionInfoProps> = ({ chapter, gapLeft }) => {
       className={clsx('pageinfo absolute right-0 top-0 flex h-8 items-end')}
       style={{ left: gapLeft }}
     >
-      <h2 className='text-center font-sans font-light text-slate-500' style={{ fontSize: '10px' }}>
-        {chapter || ''}
-      </h2>
+      <h2 className='text-center font-sans text-xs font-light text-slate-500'>{chapter || ''}</h2>
     </div>
   );
 };
