@@ -1,4 +1,16 @@
 export type BookFormat = 'EPUB' | 'PDF' | 'MOBI' | 'CBZ' | 'FB2' | 'FBZ';
+export type BookNoteType = 'bookmark' | 'highlight' | 'annotation';
+export type BookNoteStyle =
+  | 'underline'
+  | 'squiggly'
+  | 'strikethrough'
+  | 'yellow'
+  | 'orange'
+  | 'red'
+  | 'magenta'
+  | 'aqua'
+  | 'lime'
+  | 'custom';
 
 export interface Book {
   hash: string;
@@ -19,14 +31,14 @@ export interface PageInfo {
 }
 
 export interface BookNote {
+  type: BookNoteType;
   cfi: string;
-  start: string;
-  end: string;
-  page: number;
-  noteText?: string;
-  annotation?: string;
-  lastModified: number;
-  removalTimestamp?: number;
+  text?: string;
+  style?: string;
+  customStyle?: string;
+  note: string;
+  created: number;
+  modified?: number;
 }
 
 export interface BookLayout {

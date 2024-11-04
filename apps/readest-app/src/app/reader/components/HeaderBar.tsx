@@ -2,11 +2,12 @@ import clsx from 'clsx';
 import React, { useRef, useState } from 'react';
 import { PiDotsThreeVerticalBold } from 'react-icons/pi';
 
+import { useReaderStore } from '@/store/readerStore';
 import WindowButtons from '@/components/WindowButtons';
 import Dropdown from '@/components/Dropdown';
 import SidebarToggler from './SidebarToggler';
+import BookmarkToggler from './BookmarkToggler';
 import ViewMenu from './ViewMenu';
-import { useReaderStore } from '@/store/readerStore';
 
 interface HeaderBarProps {
   bookKey: string;
@@ -25,17 +26,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
 }) => {
   const headerRef = useRef<HTMLDivElement>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { hoveredBookKey, setHoveredBookKey, sideBarBookKey, setSideBarBookKey } = useReaderStore();
-  const { isSideBarVisible, toggleSideBar } = useReaderStore();
-
-  const toggleSidebarForBook = (bookKey: string) => {
-    if (sideBarBookKey === bookKey) {
-      toggleSideBar();
-    } else {
-      setSideBarBookKey(bookKey);
-      if (!isSideBarVisible) toggleSideBar();
-    }
-  };
+  const { hoveredBookKey, isSideBarVisible, setHoveredBookKey } = useReaderStore();
 
   const handleToggleDropdown = (isOpen: boolean) => {
     setIsDropdownOpen(isOpen);
@@ -56,12 +47,9 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
       onMouseEnter={() => setHoveredBookKey(bookKey)}
       onMouseLeave={() => setHoveredBookKey('')}
     >
-      <div className='sidebar-toggler mr-auto flex h-full items-center'>
-        <SidebarToggler
-          isSidebarVisible={isSideBarVisible}
-          isCurrentBook={sideBarBookKey === bookKey}
-          toggleSidebar={() => toggleSidebarForBook(bookKey)}
-        ></SidebarToggler>
+      <div className='sidebar-bookmark-toggler mr-auto flex h-full items-center'>
+        <SidebarToggler bookKey={bookKey} />
+        <BookmarkToggler bookKey={bookKey} />
       </div>
 
       <div className='header-title flex flex-1 items-center justify-center'>

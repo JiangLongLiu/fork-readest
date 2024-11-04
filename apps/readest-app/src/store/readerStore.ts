@@ -24,6 +24,7 @@ interface ReaderStore {
   books: Record<string, BookState>;
   foliateViews: Record<string, FoliateView>;
   bookDocCache: Record<string, BookDoc>;
+  bookmarkRibbons: Record<string, boolean>;
 
   hoveredBookKey: string | null;
   sideBarBookKey: string | null;
@@ -38,6 +39,8 @@ interface ReaderStore {
   toggleSideBarPin: () => void;
   setSideBarVisibility: (visible: boolean) => void;
   setSideBarPin: (pinned: boolean) => void;
+
+  setBookmarkRibbonVisibility: (key: string, visible: boolean) => void;
 
   isFontLayoutSettingsDialogOpen: boolean;
   isFontLayoutSettingsGlobal: boolean;
@@ -70,7 +73,7 @@ interface ReaderStore {
   initBookState: (envConfig: EnvConfigType, id: string, key: string, isPrimary?: boolean) => void;
 
   clearBookState: (key: string) => void;
-  addBookmark: (key: string, bookmark: BookNote) => void;
+  updateBookmarks: (key: string, bookmarks: BookNote[]) => void;
 }
 
 export const DEFAULT_BOOK_STATE = {
@@ -91,6 +94,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
   books: {},
   foliateViews: {},
   bookDocCache: {},
+  bookmarkRibbons: {},
 
   hoveredBookKey: null,
   sideBarBookKey: null,
@@ -274,7 +278,15 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
       };
     }),
 
-  addBookmark: (key: string, bookmark: BookNote) =>
+  setBookmarkRibbonVisibility: (key: string, visible: boolean) =>
+    set((state) => ({
+      bookmarkRibbons: {
+        ...state.bookmarkRibbons,
+        [key]: visible,
+      },
+    })),
+
+  updateBookmarks: (key: string, bookmarks: BookNote[]) =>
     set((state) => {
       const book = state.books[key];
       if (!book) return state;
@@ -286,7 +298,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
             config: {
               ...book.config,
               lastUpdated: Date.now(),
-              bookmarks: [...(book.config?.bookmarks || []), bookmark],
+              bookmarks,
             },
           },
         },

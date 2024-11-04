@@ -1,13 +1,15 @@
 import React from 'react';
 
 import { BookState, useReaderStore } from '@/store/readerStore';
-import HeaderBar from './HeaderBar';
-import FoliateViewer from './FoliateViewer';
-import PageInfo from './PageInfo';
-import FooterBar from './FooterBar';
-import SectionInfo from './SectionInfo';
-import getGridTemplate from '@/utils/grid';
+
 import SettingsDialog from './settings/SettingsDialog';
+import FoliateViewer from './FoliateViewer';
+import getGridTemplate from '@/utils/grid';
+import SectionInfo from './SectionInfo';
+import HeaderBar from './HeaderBar';
+import FooterBar from './FooterBar';
+import PageInfo from './PageInfo';
+import Ribbon from './Ribbon';
 
 interface BookGridProps {
   bookKeys: string[];
@@ -16,7 +18,7 @@ interface BookGridProps {
 }
 
 const BookGrid: React.FC<BookGridProps> = ({ bookKeys, bookStates, onCloseBook }) => {
-  const { isSideBarPinned, isSideBarVisible, sideBarWidth } = useReaderStore();
+  const { isSideBarPinned, isSideBarVisible, sideBarWidth, bookmarkRibbons } = useReaderStore();
   const { isFontLayoutSettingsDialogOpen, setFontLayoutSettingsDialogOpen } = useReaderStore();
   const gridWidth = isSideBarPinned && isSideBarVisible ? `calc(100% - ${sideBarWidth})` : '100%';
   const gridTemplate = getGridTemplate(bookKeys.length, window.innerWidth / window.innerHeight);
@@ -32,6 +34,7 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, bookStates, onCloseBook }
     >
       {bookStates.map((bookState, index) => {
         const bookKey = bookKeys[index]!;
+        const isBookmarked = bookmarkRibbons[bookKey];
         const { book, config, bookDoc } = bookState;
         if (!book || !config || !bookDoc) return null;
         const { section, pageinfo, progress, chapter } = config;
@@ -39,6 +42,7 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, bookStates, onCloseBook }
 
         return (
           <div key={bookKey} className='relative h-full w-full overflow-hidden'>
+            {isBookmarked && <Ribbon width={marginGap} />}
             <HeaderBar
               bookKey={bookKey}
               bookTitle={book.title}
