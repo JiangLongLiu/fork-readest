@@ -1,7 +1,7 @@
 import { MONOSPACE_FONTS, SANS_SERIF_FONTS, SERIF_FONTS } from '@/services/constants';
 import { BookConfig } from '@/types/book';
 
-import fontfacesCSS from '!!raw-loader!../app/fonts.css';
+import fontfacesCSS from '!!raw-loader!../styles/fonts.css';
 
 const getFontStyles = (
   serif: string,
