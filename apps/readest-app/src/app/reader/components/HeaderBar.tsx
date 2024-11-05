@@ -41,13 +41,13 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
         `shadow-xs bg-base-100 rounded-window-top-right transition-opacity duration-300`,
         !isSideBarVisible && 'rounded-window-top-left',
         isHoveredAnim && 'hover-bar-anim',
-        hoveredBookKey === bookKey || isDropdownOpen ? `opacity-100` : `opacity-0`,
+        hoveredBookKey === bookKey || isDropdownOpen ? `visible` : `opacity-0`,
         isDropdownOpen && 'header-bar-pinned',
       )}
       onMouseEnter={() => setHoveredBookKey(bookKey)}
       onMouseLeave={() => setHoveredBookKey('')}
     >
-      <div className='sidebar-bookmark-toggler mr-auto flex h-full items-center'>
+      <div className='sidebar-bookmark-toggler flex h-full items-center'>
         <SidebarToggler bookKey={bookKey} />
         <BookmarkToggler bookKey={bookKey} />
       </div>
