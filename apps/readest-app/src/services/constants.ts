@@ -8,6 +8,13 @@ export const DEFAULT_READSETTINGS: ReadSettings = {
   sideBarWidth: '25%',
   isSideBarPinned: true,
   autohideCursor: true,
+
+  highlightStyle: 'highlight',
+  highlightStyles: {
+    highlight: 'yellow',
+    underline: 'green',
+    squiggly: 'blue',
+  },
 };
 
 export const DEFAULT_BOOK_FONT: BookFont = {

@@ -73,7 +73,7 @@ interface ReaderStore {
   initBookState: (envConfig: EnvConfigType, id: string, key: string, isPrimary?: boolean) => void;
 
   clearBookState: (key: string) => void;
-  updateBookmarks: (key: string, bookmarks: BookNote[]) => void;
+  updateBooknotes: (key: string, booknotes: BookNote[]) => void;
 }
 
 export const DEFAULT_BOOK_STATE = {
@@ -310,7 +310,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
       },
     })),
 
-  updateBookmarks: (key: string, bookmarks: BookNote[]) =>
+  updateBooknotes: (key: string, booknotes: BookNote[]) =>
     set((state) => {
       const book = state.books[key];
       if (!book) return state;
@@ -322,7 +322,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
             config: {
               ...book.config,
               lastUpdated: Date.now(),
-              bookmarks,
+              booknotes,
             },
           },
         },

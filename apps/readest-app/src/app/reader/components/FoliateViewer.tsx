@@ -13,6 +13,7 @@ export interface FoliateView extends HTMLElement {
   goToFraction: (fraction: number) => void;
   goLeft: () => void;
   goRight: () => void;
+  getCFI: (index: number, range: Range) => string;
   renderer: {
     setStyles?: (css: string) => void;
     setAttribute: (name: string, value: string | number) => void;

@@ -1,5 +1,6 @@
 import clsx from 'clsx';
-import React, { useRef, useState, isValidElement, ReactElement, useEffect } from 'react';
+import React, { useState, isValidElement, ReactElement } from 'react';
+import useOutsideClick from '@/hooks/useOutsideClick';
 
 interface DropdownProps {
   className?: string;
@@ -16,7 +17,6 @@ const Dropdown: React.FC<DropdownProps> = ({
   children,
   onToggle,
 }) => {
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleDropdown = () => {
@@ -36,27 +36,7 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
   };
 
-  const handleClickOutside = (event: MouseEvent | Event) => {
-    if (event instanceof MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-    } else if (event instanceof MessageEvent) {
-      if (event.data && event.data.type === 'iframe-mousedown') {
-        setIsDropdownOpen(false);
-      }
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener('mousedown', handleClickOutside);
-    window.addEventListener('message', handleClickOutside);
-    return () => {
-      window.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('message', handleClickOutside);
-    };
-  }, []);
-
+  const dropdownRef = useOutsideClick<HTMLDivElement>(() => setIsDropdownOpen(false));
   const childrenWithToggle = isValidElement(children)
     ? React.cloneElement(children, { setIsDropdownOpen })
     : children;

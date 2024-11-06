@@ -2,7 +2,7 @@ import React from 'react';
 
 import { BookDoc } from '@/libs/document';
 import TOCView from './TOCView';
-import BookmarkView from './BookmarkView';
+import BooknoteView from './BooknoteView';
 
 const SidebarContent: React.FC<{
   activeTab: string;
@@ -14,8 +14,12 @@ const SidebarContent: React.FC<{
     {activeTab === 'toc' && bookDoc.toc && (
       <TOCView toc={bookDoc.toc} bookKey={sideBarBookKey} currentHref={currentHref} />
     )}
-    {activeTab === 'annotations' && <div>Annotations</div>}
-    {activeTab === 'bookmarks' && <BookmarkView toc={bookDoc.toc} bookKey={sideBarBookKey} />}
+    {activeTab === 'annotations' && (
+      <BooknoteView type={'annotation'} toc={bookDoc.toc} bookKey={sideBarBookKey} />
+    )}
+    {activeTab === 'bookmarks' && (
+      <BooknoteView type={'bookmark'} toc={bookDoc.toc} bookKey={sideBarBookKey} />
+    )}
   </div>
 );
 

@@ -2,7 +2,6 @@ import React from 'react';
 
 import { BookState, useReaderStore } from '@/store/readerStore';
 
-import SettingsDialog from './settings/SettingsDialog';
 import FoliateViewer from './FoliateViewer';
 import getGridTemplate from '@/utils/grid';
 import SectionInfo from './SectionInfo';
@@ -10,6 +9,8 @@ import HeaderBar from './HeaderBar';
 import FooterBar from './FooterBar';
 import PageInfo from './PageInfo';
 import Ribbon from './Ribbon';
+import SettingsDialog from './settings/SettingsDialog';
+import Annotator from './annotator/Annotator';
 
 interface BookGridProps {
   bookKeys: string[];
@@ -41,7 +42,11 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, bookStates, onCloseBook }
         const marginGap = config.viewSettings ? `${config.viewSettings!.gapPercent!}%` : '';
 
         return (
-          <div key={bookKey} className='relative h-full w-full overflow-hidden'>
+          <div
+            id={`gridcell-${bookKey}`}
+            key={bookKey}
+            className='relative h-full w-full overflow-hidden'
+          >
             {isBookmarked && <Ribbon width={marginGap} />}
             <HeaderBar
               bookKey={bookKey}
@@ -62,6 +67,7 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, bookStates, onCloseBook }
                 />
               </>
             )}
+            <Annotator bookKey={bookKey} />
             <FooterBar bookKey={bookKey} pageinfo={pageinfo} isHoveredAnim={false} />
             {isFontLayoutSettingsDialogOpen && <SettingsDialog bookKey={bookKey} config={config} />}
           </div>

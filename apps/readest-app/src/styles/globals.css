@@ -128,6 +128,15 @@ foliate-view {
   display: none;
 }
 
+.tooltip.no-triangle::before,
+.tooltip.no-triangle::after,
+.tooltip-top.no-triangle::before,
+.tooltip-top.no-triangle::after,
+.tooltip-bottom.no-triangle::before,
+.tooltip-bottom.no-triangle::after {
+  display: none;
+}
+
 .dropdown-content, .settings-content {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 14px;

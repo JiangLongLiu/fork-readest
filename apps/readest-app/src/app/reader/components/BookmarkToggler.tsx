@@ -10,7 +10,7 @@ interface BookmarkTogglerProps {
 }
 
 const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
-  const { books, updateBookmarks, setBookmarkRibbonVisibility } = useReaderStore();
+  const { books, updateBooknotes, setBookmarkRibbonVisibility } = useReaderStore();
   const bookState = books[bookKey]!;
   const config = bookState.config!;
   const progress = bookState.progress!;
@@ -18,7 +18,7 @@ const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   const toggleBookmark = () => {
-    const { bookmarks = [] } = config;
+    const { booknotes: bookmarks = [] } = config;
     const { location: cfi, tocHref: href, range } = progress;
     if (!cfi) return;
     if (!isBookmarked) {
@@ -34,12 +34,12 @@ const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
         created: Date.now(),
       };
       bookmarks.push(bookmark);
-      updateBookmarks(bookKey, bookmarks);
+      updateBooknotes(bookKey, bookmarks);
     } else {
       setIsBookmarked(false);
       const start = CFI.collapse(cfi);
       const end = CFI.collapse(cfi, true);
-      updateBookmarks(
+      updateBooknotes(
         bookKey,
         bookmarks.filter((item) => CFI.compare(start, item.cfi) * CFI.compare(end, item.cfi) > 0),
       );
@@ -47,14 +47,14 @@ const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
   };
 
   useEffect(() => {
-    const { location: cfi, bookmarks = [] } = config;
+    const { location: cfi, booknotes = [] } = config;
     if (!cfi) return;
 
     const start = CFI.collapse(cfi);
     const end = CFI.collapse(cfi, true);
-    const locationBookmarked = bookmarks.some(
-      (item) => CFI.compare(start, item.cfi) * CFI.compare(end, item.cfi) <= 0,
-    );
+    const locationBookmarked = booknotes
+      .filter((booknote) => booknote.type === 'bookmark')
+      .some((item) => CFI.compare(start, item.cfi) * CFI.compare(end, item.cfi) <= 0);
     setIsBookmarked(locationBookmarked);
     setBookmarkRibbonVisibility(bookKey, locationBookmarked);
   }, [config]);

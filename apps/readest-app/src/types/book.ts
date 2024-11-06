@@ -1,16 +1,7 @@
 export type BookFormat = 'EPUB' | 'PDF' | 'MOBI' | 'CBZ' | 'FB2' | 'FBZ';
 export type BookNoteType = 'bookmark' | 'highlight' | 'annotation';
-export type BookNoteStyle =
-  | 'underline'
-  | 'squiggly'
-  | 'strikethrough'
-  | 'yellow'
-  | 'orange'
-  | 'red'
-  | 'magenta'
-  | 'aqua'
-  | 'lime'
-  | 'custom';
+export type HighlightStyle = 'highlight' | 'underline' | 'squiggly';
+export type HighlightColor = 'red' | 'yellow' | 'green' | 'blue' | 'violet';
 
 export interface Book {
   hash: string;
@@ -35,8 +26,8 @@ export interface BookNote {
   cfi: string;
   href: string;
   text?: string;
-  style?: string;
-  customStyle?: string;
+  style?: HighlightStyle;
+  color?: HighlightColor;
   note: string;
   created: number;
   modified?: number;
@@ -90,8 +81,7 @@ export interface BookConfig {
   progress?: [number, number];
   location?: string;
 
-  bookmarks?: BookNote[];
-  annotations?: BookNote[];
+  booknotes?: BookNote[];
   removedNotesTimestamps?: Record<string, number>;
 
   viewSettings?: Partial<ViewSettings>;
