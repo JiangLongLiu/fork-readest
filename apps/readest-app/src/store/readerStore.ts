@@ -65,7 +65,7 @@ interface ReaderStore {
   deleteBook: (envConfig: EnvConfigType, book: Book) => void;
   saveConfig: (
     envConfig: EnvConfigType,
-    book: Book,
+    bookKey: string,
     config: BookConfig,
     settings: SystemSettings,
   ) => void;
@@ -73,7 +73,7 @@ interface ReaderStore {
   initBookState: (envConfig: EnvConfigType, id: string, key: string, isPrimary?: boolean) => void;
 
   clearBookState: (key: string) => void;
-  updateBooknotes: (key: string, booknotes: BookNote[]) => void;
+  updateBooknotes: (key: string, booknotes: BookNote[]) => BookConfig | undefined;
 }
 
 export const DEFAULT_BOOK_STATE = {
@@ -156,17 +156,17 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
   },
   saveConfig: async (
     envConfig: EnvConfigType,
-    book: Book,
+    bookKey: string,
     config: BookConfig,
     settings: SystemSettings,
   ) => {
     const appService = await envConfig.getAppService();
     const { library } = get();
-    const bookIndex = library.findIndex((b) => b.hash === book.hash);
-    if (bookIndex !== -1) {
-      book.lastUpdated = Date.now();
-      library[bookIndex] = book;
-    }
+    const bookIndex = library.findIndex((b) => b.hash === bookKey.split('-')[0]);
+    if (bookIndex == -1) return;
+    const book = library[bookIndex]!;
+    book.lastUpdated = Date.now();
+    library[bookIndex] = book;
     set({ library });
     config.lastUpdated = Date.now();
     appService.saveBookConfig(book, config, settings);
@@ -310,22 +310,26 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
       },
     })),
 
-  updateBooknotes: (key: string, booknotes: BookNote[]) =>
+  updateBooknotes: (key: string, booknotes: BookNote[]) => {
+    let updatedConfig: BookConfig | undefined;
     set((state) => {
       const book = state.books[key];
       if (!book) return state;
+      updatedConfig = {
+        ...book.config,
+        lastUpdated: Date.now(),
+        booknotes,
+      };
       return {
         books: {
           ...state.books,
           [key]: {
             ...book,
-            config: {
-              ...book.config,
-              lastUpdated: Date.now(),
-              booknotes,
-            },
+            config: updatedConfig,
           },
         },
       };
-    }),
+    });
+    return updatedConfig;
+  },
 }));

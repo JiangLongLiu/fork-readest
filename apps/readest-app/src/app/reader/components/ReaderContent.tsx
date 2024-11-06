@@ -31,7 +31,7 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
     if (!bookState) return;
     const { book, config, isPrimary } = bookState;
     if (isPrimary && book && config) {
-      saveConfig(envConfig, book, config, settings);
+      saveConfig(envConfig, bookKey, config, settings);
     }
     clearBookState(bookKey);
   };

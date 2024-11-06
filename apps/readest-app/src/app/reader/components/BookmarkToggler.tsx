@@ -3,6 +3,7 @@ import { MdOutlineBookmarkAdd, MdOutlineBookmark } from 'react-icons/md';
 import * as CFI from 'foliate-js/epubcfi.js';
 
 import { useReaderStore } from '@/store/readerStore';
+import { useEnv } from '@/context/EnvContext';
 import { BookNote } from '@/types/book';
 
 interface BookmarkTogglerProps {
@@ -10,7 +11,9 @@ interface BookmarkTogglerProps {
 }
 
 const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
-  const { books, updateBooknotes, setBookmarkRibbonVisibility } = useReaderStore();
+  const { envConfig } = useEnv();
+  const { books, settings, saveConfig, updateBooknotes, setBookmarkRibbonVisibility } =
+    useReaderStore();
   const bookState = books[bookKey]!;
   const config = bookState.config!;
   const progress = bookState.progress!;
@@ -34,15 +37,21 @@ const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
         created: Date.now(),
       };
       bookmarks.push(bookmark);
-      updateBooknotes(bookKey, bookmarks);
+      const updatedConfig = updateBooknotes(bookKey, bookmarks);
+      if (updatedConfig) {
+        saveConfig(envConfig, bookKey, updatedConfig, settings);
+      }
     } else {
       setIsBookmarked(false);
       const start = CFI.collapse(cfi);
       const end = CFI.collapse(cfi, true);
-      updateBooknotes(
+      const updatedConfig = updateBooknotes(
         bookKey,
         bookmarks.filter((item) => CFI.compare(start, item.cfi) * CFI.compare(end, item.cfi) > 0),
       );
+      if (updatedConfig) {
+        saveConfig(envConfig, bookKey, updatedConfig, settings);
+      }
     }
   };
 

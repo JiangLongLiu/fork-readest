@@ -5,6 +5,7 @@ import { PiHighlighterFill } from 'react-icons/pi';
 import { FaWikipediaW } from 'react-icons/fa';
 import { BsPencilSquare } from 'react-icons/bs';
 
+import { useEnv } from '@/context/EnvContext';
 import { BookNote } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
 import { useFoliateEvents } from '../../hooks/useFoliateEvents';
@@ -21,7 +22,8 @@ interface TextSelection {
 }
 
 const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
-  const { books, settings, updateBooknotes, getFoliateView } = useReaderStore();
+  const { envConfig } = useEnv();
+  const { books, settings, saveConfig, updateBooknotes, getFoliateView } = useReaderStore();
   const globalReadSettings = settings.globalReadSettings;
   const bookState = books[bookKey]!;
   const config = bookState.config!;
@@ -149,7 +151,10 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       ).values(),
     );
 
-    updateBooknotes(bookKey, dedupedAnnotations);
+    const updatedConfig = updateBooknotes(bookKey, dedupedAnnotations);
+    if (updatedConfig) {
+      saveConfig(envConfig, bookKey, updatedConfig, settings);
+    }
   };
   const handleAnnotate = () => {};
   const handleSearch = () => {};
