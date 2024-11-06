@@ -13,6 +13,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  devIndicators: {
+    appIsrStatus: false,
+  },
   // Configure assetPrefix or else the server won't properly resolve your assets.
   assetPrefix: isProd ? '' : `http://${internalHost}:3000`,
   reactStrictMode: true,
