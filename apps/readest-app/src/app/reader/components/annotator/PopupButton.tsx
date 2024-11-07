@@ -14,7 +14,10 @@ const PopupButton: React.FC<PopupButtonProps> = ({ tooltipText, Icon, onClick })
   };
   return (
     <div className='tooltip tooltip-bottom' data-tip={!buttonClicked ? tooltipText : null}>
-      <button onClick={handleClick} className='btn btn-ghost my-2 h-8 min-h-8 w-8 p-0'>
+      <button
+        onClick={handleClick}
+        className='my-2 flex h-8 min-h-8 w-8 items-center justify-center p-0'
+      >
         <Icon size={20} />
       </button>
     </div>
