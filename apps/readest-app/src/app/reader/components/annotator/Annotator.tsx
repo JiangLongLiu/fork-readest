@@ -7,7 +7,7 @@ import { BsPencilSquare } from 'react-icons/bs';
 import { RiDeleteBinFill } from 'react-icons/ri';
 
 import { useEnv } from '@/context/EnvContext';
-import { BookNote } from '@/types/book';
+import { BookNote, HighlightColor, HighlightStyle } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
 import { useFoliateEvents } from '../../hooks/useFoliateEvents';
 import { getPosition, Position } from '@/utils/sel';
@@ -39,6 +39,13 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const [popupPosition, setPopupPosition] = useState<Position>();
   const [toastMessage, setToastMessage] = useState('');
   const [highlightOptionsVisible, setHighlightOptionsVisible] = useState(false);
+
+  const [selectedStyle, setSelectedStyle] = useState<HighlightStyle>(
+    globalReadSettings.highlightStyle,
+  );
+  const [selectedColor, setSelectedColor] = useState<HighlightColor>(
+    globalReadSettings.highlightStyles[selectedStyle],
+  );
 
   const popupWidthPx = 240;
   const popupHeightPx = 44;
@@ -89,6 +96,8 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       range,
       index,
     };
+    setSelectedStyle(annotation.style!);
+    setSelectedColor(annotation.color!);
     setSelection(selection as TextSelection);
   };
 
@@ -262,7 +271,6 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
           </div>
           {highlightOptionsVisible && (
             <HighlightOptions
-              onHandleHighlight={handleHighlight}
               style={{
                 width: `${popupWidthPx}px`,
                 height: `${popupHeightPx}px`,
@@ -272,6 +280,9 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
                   (highlightOptionsHeightPx + highlightOptionsPaddingPx) * (isPopupAbove ? -1 : 1)
                 }px`,
               }}
+              selectedStyle={selectedStyle}
+              selectedColor={selectedColor}
+              onHandleHighlight={handleHighlight}
             />
           )}
         </div>

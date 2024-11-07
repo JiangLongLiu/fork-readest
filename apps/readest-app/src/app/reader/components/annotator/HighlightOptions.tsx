@@ -10,10 +10,17 @@ const colors = ['red', 'violet', 'blue', 'green', 'yellow'] as HighlightColor[];
 
 interface HighlightOptionsProps {
   style: React.CSSProperties;
+  selectedStyle: HighlightStyle;
+  selectedColor: HighlightColor;
   onHandleHighlight: (update: boolean) => void;
 }
 
-const HighlightOptions: React.FC<HighlightOptionsProps> = ({ style, onHandleHighlight }) => {
+const HighlightOptions: React.FC<HighlightOptionsProps> = ({
+  style,
+  selectedStyle,
+  selectedColor,
+  onHandleHighlight,
+}) => {
   const { settings, setSettings } = useReaderStore();
   const globalReadSettings = settings.globalReadSettings;
 
@@ -28,8 +35,6 @@ const HighlightOptions: React.FC<HighlightOptionsProps> = ({ style, onHandleHigh
     setSettings(settings);
     onHandleHighlight(true);
   };
-  const selectedStyle = globalReadSettings.highlightStyle;
-  const selectedColor = globalReadSettings.highlightStyles[selectedStyle];
   return (
     <div className='highlight-options absolute flex h-7 items-center justify-between' style={style}>
       <div className='flex h-7 gap-2'>
