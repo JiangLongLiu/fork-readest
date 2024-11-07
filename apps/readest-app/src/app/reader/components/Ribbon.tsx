@@ -8,7 +8,7 @@ interface RibbonProps {
 const Ribbon: React.FC<RibbonProps> = ({ width }) => {
   return (
     <div
-      className={clsx('absolute inset-0 z-40 flex h-11 justify-center')}
+      className={clsx('absolute inset-0 z-10 flex h-11 justify-center')}
       style={{ width: width }}
     >
       <svg
