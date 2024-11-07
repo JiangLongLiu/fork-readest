@@ -39,7 +39,7 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, bookStates, onCloseBook }
         const { book, config, progress, bookDoc } = bookState;
         if (!book || !config || !progress || !bookDoc) return null;
         const { section, pageinfo, tocLabel: chapter } = progress;
-        const marginGap = config.viewSettings ? `${config.viewSettings!.gapPercent!}%` : '';
+        const marginGap = `${config.viewSettings!.gapPercent}%`;
 
         return (
           <div

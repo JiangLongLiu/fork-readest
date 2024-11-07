@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React from 'react';
 
 interface RibbonProps {
@@ -6,7 +7,10 @@ interface RibbonProps {
 
 const Ribbon: React.FC<RibbonProps> = ({ width }) => {
   return (
-    <div className='absolute inset-0 z-10 flex h-11 justify-center' style={{ width }}>
+    <div
+      className={clsx('absolute inset-0 z-40 flex h-11 justify-center')}
+      style={{ width: width }}
+    >
       <svg
         stroke='currentColor'
         fill='currentColor'

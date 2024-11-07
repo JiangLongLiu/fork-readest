@@ -325,7 +325,11 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
           ...state.books,
           [key]: {
             ...book,
-            config: updatedConfig,
+            config: {
+              ...book.config,
+              lastUpdated: Date.now(),
+              booknotes,
+            },
           },
         },
       };

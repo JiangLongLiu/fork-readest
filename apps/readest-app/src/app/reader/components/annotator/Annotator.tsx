@@ -4,6 +4,7 @@ import { FiCopy } from 'react-icons/fi';
 import { PiHighlighterFill } from 'react-icons/pi';
 import { FaWikipediaW } from 'react-icons/fa';
 import { BsPencilSquare } from 'react-icons/bs';
+import { RiDeleteBinFill } from 'react-icons/ri';
 
 import { useEnv } from '@/context/EnvContext';
 import { BookNote } from '@/types/book';
@@ -13,11 +14,12 @@ import { getPosition, Position } from '@/utils/sel';
 import useOutsideClick from '@/hooks/useOutsideClick';
 import PopupButton from './PopupButton';
 import HighlightOptions from './HighlightOptions';
+import { Overlayer } from 'foliate-js/overlayer.js';
 
 interface TextSelection {
+  annotated?: boolean;
   text: string;
   range: Range;
-  sel: Selection;
   index: number;
 }
 
@@ -28,6 +30,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const bookState = books[bookKey]!;
   const config = bookState.config!;
   const progress = bookState.progress!;
+  const view = getFoliateView(bookKey);
 
   const [selection, setSelection] = useState<TextSelection | null>();
   const [showPopup, setShowPopup] = useState(false);
@@ -50,7 +53,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     const handlePointerup = () => {
       const sel = doc.getSelection();
       if (sel && sel.toString().trim().length > 0) {
-        setSelection({ text: sel.toString(), range: sel.getRangeAt(0), sel, index });
+        setSelection({ text: sel.toString(), range: sel.getRangeAt(0), index });
       }
     };
     if (detail.doc) {
@@ -58,14 +61,54 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     }
   };
 
+  const drawAnnotationHandler = (event: Event) => {
+    const detail = (event as CustomEvent).detail;
+    const { draw, annotation, doc, range } = detail;
+    const { style, color } = annotation as BookNote;
+    if (style === 'highlight') {
+      draw(Overlayer.highlight, { color });
+    } else if (['underline', 'squiggly'].includes(style as string)) {
+      const { defaultView } = doc;
+      const node = range.startContainer;
+      const el = node.nodeType === 1 ? node : node.parentElement;
+      const { writingMode } = defaultView.getComputedStyle(el);
+      draw(Overlayer[style as keyof typeof Overlayer], { writingMode, color });
+    }
+  };
+
+  const showAnnotationHandler = (event: Event) => {
+    const detail = (event as CustomEvent).detail;
+    const { value: cfi, index, range } = detail;
+    const { booknotes = [] } = config;
+    const annotations = booknotes.filter((booknote) => booknote.type === 'annotation');
+    const annotation = annotations.find((annotation) => annotation.cfi === cfi);
+    if (!annotation) return;
+    const selection = {
+      annotated: true,
+      text: annotation.text,
+      range,
+      index,
+    };
+    setSelection(selection as TextSelection);
+  };
+
+  useFoliateEvents(
+    view,
+    {
+      onLoad: docLoadHandler,
+      onDrawAnnotation: drawAnnotationHandler,
+      onShowAnnotation: showAnnotationHandler,
+    },
+    [bookState],
+  );
+
   const popupRef = useOutsideClick<HTMLDivElement>(() => {
     setShowPopup(false);
     setSelection(null);
   });
-  useFoliateEvents(getFoliateView(bookKey), { onLoad: docLoadHandler });
 
   useEffect(() => {
-    setHighlightOptionsVisible(false);
+    setHighlightOptionsVisible(!!(selection && selection.annotated));
     if (selection && selection.text.trim().length > 0) {
       const gridFrame = document.querySelector(`#gridcell-${bookKey}`);
       if (!gridFrame) return;
@@ -119,12 +162,12 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     if (selection) navigator.clipboard.writeText(selection.text);
   };
 
-  const handleHighlight = () => {
+  const handleHighlight = (update = false) => {
     if (!selection || !selection.text) return;
     setHighlightOptionsVisible(true);
     const { booknotes: annotations = [] } = config;
     const { tocHref: href } = progress;
-    const cfi = getFoliateView(bookKey)?.getCFI(selection.index, selection.range);
+    const cfi = view?.getCFI(selection.index, selection.range);
     if (!cfi) return;
     const annotation: BookNote = {
       type: 'annotation',
@@ -140,9 +183,17 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       (annotation) => annotation.cfi === cfi && annotation.type === 'annotation',
     );
     if (existingIndex !== -1) {
-      annotations[existingIndex] = annotation;
+      view?.addAnnotation(annotation, true);
+      if (update) {
+        annotations[existingIndex] = annotation;
+        view?.addAnnotation(annotation);
+      } else {
+        annotations.splice(existingIndex, 1);
+        setShowPopup(false);
+      }
     } else {
       annotations.push(annotation);
+      view?.addAnnotation(annotation);
     }
 
     const dedupedAnnotations = Array.from(
@@ -160,9 +211,14 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const handleSearch = () => {};
   const handleDictionary = () => {};
 
+  const selectionAnnotated = selection?.annotated;
   const buttons = [
     { tooltipText: 'Copy', Icon: FiCopy, onClick: handleCopy },
-    { tooltipText: 'Highlight', Icon: PiHighlighterFill, onClick: handleHighlight },
+    {
+      tooltipText: selectionAnnotated ? 'Delete Highlight' : 'Highlight',
+      Icon: selectionAnnotated ? RiDeleteBinFill : PiHighlighterFill,
+      onClick: handleHighlight,
+    },
     { tooltipText: 'Annotate', Icon: BsPencilSquare, onClick: handleAnnotate },
     { tooltipText: 'Search', Icon: FiSearch, onClick: handleSearch },
     { tooltipText: 'Dictionary', Icon: FaWikipediaW, onClick: handleDictionary },

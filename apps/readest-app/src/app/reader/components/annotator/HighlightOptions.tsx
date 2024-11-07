@@ -10,7 +10,7 @@ const colors = ['red', 'violet', 'blue', 'green', 'yellow'] as HighlightColor[];
 
 interface HighlightOptionsProps {
   style: React.CSSProperties;
-  onHandleHighlight: () => void;
+  onHandleHighlight: (update: boolean) => void;
 }
 
 const HighlightOptions: React.FC<HighlightOptionsProps> = ({ style, onHandleHighlight }) => {
@@ -20,13 +20,13 @@ const HighlightOptions: React.FC<HighlightOptionsProps> = ({ style, onHandleHigh
   const handleSelectStyle = (style: HighlightStyle) => {
     globalReadSettings.highlightStyle = style;
     setSettings(settings);
-    onHandleHighlight();
+    onHandleHighlight(true);
   };
   const handleSelectColor = (color: HighlightColor) => {
     const style = globalReadSettings.highlightStyle;
     globalReadSettings.highlightStyles[style] = color;
     setSettings(settings);
-    onHandleHighlight();
+    onHandleHighlight(true);
   };
   const selectedStyle = globalReadSettings.highlightStyle;
   const selectedColor = globalReadSettings.highlightStyles[selectedStyle];

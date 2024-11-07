@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useFoliateEvents } from '../hooks/useFoliateEvents';
 import { BookDoc } from '@/libs/document';
-import { BookConfig } from '@/types/book';
+import { BookConfig, BookNote } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
 import { getStyles } from '@/utils/style';
 
@@ -14,6 +14,7 @@ export interface FoliateView extends HTMLElement {
   goLeft: () => void;
   goRight: () => void;
   getCFI: (index: number, range: Range) => string;
+  addAnnotation: (note: BookNote, remove?: boolean) => { index: number; label: string };
   renderer: {
     setStyles?: (css: string) => void;
     setAttribute: (name: string, value: string | number) => void;
@@ -23,6 +24,19 @@ export interface FoliateView extends HTMLElement {
   };
 }
 
+const wrappedFoliateView = (originalView: FoliateView): FoliateView => {
+  const originalAddAnnotation = originalView.addAnnotation.bind(originalView);
+  originalView.addAnnotation = (note: BookNote, remove = false) => {
+    // transform BookNote to foliate annotation
+    const annotation = {
+      ...note,
+      value: note.cfi,
+    };
+    return originalAddAnnotation(annotation, remove);
+  };
+  return originalView;
+};
+
 const FoliateViewer: React.FC<{
   bookKey: string;
   bookDoc: BookDoc;
@@ -30,6 +44,7 @@ const FoliateViewer: React.FC<{
 }> = ({ bookKey, bookDoc, bookConfig }) => {
   const viewRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<FoliateView | null>(null);
+  const [viewInited, setViewInited] = useState(false);
   const isViewCreated = useRef(false);
   const { setFoliateView } = useReaderStore();
   const setProgress = useReaderStore((state) => state.setProgress);
@@ -92,7 +107,7 @@ const FoliateViewer: React.FC<{
     const openBook = async () => {
       console.log('Opening book', bookKey);
       await import('foliate-js/view.js');
-      const view = document.createElement('foliate-view') as FoliateView;
+      const view = wrappedFoliateView(document.createElement('foliate-view') as FoliateView);
       document.body.append(view);
       viewRef.current?.appendChild(view);
       setView(view);
@@ -123,10 +138,11 @@ const FoliateViewer: React.FC<{
 
       const lastLocation = bookConfig.location;
       if (lastLocation) {
-        view.init({ lastLocation });
+        await view.init({ lastLocation });
       } else {
-        view.goToFraction(0);
+        await view.goToFraction(0);
       }
+      setViewInited(true);
     };
 
     openBook();
@@ -138,6 +154,22 @@ const FoliateViewer: React.FC<{
       view?.remove();
     };
   }, []);
+
+  const initAnnotations = () => {
+    const { booknotes = [] } = bookConfig;
+    const annotations = booknotes.filter((item) => item.type === 'annotation');
+    try {
+      Promise.all(annotations.map((annotation) => view?.addAnnotation(annotation)));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    if (viewInited) {
+      initAnnotations();
+    }
+  }, [viewInited]);
 
   return <div className='foliate-viewer h-[100%] w-[100%]' ref={viewRef} />;
 };
