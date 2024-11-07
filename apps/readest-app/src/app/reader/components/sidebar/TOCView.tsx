@@ -85,10 +85,10 @@ const TOCItemView: React.FC<{
       </span>
       {item.subitems && isExpanded && (
         <ol role='group'>
-          {item.subitems.map((subitem) => (
+          {item.subitems.map((subitem, index) => (
             <TOCItemView
               bookKey={bookKey}
-              key={subitem.label}
+              key={`${index}-${subitem.href}`}
               item={subitem}
               depth={depth + 1}
               setCurrentHref={setCurrentHref}
@@ -152,10 +152,10 @@ const TOCView: React.FC<{
       <div className='max-h-[calc(100vh-173px)] overflow-y-auto rounded pt-2'>
         <ul role='tree' ref={tocRef} className='overflow-y-auto px-2'>
           {toc &&
-            toc.map((item) => (
+            toc.map((item, index) => (
               <TOCItemView
                 bookKey={bookKey}
-                key={item.label}
+                key={`${index}-${item.href}`}
                 item={item}
                 depth={0}
                 setCurrentHref={setCurrentHref}
