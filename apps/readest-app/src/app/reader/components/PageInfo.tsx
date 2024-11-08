@@ -1,13 +1,14 @@
+import { PageInfo } from '@/types/book';
 import React from 'react';
 
 interface PageInfoProps {
   bookFormat: string;
-  section?: { current: number; total: number };
-  pageinfo?: { current: number; total: number };
+  section: PageInfo | null;
+  pageinfo: PageInfo | null;
   gapRight: string;
 }
 
-const PageInfo: React.FC<PageInfoProps> = ({ bookFormat, section, pageinfo, gapRight }) => {
+const PageInfoView: React.FC<PageInfoProps> = ({ bookFormat, section, pageinfo, gapRight }) => {
   const pageInfo =
     bookFormat === 'PDF'
       ? section
@@ -27,4 +28,4 @@ const PageInfo: React.FC<PageInfoProps> = ({ bookFormat, section, pageinfo, gapR
   );
 };
 
-export default PageInfo;
+export default PageInfoView;

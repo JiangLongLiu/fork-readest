@@ -31,7 +31,7 @@ const TOCItemView: React.FC<{
   expandedItems: string[];
 }> = ({ bookKey, item, depth, setCurrentHref, currentHref, expandedItems }) => {
   const [isExpanded, setIsExpanded] = useState(expandedItems.includes(item.href || ''));
-  const { getFoliateView } = useReaderStore();
+  const { getView } = useReaderStore();
 
   const handleToggleExpand = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -42,7 +42,7 @@ const TOCItemView: React.FC<{
   const handleClickItem = (event: React.MouseEvent) => {
     event.preventDefault();
     if (item.href) {
-      getFoliateView(bookKey)?.goTo(item.href);
+      getView(bookKey)?.goTo(item.href);
       setCurrentHref(item.href);
     }
   };
@@ -109,7 +109,7 @@ const TOCView: React.FC<{
 }> = ({ bookKey, toc, currentHref: href }) => {
   const [currentHref, setCurrentHref] = useState<string | null>(href);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const { getFoliateView } = useReaderStore();
+  const { getView } = useReaderStore();
   const tocRef = useRef<HTMLUListElement | null>(null);
 
   const tocRelocateHandler = (event: Event) => {
@@ -120,7 +120,7 @@ const TOCView: React.FC<{
     }
   };
 
-  useFoliateEvents(getFoliateView(bookKey), { onRelocate: tocRelocateHandler });
+  useFoliateEvents(getView(bookKey), { onRelocate: tocRelocateHandler });
 
   useEffect(() => {
     setCurrentHref(href);

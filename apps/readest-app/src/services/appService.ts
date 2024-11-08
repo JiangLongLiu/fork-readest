@@ -190,6 +190,7 @@ export abstract class BaseAppService implements AppService {
 
   async saveBookConfig(book: Book, config: BookConfig, settings?: SystemSettings) {
     if (settings) {
+      config = JSON.parse(JSON.stringify(config));
       const globalViewSettings = settings.globalViewSettings as ViewSettings;
       const viewSettings = config.viewSettings as Partial<ViewSettings>;
       config.viewSettings = Object.entries(viewSettings).reduce(

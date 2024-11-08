@@ -27,8 +27,8 @@ const BookMenu: React.FC<BookMenuProps> = ({ openSplitView, setIsDropdownOpen })
         className='flex w-full items-center justify-between rounded-md p-2 hover:bg-gray-100'
         onClick={handleOpenSplitView}
       >
-        <span className='ml-2'>Split View</span>
-        <span className='text-sm text-gray-400'>Shift+S</span>
+        <span className='ml-2'>Parallel Read</span>
+        <span className='text-sm text-gray-400'>Shift+P</span>
       </button>
       <button
         className='flex w-full items-center justify-between rounded-md p-2 hover:bg-gray-100'

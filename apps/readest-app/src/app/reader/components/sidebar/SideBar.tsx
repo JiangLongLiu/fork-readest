@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import React, { useState, useEffect } from 'react';
 
-import { BookState, DEFAULT_BOOK_STATE, useReaderStore } from '@/store/readerStore';
+import { useReaderStore } from '@/store/readerStore';
 import SidebarHeader from './Header';
 import SidebarContent from './Content';
 import TabNavigation from './TabNavigation';
@@ -18,9 +18,8 @@ const SideBar: React.FC<{
   onGoToLibrary: () => void;
   onOpenSplitView: () => void;
 }> = ({ width, isPinned, onGoToLibrary, onOpenSplitView }) => {
+  const { getBookData, getProgress } = useReaderStore();
   const [activeTab, setActiveTab] = useState('toc');
-  const { books } = useReaderStore();
-  const [bookState, setBookState] = useState<BookState | null>(null);
   const [currentHref, setCurrentHref] = useState<string | null>(null);
   const { sideBarBookKey } = useReaderStore();
   const {
@@ -33,22 +32,22 @@ const SideBar: React.FC<{
   const { handleMouseDown } = useDragBar(handleSideBarResize, MIN_SIDEBAR_WIDTH, MAX_SIDEBAR_WIDTH);
 
   useEffect(() => {
-    if (!books || !sideBarBookKey) return;
-    const bookState = books[sideBarBookKey] || DEFAULT_BOOK_STATE;
-    const { progress } = bookState;
-    setBookState(bookState);
+    if (!sideBarBookKey) return;
+    const progress = getProgress(sideBarBookKey);
     setCurrentHref(progress?.tocHref || null);
-  }, [books, sideBarBookKey]);
+  }, [sideBarBookKey]);
 
   const handleClickOverlay = () => {
     setSideBarVisibility(false);
   };
 
-  if (!sideBarBookKey || !bookState || !bookState.book || !bookState.bookDoc) {
+  if (!sideBarBookKey) return null;
+
+  const bookData = getBookData(sideBarBookKey);
+  if (!bookData || !bookData.book || !bookData.bookDoc) {
     return null;
   }
-
-  const { book, bookDoc } = bookState;
+  const { book, bookDoc } = bookData;
 
   return isSideBarVisible ? (
     <>

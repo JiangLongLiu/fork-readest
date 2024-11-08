@@ -6,29 +6,27 @@ import { useReaderStore } from '@/store/readerStore';
 
 interface FooterBarProps {
   bookKey: string;
-  pageinfo?: { current: number; total: number } | undefined;
+  pageinfo: { current: number; total: number } | undefined;
   isHoveredAnim: boolean;
 }
 
 const FooterBar: React.FC<FooterBarProps> = ({ bookKey, pageinfo, isHoveredAnim }) => {
-  const { isSideBarVisible, hoveredBookKey, setHoveredBookKey, getFoliateView } = useReaderStore();
+  const { isSideBarVisible, hoveredBookKey, setHoveredBookKey, getView } = useReaderStore();
 
   const handleProgressChange = (event: React.ChangeEvent) => {
     const newProgress = parseInt((event.target as HTMLInputElement).value, 10);
-    const foliateView = getFoliateView(bookKey);
-    foliateView?.goToFraction(newProgress / 100.0);
+    getView(bookKey)?.goToFraction(newProgress / 100.0);
   };
 
   const handleGoPrev = () => {
-    const foliateView = getFoliateView(bookKey);
-    foliateView?.goLeft();
+    getView(bookKey)?.goLeft();
   };
 
   const handleGoNext = () => {
-    const foliateView = getFoliateView(bookKey);
-    foliateView?.goRight();
+    getView(bookKey)?.goRight();
   };
-  const progressFraction = pageinfo ? pageinfo.current / pageinfo.total : 0;
+  const pageinfoValid = pageinfo && pageinfo.total > 0 && pageinfo.current >= 0;
+  const progressFraction = pageinfoValid ? pageinfo.current / pageinfo.total : 0;
   return (
     <div
       className={clsx(
@@ -45,14 +43,14 @@ const FooterBar: React.FC<FooterBarProps> = ({ bookKey, pageinfo, isHoveredAnim 
         <RiArrowLeftWideLine size={20} />
       </button>
       <span className='mx-2 text-center text-sm text-black'>
-        {pageinfo ? `${Math.round(progressFraction * 100)}%` : ''}
+        {pageinfoValid ? `${Math.round(progressFraction * 100)}%` : ''}
       </span>
       <input
         type='range'
         className='mx-2 w-full'
         min={0}
         max={100}
-        value={pageinfo ? progressFraction * 100 : 0}
+        value={pageinfoValid ? progressFraction * 100 : 0}
         onChange={(e) => handleProgressChange(e)}
       />
       <button className='btn btn-ghost mx-2 h-8 min-h-8 w-8 p-0' onClick={handleGoNext}>

@@ -5,27 +5,34 @@ import { EnvConfigType } from '@/services/environment';
 import { SystemSettings } from '@/types/settings';
 import { FoliateView } from '@/app/reader/components/FoliateViewer';
 import { BookDoc, DocumentLoader, TOCItem } from '@/libs/document';
+import { updateTocID } from '@/utils/toc';
 
-export interface BookState {
+export interface BookData {
+  /* Persistent data shared with different views of the same book */
+  id: string;
+  book: Book | null;
+  file: File | null;
+  config: BookConfig | null;
+  bookDoc: BookDoc | null;
+}
+
+export interface ViewState {
+  /* Unique key for each book view */
   key: string;
-  loading?: boolean;
-  error?: string | null;
-  book?: Book | null;
-  file?: File | null;
-  config?: BookConfig | null;
-  progress?: BookProgress | null;
-  bookDoc?: BookDoc | null;
-  isPrimary?: boolean;
+  view: FoliateView | null;
+  isPrimary: boolean;
+  loading: boolean;
+  error: string | null;
+  progress: BookProgress | null;
+  ribbonVisible: boolean;
 }
 
 interface ReaderStore {
   library: Book[];
   settings: SystemSettings;
 
-  books: Record<string, BookState>;
-  foliateViews: Record<string, FoliateView>;
-  bookDocCache: Record<string, BookDoc>;
-  bookmarkRibbons: Record<string, boolean>;
+  booksData: { [id: string]: BookData };
+  viewStates: { [key: string]: ViewState };
 
   hoveredBookKey: string | null;
   sideBarBookKey: string | null;
@@ -58,9 +65,11 @@ interface ReaderStore {
     pageinfo: PageInfo,
     range: Range,
   ) => void;
+  getProgress: (key: string) => BookProgress | null;
   setConfig: (key: string, config: BookConfig) => void;
-  setFoliateView: (key: string, view: FoliateView) => void;
-  getFoliateView: (key: string | null) => FoliateView | null;
+  getConfig: (key: string) => BookConfig | null;
+  setView: (key: string, view: FoliateView) => void;
+  getView: (key: string | null) => FoliateView | null;
 
   deleteBook: (envConfig: EnvConfigType, book: Book) => void;
   saveConfig: (
@@ -70,32 +79,19 @@ interface ReaderStore {
     settings: SystemSettings,
   ) => void;
   saveSettings: (envConfig: EnvConfigType, settings: SystemSettings) => void;
-  initBookState: (envConfig: EnvConfigType, id: string, key: string, isPrimary?: boolean) => void;
-
-  clearBookState: (key: string) => void;
+  initViewState: (envConfig: EnvConfigType, id: string, key: string, isPrimary?: boolean) => void;
+  clearViewState: (key: string) => void;
+  getBookData: (key: string) => BookData | null;
+  getViewState: (key: string) => ViewState | null;
   updateBooknotes: (key: string, booknotes: BookNote[]) => BookConfig | undefined;
 }
-
-export const DEFAULT_BOOK_STATE = {
-  key: '',
-  loading: true,
-  error: null,
-  file: null,
-  book: null,
-  config: null,
-  progress: null,
-  bookDoc: null,
-  isPrimary: true,
-};
 
 export const useReaderStore = create<ReaderStore>((set, get) => ({
   library: [],
   settings: {} as SystemSettings,
 
-  books: {},
-  foliateViews: {},
-  bookDocCache: {},
-  bookmarkRibbons: {},
+  booksData: {},
+  viewStates: {},
 
   hoveredBookKey: null,
   sideBarBookKey: null,
@@ -120,15 +116,15 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
   setSettings: (settings: SystemSettings) => set({ settings }),
   setConfig: (key: string, config: BookConfig) => {
     set((state) => {
-      const book = state.books[key];
-      if (!book) return state;
+      const bookData = state.booksData[key];
+      if (!bookData) return state;
       return {
-        books: {
-          ...state.books,
+        booksData: {
+          ...state.booksData,
           [key]: {
-            ...book,
+            ...bookData,
             config: {
-              ...book.config,
+              ...bookData.config,
               ...config,
               lastUpdated: Date.now(),
             },
@@ -138,10 +134,17 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     });
   },
 
-  setFoliateView: (key: string, view) =>
-    set((state) => ({ foliateViews: { ...state.foliateViews, [key]: view } })),
+  getConfig: (key: string) => {
+    const id = key.split('-')[0]!;
+    return get().booksData[id]?.config || null;
+  },
 
-  getFoliateView: (key: string | null) => (key && get().foliateViews[key]) || null,
+  setView: (key: string, view) =>
+    set((state) => ({
+      viewStates: { ...state.viewStates, [key]: { ...state.viewStates[key]!, view } },
+    })),
+
+  getView: (key: string | null) => (key && get().viewStates[key]?.view) || null,
 
   deleteBook: async (envConfig: EnvConfigType, book: Book) => {
     const appService = await envConfig.getAppService();
@@ -177,89 +180,89 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     await appService.saveSettings(settings);
   },
 
-  clearBookState: (key: string) => {
+  clearViewState: (key: string) => {
     set((state) => {
-      const books = { ...state.books };
-      delete books[key];
-      return { books };
+      const viewStates = { ...state.viewStates };
+      delete viewStates[key];
+      return { viewStates };
     });
   },
-  initBookState: async (envConfig: EnvConfigType, id: string, key: string, isPrimary = true) => {
-    const cache = get().bookDocCache || {};
-
+  initViewState: async (envConfig: EnvConfigType, id: string, key: string, isPrimary = true) => {
+    const bookData = get().booksData[id];
     set((state) => ({
-      books: {
-        ...state.books,
-        [key]: DEFAULT_BOOK_STATE,
+      viewStates: {
+        ...state.viewStates,
+        [key]: {
+          key: '',
+          view: null,
+          isPrimary: false,
+          loading: true,
+          error: null,
+          progress: null,
+          ribbonVisible: false,
+        },
       },
     }));
-
     try {
-      const appService = await envConfig.getAppService();
-      const { library, settings } = get();
-      const book = library.find((b) => b.hash === id);
-      if (!book) {
-        throw new Error('Book not found');
-      }
-      const content = (await appService.loadBookContent(book, settings)) as BookContent;
-      const { file, config } = content;
-      let bookDoc: BookDoc;
-      if (cache[id]) {
-        console.log('Using cached bookDoc for book', key);
-        bookDoc = cache[id];
-      } else {
+      if (!bookData) {
+        const appService = await envConfig.getAppService();
+        const { library, settings } = get();
+        const book = library.find((b) => b.hash === id);
+        if (!book) {
+          throw new Error('Book not found');
+        }
+        const content = (await appService.loadBookContent(book, settings)) as BookContent;
+        const { file, config } = content;
         console.log('Loading book', key);
         const { book: loadedBookDoc } = await new DocumentLoader(file).open();
-        bookDoc = loadedBookDoc as BookDoc;
-        const updateTocID = (items: TOCItem[], index = 0): number => {
-          items.forEach((item) => {
-            if (item.id === undefined) {
-              item.id = index++;
-            }
-            if (item.subitems) {
-              index = updateTocID(item.subitems, index);
-            }
-          });
-          return index;
-        };
+        const bookDoc = loadedBookDoc as BookDoc;
         updateTocID(bookDoc.toc);
         set((state) => ({
-          bookDocCache: {
-            ...state.bookDocCache,
-            [id]: bookDoc,
+          booksData: {
+            ...state.booksData,
+            [id]: { id, book, file, config, bookDoc },
           },
         }));
       }
-
       set((state) => ({
-        books: {
-          ...state.books,
+        viewStates: {
+          ...state.viewStates,
           [key]: {
-            ...state.books[key],
-            loading: false,
+            ...state.viewStates[key],
             key,
-            book,
-            file,
-            config,
-            progress: {} as BookProgress,
-            bookDoc,
+            view: null,
             isPrimary,
+            loading: false,
+            error: null,
+            progress: null,
+            ribbonVisible: false,
           },
         },
       }));
-      return content;
     } catch (error) {
       console.error(error);
       set((state) => ({
-        books: {
-          ...state.books,
-          [key]: { ...state.books[key], key: '', loading: false, error: 'Failed to load book.' },
+        viewStates: {
+          ...state.viewStates,
+          [key]: {
+            ...state.viewStates[key],
+            key: '',
+            view: null,
+            isPrimary: false,
+            loading: false,
+            error: 'Failed to load book.',
+            progress: null,
+            ribbonVisible: false,
+          },
         },
       }));
-      return null;
     }
   },
-
+  getBookData: (key: string) => {
+    const id = key.split('-')[0]!;
+    return get().booksData[id] || null;
+  },
+  getViewState: (key: string) => get().viewStates[key] || null,
   setProgress: (
     key: string,
     location: string,
@@ -269,26 +272,31 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     range: Range,
   ) =>
     set((state) => {
-      const book = state.books[key];
-      if (!book) return state;
+      const id = key.split('-')[0]!;
+      const bookData = state.booksData[id];
+      const viewState = state.viewStates[key];
+      if (!viewState || !bookData) return state;
+      const oldConfig = bookData.config;
+      const newConfig = {
+        ...bookData.config,
+        lastUpdated: Date.now(),
+        progress: [pageinfo.current, pageinfo.total] as [number, number],
+        location,
+      };
       return {
-        books: {
-          ...state.books,
+        booksData: {
+          ...state.booksData,
+          [id]: {
+            ...bookData,
+            config: viewState.isPrimary ? newConfig : oldConfig,
+          },
+        },
+        viewStates: {
+          ...state.viewStates,
           [key]: {
-            ...book,
-            config: {
-              ...book.config,
-              lastUpdated: Date.now(),
-              href: tocItem?.href,
-              chapter: tocItem?.label,
-              progress: [pageinfo.current, pageinfo.total],
-              location,
-              section,
-              pageinfo,
-            },
+            ...viewState,
             progress: {
-              ...book.progress,
-              progress: [pageinfo.current, pageinfo.total],
+              ...viewState.progress,
               location,
               tocHref: tocItem?.href,
               tocLabel: tocItem?.label,
@@ -302,18 +310,24 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
       };
     }),
 
+  getProgress: (key: string) => get().viewStates[key]?.progress || null,
+
   setBookmarkRibbonVisibility: (key: string, visible: boolean) =>
     set((state) => ({
-      bookmarkRibbons: {
-        ...state.bookmarkRibbons,
-        [key]: visible,
+      viewStates: {
+        ...state.viewStates,
+        [key]: {
+          ...state.viewStates[key]!,
+          ribbonVisible: visible,
+        },
       },
     })),
 
   updateBooknotes: (key: string, booknotes: BookNote[]) => {
     let updatedConfig: BookConfig | undefined;
     set((state) => {
-      const book = state.books[key];
+      const id = key.split('-')[0]!;
+      const book = state.booksData[id];
       if (!book) return state;
       updatedConfig = {
         ...book.config,
@@ -321,9 +335,9 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
         booknotes,
       };
       return {
-        books: {
-          ...state.books,
-          [key]: {
+        booksData: {
+          ...state.booksData,
+          [id]: {
             ...book,
             config: {
               ...book.config,

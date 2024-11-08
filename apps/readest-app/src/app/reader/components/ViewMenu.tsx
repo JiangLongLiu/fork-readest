@@ -18,9 +18,8 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
   setIsDropdownOpen,
   onSetSettingsDialogOpen,
 }) => {
-  const { books, setConfig, getFoliateView } = useReaderStore();
-  const bookState = books[bookKey]!;
-  const config = bookState.config!;
+  const { getConfig, setConfig, getView } = useReaderStore();
+  const config = getConfig(bookKey)!;
 
   const [isDarkMode, setDarkMode] = useState(config.viewSettings!.theme === 'dark');
   const [isScrolledMode, setScrolledMode] = useState(config.viewSettings!.scrolled);
@@ -40,8 +39,7 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
   };
 
   useEffect(() => {
-    const view = getFoliateView(bookKey);
-    view?.renderer.setAttribute('flow', isScrolledMode ? 'scrolled' : 'paginated');
+    getView(bookKey)?.renderer.setAttribute('flow', isScrolledMode ? 'scrolled' : 'paginated');
     config.viewSettings!.scrolled = isScrolledMode;
     setConfig(bookKey, config);
   }, [isScrolledMode]);
@@ -51,7 +49,7 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
   }, [isInvertedColors]);
 
   useEffect(() => {
-    const view = getFoliateView(bookKey);
+    const view = getView(bookKey);
     if (!view) return;
     // FIXME: zoom level is not working in paginated mode
     if (config.viewSettings?.scrolled) {

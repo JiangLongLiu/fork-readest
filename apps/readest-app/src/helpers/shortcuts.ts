@@ -10,7 +10,7 @@ export interface ShortcutConfig {
 const DEFAULT_SHORTCUTS: ShortcutConfig = {
   switchSidebar: ['ctrl+Tab', 'opt+Tab', 'alt+Tab'],
   toggleSidebar: ['t'],
-  openSplitView: ['shift+s'],
+  openSplitView: ['shift+p'],
   reloadPage: ['shift+r'],
   goLeft: ['ArrowLeft', 'PageUp', 'h'],
   goRight: ['ArrowRight', 'PageDown', 'l'],

@@ -7,10 +7,9 @@ const cssRegex =
   /((?:\s*)([\w#.@*,:\-.:>+~\[\]\"=(),*\s]+)\s*{(?:[\s]*)((?:[A-Za-z\- \s]+[:]\s*['"0-9\w .,\/\()\-!#%]+;?)*)*\s*}(?:\s*))/gim;
 
 const MiscPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
-  const { books, settings, setSettings, setConfig, getFoliateView } = useReaderStore();
-  const { isFontLayoutSettingsGlobal } = useReaderStore();
-  const bookState = books[bookKey]!;
-  const config = bookState.config!;
+  const { settings, isFontLayoutSettingsGlobal } = useReaderStore();
+  const { setSettings, getConfig, setConfig, getView } = useReaderStore();
+  const config = getConfig(bookKey)!;
 
   const [animated, setAnimated] = useState(config.viewSettings!.animated!);
   const [userStylesheet, setUserStylesheet] = useState(config.viewSettings!.userStylesheet!);
@@ -44,7 +43,7 @@ const MiscPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
         settings.globalViewSettings.userStylesheet = formattedCSS;
         setSettings(settings);
       }
-      getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+      getView(bookKey)?.renderer.setStyles?.(getStyles(config));
     } catch (err) {
       setError('Invalid CSS: Please check your input.');
       console.log('CSS Error:', err);
@@ -64,9 +63,9 @@ const MiscPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSettings(settings);
     }
     if (animated) {
-      getFoliateView(bookKey)?.renderer.setAttribute('animated', '');
+      getView(bookKey)?.renderer.setAttribute('animated', '');
     } else {
-      getFoliateView(bookKey)?.renderer.removeAttribute('animated');
+      getView(bookKey)?.renderer.removeAttribute('animated');
     }
   }, [animated]);
 

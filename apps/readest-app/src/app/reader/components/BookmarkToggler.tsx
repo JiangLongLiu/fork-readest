@@ -12,11 +12,10 @@ interface BookmarkTogglerProps {
 
 const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
   const { envConfig } = useEnv();
-  const { books, settings, saveConfig, updateBooknotes, setBookmarkRibbonVisibility } =
-    useReaderStore();
-  const bookState = books[bookKey]!;
-  const config = bookState.config!;
-  const progress = bookState.progress!;
+  const { settings, saveConfig, updateBooknotes } = useReaderStore();
+  const { getConfig, getProgress, setBookmarkRibbonVisibility } = useReaderStore();
+  const config = getConfig(bookKey)!;
+  const progress = getProgress(bookKey)!;
 
   const [isBookmarked, setIsBookmarked] = useState(false);
 
@@ -56,7 +55,8 @@ const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
   };
 
   useEffect(() => {
-    const { location: cfi, booknotes = [] } = config;
+    const { booknotes = [] } = config || {};
+    const { location: cfi } = progress || {};
     if (!cfi) return;
 
     const start = CFI.collapse(cfi);
@@ -66,7 +66,7 @@ const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
       .some((item) => CFI.compare(start, item.cfi) * CFI.compare(end, item.cfi) <= 0);
     setIsBookmarked(locationBookmarked);
     setBookmarkRibbonVisibility(bookKey, locationBookmarked);
-  }, [config]);
+  }, [config, progress]);
 
   return (
     <button onClick={toggleBookmark} className='p-2'>

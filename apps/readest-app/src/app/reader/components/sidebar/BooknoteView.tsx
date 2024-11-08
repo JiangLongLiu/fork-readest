@@ -20,13 +20,11 @@ interface BooknoteItemProps {
 }
 
 const BooknoteItem: React.FC<BooknoteItemProps> = ({ bookKey, item }) => {
-  const { getFoliateView } = useReaderStore();
-  const { books } = useReaderStore();
+  const { getProgress, getView } = useReaderStore();
   const [isCurrentBookmark, setIsCurrentBookmark] = useState(false);
 
   const { text, cfi } = item;
-  const bookState = books[bookKey]!;
-  const progress = bookState.progress!;
+  const progress = getProgress(bookKey)!;
 
   useEffect(() => {
     const { location } = progress;
@@ -37,7 +35,7 @@ const BooknoteItem: React.FC<BooknoteItemProps> = ({ bookKey, item }) => {
 
   const handleClickItem = (event: React.MouseEvent) => {
     event.preventDefault();
-    getFoliateView(bookKey)?.goTo(cfi);
+    getView(bookKey)?.goTo(cfi);
   };
 
   return (
@@ -74,9 +72,8 @@ const BooknoteView: React.FC<{
   bookKey: string;
   toc: TOCItem[];
 }> = ({ type, bookKey, toc }) => {
-  const { books } = useReaderStore();
-  const bookState = books[bookKey]!;
-  const config = bookState.config!;
+  const { getConfig } = useReaderStore();
+  const config = getConfig(bookKey)!;
   const { booknotes: allNotes = [] } = config;
   const booknotes = allNotes.filter((note) => note.type === type);
 

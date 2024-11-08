@@ -5,11 +5,10 @@ import { ONE_COLUMN_MAX_INLINE_SIZE } from '@/services/constants';
 import NumberInput from './NumberInput';
 
 const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
-  const { books, settings, setSettings, setConfig, getFoliateView } = useReaderStore();
-  const { isFontLayoutSettingsGlobal } = useReaderStore();
-  const bookState = books[bookKey]!;
-  const config = bookState.config!;
-  const view = getFoliateView(bookKey);
+  const { settings, isFontLayoutSettingsGlobal } = useReaderStore();
+  const { setSettings, getConfig, setConfig, getView } = useReaderStore();
+  const config = getConfig(bookKey)!;
+  const view = getView(bookKey);
 
   const [lineHeight, setLineHeight] = useState(config.viewSettings!.lineHeight!);
   const [fullJustification, setFullJustification] = useState(

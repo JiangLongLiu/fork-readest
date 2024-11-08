@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useEnv } from '@/context/EnvContext';
-import { DEFAULT_BOOK_STATE, useReaderStore } from '@/store/readerStore';
+import { useReaderStore } from '@/store/readerStore';
 import { SystemSettings } from '@/types/settings';
 
 import Spinner from '@/components/Spinner';
@@ -17,23 +17,22 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
   const router = useRouter();
   const { envConfig } = useEnv();
   const { bookKeys, dismissBook, getNextBookKey, openSplitView } = useBooks();
-  const { sideBarBookKey, setSideBarBookKey } = useReaderStore();
-
-  const { books, getFoliateView, clearBookState, saveConfig, saveSettings } = useReaderStore();
-  const bookStates = bookKeys.map((key) => books[key] || DEFAULT_BOOK_STATE);
+  const { sideBarBookKey, getConfig, setSideBarBookKey } = useReaderStore();
+  const { getView, getBookData, getViewState, clearViewState, saveConfig, saveSettings } =
+    useReaderStore();
 
   useBookShortcuts({ sideBarBookKey, bookKeys, openSplitView, getNextBookKey });
 
   const saveConfigAndCloseBook = (bookKey: string) => {
-    getFoliateView(bookKey)?.close();
-    getFoliateView(bookKey)?.remove();
-    const bookState = books[bookKey];
-    if (!bookState) return;
-    const { book, config, isPrimary } = bookState;
+    getView(bookKey)?.close();
+    getView(bookKey)?.remove();
+    const config = getConfig(bookKey);
+    const { book } = getBookData(bookKey) || {};
+    const { isPrimary } = getViewState(bookKey) || {};
     if (isPrimary && book && config) {
       saveConfig(envConfig, bookKey, config, settings);
     }
-    clearBookState(bookKey);
+    clearViewState(bookKey);
   };
 
   const saveSettingsAndGoToLibrary = () => {
@@ -59,21 +58,12 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
     }
   };
 
-  const bookState = bookStates[0];
-  if (
-    bookStates.length !== bookKeys.length ||
-    !bookState ||
-    !bookState.book ||
-    !bookState.bookDoc
-  ) {
+  if (!bookKeys || bookKeys.length === 0) return null;
+  const bookData = getBookData(bookKeys[0]!);
+  if (!bookData || !bookData.book || !bookData.bookDoc) {
     return (
       <div className={'hero hero-content min-h-screen'}>
         <Spinner loading={true} />
-        {bookState?.error && (
-          <div className='text-center'>
-            <h2 className='text-red-500'>{bookState.error}</h2>
-          </div>
-        )}
       </div>
     );
   }
@@ -87,7 +77,7 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
         onOpenSplitView={openSplitView}
       />
 
-      <BookGrid bookKeys={bookKeys} bookStates={bookStates} onCloseBook={handleCloseBook} />
+      <BookGrid bookKeys={bookKeys} onCloseBook={handleCloseBook} />
     </div>
   );
 };

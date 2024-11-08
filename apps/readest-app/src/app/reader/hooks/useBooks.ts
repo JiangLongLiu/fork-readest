@@ -9,7 +9,7 @@ const useBooks = () => {
   const { envConfig } = useEnv();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { books, initBookState, sideBarBookKey, setSideBarBookKey } = useReaderStore();
+  const { sideBarBookKey, initViewState, getViewState, setSideBarBookKey } = useReaderStore();
 
   const initialIds = (searchParams.get('ids') || '').split(',').filter(Boolean);
   const [bookKeys, setBookKeys] = useState<string[]>(() => {
@@ -32,7 +32,7 @@ const useBooks = () => {
   // Append a new book and sync with bookKeys and URL
   const appendBook = (id: string, isPrimary: boolean) => {
     const newKey = `${id}-${uniqueId()}`;
-    initBookState(envConfig, id, newKey, isPrimary);
+    initViewState(envConfig, id, newKey, isPrimary);
     setBookKeys((prevKeys) => {
       if (!prevKeys.includes(newKey)) {
         prevKeys.push(newKey);
@@ -71,8 +71,8 @@ const useBooks = () => {
       const id = key.split('-')[0]!;
       const isPrimary = !uniqueIds.has(id);
       uniqueIds.add(id);
-      if (!books[key]) {
-        initBookState(envConfig, id, key, isPrimary);
+      if (!getViewState(key)) {
+        initViewState(envConfig, id, key, isPrimary);
         if (index === 0) setSideBarBookKey(key);
       }
     });

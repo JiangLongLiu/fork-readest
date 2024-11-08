@@ -25,12 +25,12 @@ interface TextSelection {
 
 const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { envConfig } = useEnv();
-  const { books, settings, saveConfig, updateBooknotes, getFoliateView } = useReaderStore();
+  const { settings, getConfig, saveConfig, getProgress, updateBooknotes, getView } =
+    useReaderStore();
   const globalReadSettings = settings.globalReadSettings;
-  const bookState = books[bookKey]!;
-  const config = bookState.config!;
-  const progress = bookState.progress!;
-  const view = getFoliateView(bookKey);
+  const config = getConfig(bookKey)!;
+  const progress = getProgress(bookKey)!;
+  const view = getView(bookKey);
 
   const [selection, setSelection] = useState<TextSelection | null>();
   const [showPopup, setShowPopup] = useState(false);
@@ -90,7 +90,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     setSelection(selection as TextSelection);
   };
 
-  useFoliateEvents(view, { onLoad, onDrawAnnotation, onShowAnnotation }, [bookState]);
+  useFoliateEvents(view, { onLoad, onDrawAnnotation, onShowAnnotation }, [config]);
 
   const popupRef = useOutsideClick<HTMLDivElement>(() => {
     setShowPopup(false);

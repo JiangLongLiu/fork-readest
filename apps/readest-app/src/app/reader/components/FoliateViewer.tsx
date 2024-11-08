@@ -41,13 +41,13 @@ const wrappedFoliateView = (originalView: FoliateView): FoliateView => {
 const FoliateViewer: React.FC<{
   bookKey: string;
   bookDoc: BookDoc;
-  bookConfig: BookConfig;
-}> = ({ bookKey, bookDoc, bookConfig }) => {
+  config: BookConfig;
+}> = ({ bookKey, bookDoc, config }) => {
   const viewRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<FoliateView | null>(null);
   const [viewInited, setViewInited] = useState(false);
   const isViewCreated = useRef(false);
-  const { setFoliateView } = useReaderStore();
+  const { setView: setFoliateView } = useReaderStore();
   const setProgress = useReaderStore((state) => state.setProgress);
 
   const progressRelocateHandler = (event: Event) => {
@@ -115,8 +115,8 @@ const FoliateViewer: React.FC<{
       setFoliateView(bookKey, view);
 
       await view.open(bookDoc);
-      const viewSettings = bookConfig.viewSettings!;
-      view.renderer.setStyles?.(getStyles(bookConfig));
+      const viewSettings = config.viewSettings!;
+      view.renderer.setStyles?.(getStyles(config));
       const isScrolled = viewSettings.scrolled!;
       const marginPx = viewSettings.marginPx!;
       const gapPercent = viewSettings.gapPercent!;
@@ -130,7 +130,6 @@ const FoliateViewer: React.FC<{
       } else {
         view.renderer.removeAttribute('animated');
       }
-      view.renderer.setAttribute('animated', animated ? 'animated' : '');
       view.renderer.setAttribute('flow', isScrolled ? 'scrolled' : 'paginated');
       view.renderer.setAttribute('margin', `${marginPx}px`);
       view.renderer.setAttribute('gap', `${gapPercent}%`);
@@ -138,7 +137,7 @@ const FoliateViewer: React.FC<{
       view.renderer.setAttribute('max-inline-size', `${maxInlineSize}px`);
       view.renderer.setAttribute('max-block-size', `${maxBlockSize}px`);
 
-      const lastLocation = bookConfig.location;
+      const lastLocation = config.location;
       if (lastLocation) {
         await view.init({ lastLocation });
       } else {
@@ -158,7 +157,7 @@ const FoliateViewer: React.FC<{
   }, []);
 
   const initAnnotations = () => {
-    const { booknotes = [] } = bookConfig;
+    const { booknotes = [] } = config;
     const annotations = booknotes.filter((item) => item.type === 'annotation');
     try {
       Promise.all(annotations.map((annotation) => view?.addAnnotation(annotation)));
