@@ -70,6 +70,7 @@ interface ReaderStore {
   getConfig: (key: string) => BookConfig | null;
   setView: (key: string, view: FoliateView) => void;
   getView: (key: string | null) => FoliateView | null;
+  getViewsById: (id: string) => FoliateView[];
 
   deleteBook: (envConfig: EnvConfigType, book: Book) => void;
   saveConfig: (
@@ -145,6 +146,12 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     })),
 
   getView: (key: string | null) => (key && get().viewStates[key]?.view) || null,
+  getViewsById: (id: string) => {
+    const { viewStates } = get();
+    return Object.values(viewStates)
+      .filter((state) => state.key.startsWith(id))
+      .map((state) => state.view!);
+  },
 
   deleteBook: async (envConfig: EnvConfigType, book: Book) => {
     const appService = await envConfig.getAppService();

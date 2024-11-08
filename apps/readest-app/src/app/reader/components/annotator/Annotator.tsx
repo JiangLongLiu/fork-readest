@@ -25,8 +25,8 @@ interface TextSelection {
 
 const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { envConfig } = useEnv();
-  const { settings, getConfig, saveConfig, getProgress, updateBooknotes, getView } =
-    useReaderStore();
+  const { settings, saveConfig, getProgress, updateBooknotes } = useReaderStore();
+  const { getConfig, getView, getViewsById } = useReaderStore();
   const globalReadSettings = settings.globalReadSettings;
   const config = getConfig(bookKey)!;
   const progress = getProgress(bookKey)!;
@@ -139,18 +139,19 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     const existingIndex = annotations.findIndex(
       (annotation) => annotation.cfi === cfi && annotation.type === 'annotation',
     );
+    const views = getViewsById(bookKey.split('-')[0]!);
     if (existingIndex !== -1) {
-      view?.addAnnotation(annotation, true);
+      views.forEach((view) => view?.addAnnotation(annotation, true));
       if (update) {
         annotations[existingIndex] = annotation;
-        view?.addAnnotation(annotation);
+        views.forEach((view) => view?.addAnnotation(annotation));
       } else {
         annotations.splice(existingIndex, 1);
         setShowPopup(false);
       }
     } else {
       annotations.push(annotation);
-      view?.addAnnotation(annotation);
+      views.forEach((view) => view?.addAnnotation(annotation));
       setSelection({ ...selection, annotated: true });
     }
 
