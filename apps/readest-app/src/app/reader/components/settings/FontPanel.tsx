@@ -40,6 +40,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { isFontLayoutSettingsGlobal } = useReaderStore();
   const bookState = books[bookKey]!;
   const config = bookState.config!;
+  const view = getFoliateView(bookKey);
 
   const [defaultFontSize, setDefaultFontSize] = useState(config.viewSettings!.defaultFontSize!);
   const [minFontSize, setMinFontSize] = useState(config.viewSettings!.minimumFontSize!);
@@ -56,7 +57,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.defaultFont = defaultFont;
       setSettings(settings);
     }
-    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(config));
   }, [defaultFont]);
 
   useEffect(() => {
@@ -66,7 +67,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.defaultFontSize = defaultFontSize;
       setSettings(settings);
     }
-    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(config));
   }, [defaultFontSize]);
 
   useEffect(() => {
@@ -76,7 +77,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.minimumFontSize = minFontSize;
       setSettings(settings);
     }
-    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(config));
   }, [minFontSize]);
 
   useEffect(() => {
@@ -86,7 +87,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.serifFont = serifFont;
       setSettings(settings);
     }
-    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(config));
   }, [serifFont]);
 
   useEffect(() => {
@@ -96,7 +97,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.sansSerifFont = sansSerifFont;
       setSettings(settings);
     }
-    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(config));
   }, [sansSerifFont]);
 
   useEffect(() => {
@@ -106,7 +107,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.monospaceFont = monospaceFont;
       setSettings(settings);
     }
-    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(config));
   }, [monospaceFont]);
 
   useEffect(() => {
@@ -116,7 +117,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.overrideFont = overrideFont;
       setSettings(settings);
     }
-    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(config));
   }, [overrideFont]);
 
   const handleFontFamilyFont = (option: string) => {

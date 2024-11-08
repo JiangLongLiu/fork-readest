@@ -4,6 +4,7 @@ import { BookDoc } from '@/libs/document';
 import { BookConfig, BookNote } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
 import { getStyles } from '@/utils/style';
+import { ONE_COLUMN_MAX_INLINE_SIZE } from '@/services/constants';
 
 export interface FoliateView extends HTMLElement {
   open: (book: BookDoc) => Promise<void>;
@@ -121,7 +122,8 @@ const FoliateViewer: React.FC<{
       const gapPercent = viewSettings.gapPercent!;
       const animated = viewSettings.animated!;
       const maxColumnCount = viewSettings.maxColumnCount!;
-      const maxInlineSize = viewSettings.maxInlineSize!;
+      const maxInlineSize =
+        maxColumnCount === 1 ? ONE_COLUMN_MAX_INLINE_SIZE : viewSettings.maxInlineSize!;
       const maxBlockSize = viewSettings.maxBlockSize!;
       if (animated) {
         view.renderer.setAttribute('animated', '');

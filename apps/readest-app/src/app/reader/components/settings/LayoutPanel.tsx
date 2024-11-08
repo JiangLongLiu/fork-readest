@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import NumberInput from './NumberInput';
 import { useReaderStore } from '@/store/readerStore';
 import { getStyles } from '@/utils/style';
+import { ONE_COLUMN_MAX_INLINE_SIZE } from '@/services/constants';
+import NumberInput from './NumberInput';
 
 const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { books, settings, setSettings, setConfig, getFoliateView } = useReaderStore();
   const { isFontLayoutSettingsGlobal } = useReaderStore();
   const bookState = books[bookKey]!;
   const config = bookState.config!;
+  const view = getFoliateView(bookKey);
 
   const [lineHeight, setLineHeight] = useState(config.viewSettings!.lineHeight!);
   const [fullJustification, setFullJustification] = useState(
@@ -27,7 +29,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.lineHeight = lineHeight;
       setSettings(settings);
     }
-    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(config));
   }, [lineHeight]);
 
   useEffect(() => {
@@ -37,7 +39,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.fullJustification = fullJustification;
       setSettings(settings);
     }
-    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(config));
   }, [fullJustification]);
 
   useEffect(() => {
@@ -47,7 +49,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.hyphenation = hyphenation;
       setSettings(settings);
     }
-    getFoliateView(bookKey)?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(config));
   }, [hyphenation]);
 
   useEffect(() => {
@@ -57,7 +59,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.marginPx = marginPx;
       setSettings(settings);
     }
-    getFoliateView(bookKey)?.renderer.setAttribute('margin', `${marginPx}px`);
+    view?.renderer.setAttribute('margin', `${marginPx}px`);
   }, [marginPx]);
 
   useEffect(() => {
@@ -67,7 +69,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.gapPercent = gapPercent;
       setSettings(settings);
     }
-    getFoliateView(bookKey)?.renderer.setAttribute('gap', `${gapPercent}%`);
+    view?.renderer.setAttribute('gap', `${gapPercent}%`);
   }, [gapPercent]);
 
   useEffect(() => {
@@ -77,7 +79,11 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.maxColumnCount = maxColumnCount;
       setSettings(settings);
     }
-    getFoliateView(bookKey)?.renderer.setAttribute('max-column-count', maxColumnCount);
+    view?.renderer.setAttribute('max-column-count', maxColumnCount);
+    view?.renderer.setAttribute(
+      'max-inline-size',
+      `${maxColumnCount === 1 ? ONE_COLUMN_MAX_INLINE_SIZE : maxInlineSize}px`,
+    );
   }, [maxColumnCount]);
 
   useEffect(() => {
@@ -87,7 +93,10 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.maxInlineSize = maxInlineSize;
       setSettings(settings);
     }
-    getFoliateView(bookKey)?.renderer.setAttribute('max-inline-size', `${maxInlineSize}px`);
+    view?.renderer.setAttribute(
+      'max-inline-size',
+      `${maxColumnCount === 1 ? ONE_COLUMN_MAX_INLINE_SIZE : maxInlineSize}px`,
+    );
   }, [maxInlineSize]);
 
   return (
