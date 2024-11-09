@@ -67,7 +67,7 @@ interface ReaderStore {
   ) => void;
   getProgress: (key: string) => BookProgress | null;
   setConfig: (key: string, config: BookConfig) => void;
-  getConfig: (key: string) => BookConfig | null;
+  getConfig: (key: string | null) => BookConfig | null;
   setView: (key: string, view: FoliateView) => void;
   getView: (key: string | null) => FoliateView | null;
   getViewsById: (id: string) => FoliateView[];
@@ -135,7 +135,8 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     });
   },
 
-  getConfig: (key: string) => {
+  getConfig: (key: string | null) => {
+    if (!key) return null;
     const id = key.split('-')[0]!;
     return get().booksData[id]?.config || null;
   },

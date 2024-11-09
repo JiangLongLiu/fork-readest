@@ -1,25 +1,32 @@
 export interface ShortcutConfig {
-  switchSidebar: string[];
-  toggleSidebar: string[];
-  openSplitView: string[];
-  reloadPage: string[];
-  goLeft: string[];
-  goRight: string[];
+  onSwitchSideBar: string[];
+  onToggleSideBar: string[];
+  onOpenSplitView: string[];
+  onReloadPage: string[];
+  onGoLeft: string[];
+  onGoRight: string[];
+  onGoNext: string[];
+  onGoPrev: string[];
 }
 
 const DEFAULT_SHORTCUTS: ShortcutConfig = {
-  switchSidebar: ['ctrl+Tab', 'opt+Tab', 'alt+Tab'],
-  toggleSidebar: ['t'],
-  openSplitView: ['shift+p'],
-  reloadPage: ['shift+r'],
-  goLeft: ['ArrowLeft', 'PageUp', 'h'],
-  goRight: ['ArrowRight', 'PageDown', 'l'],
+  onSwitchSideBar: ['ctrl+Tab', 'opt+Tab', 'alt+Tab'],
+  onToggleSideBar: ['t'],
+  onOpenSplitView: ['shift+p'],
+  onReloadPage: ['shift+r'],
+  onGoLeft: ['ArrowLeft', 'PageUp', 'h'],
+  onGoRight: ['ArrowRight', 'PageDown', 'l'],
+  onGoNext: ['ArrowDown', 'j'],
+  onGoPrev: ['ArrowUp', 'k'],
 };
 
 // Load shortcuts from localStorage or fallback to defaults
 export const loadShortcuts = (): ShortcutConfig => {
-  const storedShortcuts = localStorage.getItem('customShortcuts');
-  return storedShortcuts ? JSON.parse(storedShortcuts) : DEFAULT_SHORTCUTS;
+  const customShortcuts = JSON.parse(localStorage.getItem('customShortcuts') || '{}');
+  return {
+    ...DEFAULT_SHORTCUTS,
+    ...customShortcuts,
+  };
 };
 
 // Save custom shortcuts to localStorage

@@ -14,8 +14,12 @@ const useBookShortcuts = ({
   openSplitView,
   getNextBookKey,
 }: UseBookShortcutsProps) => {
-  const { getView, setSideBarBookKey } = useReaderStore();
-  const { toggleSideBar } = useReaderStore();
+  const { getView, getConfig, toggleSideBar, setSideBarBookKey } = useReaderStore();
+  const config = getConfig(sideBarBookKey);
+  const viewSettings = config?.viewSettings;
+  const fontSize = viewSettings?.defaultFontSize ?? 16;
+  const lineHeight = viewSettings?.lineHeight ?? 1.6;
+  const distance = fontSize * lineHeight * 3;
 
   const switchSideBar = () => {
     if (sideBarBookKey) setSideBarBookKey(getNextBookKey(sideBarBookKey));
@@ -27,6 +31,14 @@ const useBookShortcuts = ({
 
   const goRight = () => {
     getView(sideBarBookKey)?.goRight();
+  };
+
+  const goPrev = () => {
+    getView(sideBarBookKey)?.prev(distance);
+  };
+
+  const goNext = () => {
+    getView(sideBarBookKey)?.next(distance);
   };
 
   const reloadPage = () => {
@@ -41,6 +53,8 @@ const useBookShortcuts = ({
       onReloadPage: reloadPage,
       onGoLeft: goLeft,
       onGoRight: goRight,
+      onGoPrev: goPrev,
+      onGoNext: goNext,
     },
     [sideBarBookKey, bookKeys],
   );

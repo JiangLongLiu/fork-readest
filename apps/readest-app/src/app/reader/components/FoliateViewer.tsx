@@ -12,6 +12,8 @@ export interface FoliateView extends HTMLElement {
   init: (options: { lastLocation: string }) => void;
   goTo: (href: string) => void;
   goToFraction: (fraction: number) => void;
+  prev: (distance: number) => void;
+  next: (distance: number) => void;
   goLeft: () => void;
   goRight: () => void;
   getCFI: (index: number, range: Range) => string;
@@ -57,7 +59,8 @@ const FoliateViewer: React.FC<{
   };
 
   const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Backspace') {
+    // prevent default navigation keys in iframes
+    if (['Backspace', 'ArrowDown', 'ArrowUp'].includes(event.key)) {
       event.preventDefault();
     }
     window.postMessage(

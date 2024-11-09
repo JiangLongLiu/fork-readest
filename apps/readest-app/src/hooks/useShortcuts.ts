@@ -1,14 +1,9 @@
 import { useEffect, useState } from 'react';
 import { loadShortcuts, ShortcutConfig } from '../helpers/shortcuts';
 
-interface KeyActionHandlers {
-  onSwitchSideBar?: () => void;
-  onToggleSideBar?: () => void;
-  onOpenSplitView?: () => void;
-  onReloadPage?: () => void;
-  onGoLeft?: () => void;
-  onGoRight?: () => void;
-}
+export type KeyActionHandlers = {
+  [K in keyof ShortcutConfig]?: () => void;
+};
 
 const useShortcuts = (actions: KeyActionHandlers, dependencies: React.DependencyList = []) => {
   const [shortcuts, setShortcuts] = useState<ShortcutConfig>(loadShortcuts);
@@ -60,53 +55,19 @@ const useShortcuts = (actions: KeyActionHandlers, dependencies: React.Dependency
   ) => {
     // FIXME: This is a temporary fix to disable Back button navigation
     if (key === 'backspace') return true;
-    if (
-      shortcuts.switchSidebar.some((shortcut) =>
-        isShortcutMatch(shortcut, key, ctrlKey, altKey, metaKey, shiftKey),
-      )
-    ) {
-      actions.onSwitchSideBar?.();
-      return true;
-    }
-    if (
-      shortcuts.toggleSidebar.some((shortcut) =>
-        isShortcutMatch(shortcut, key, ctrlKey, altKey, metaKey, shiftKey),
-      )
-    ) {
-      actions.onToggleSideBar?.();
-      return true;
-    }
-    if (
-      shortcuts.openSplitView.some((shortcut) =>
-        isShortcutMatch(shortcut, key, ctrlKey, altKey, metaKey, shiftKey),
-      )
-    ) {
-      actions.onOpenSplitView?.();
-      return true;
-    }
-    if (
-      shortcuts.reloadPage.some((shortcut) =>
-        isShortcutMatch(shortcut, key, ctrlKey, altKey, metaKey, shiftKey),
-      )
-    ) {
-      actions.onReloadPage?.();
-      return true;
-    }
-    if (
-      shortcuts.goLeft.some((shortcut) =>
-        isShortcutMatch(shortcut, key, ctrlKey, altKey, metaKey, shiftKey),
-      )
-    ) {
-      actions.onGoLeft?.();
-      return true;
-    }
-    if (
-      shortcuts.goRight.some((shortcut) =>
-        isShortcutMatch(shortcut, key, ctrlKey, altKey, metaKey, shiftKey),
-      )
-    ) {
-      actions.onGoRight?.();
-      return true;
+    for (const [actionName, actionHandler] of Object.entries(actions)) {
+      const shortcutKey = actionName as keyof ShortcutConfig;
+      const handler = actionHandler as (() => void) | undefined;
+      const shortcutList = shortcuts[shortcutKey as keyof ShortcutConfig];
+      if (
+        handler &&
+        shortcutList?.some((shortcut) =>
+          isShortcutMatch(shortcut, key, ctrlKey, altKey, metaKey, shiftKey),
+        )
+      ) {
+        handler();
+        return true;
+      }
     }
     return false;
   };
