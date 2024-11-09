@@ -18,7 +18,7 @@ interface BookGridProps {
 
 const BookGrid: React.FC<BookGridProps> = ({ bookKeys, onCloseBook }) => {
   const { isSideBarPinned, isSideBarVisible, sideBarWidth } = useReaderStore();
-  const { getConfig, getProgress, getBookData, getViewState } = useReaderStore();
+  const { getConfig, getProgress, getBookData, getViewState, getViewSettings } = useReaderStore();
   const { isFontLayoutSettingsDialogOpen, setFontLayoutSettingsDialogOpen } = useReaderStore();
   const gridWidth = isSideBarPinned && isSideBarVisible ? `calc(100% - ${sideBarWidth})` : '100%';
   const gridTemplate = getGridTemplate(bookKeys.length, window.innerWidth / window.innerHeight);
@@ -36,12 +36,13 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, onCloseBook }) => {
         const bookData = getBookData(bookKey);
         const config = getConfig(bookKey);
         const progress = getProgress(bookKey);
+        const viewSettings = getViewSettings(bookKey);
         const { book, bookDoc } = bookData || {};
-        if (!book || !config || !bookDoc) return null;
+        if (!book || !config || !bookDoc || !viewSettings) return null;
 
-        const isBookmarked = getViewState(bookKey)?.ribbonVisible;
         const { section, pageinfo, tocLabel: chapter } = progress || {};
-        const marginGap = `${config.viewSettings!.gapPercent}%`;
+        const isBookmarked = getViewState(bookKey)?.ribbonVisible;
+        const marginGap = `${viewSettings.gapPercent}%`;
 
         return (
           <div
@@ -58,7 +59,7 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, onCloseBook }) => {
               onSetSettingsDialogOpen={setFontLayoutSettingsDialogOpen}
             />
             <FoliateViewer bookKey={bookKey} bookDoc={bookDoc} config={config} />
-            {config.viewSettings!.scrolled ? null : (
+            {viewSettings.scrolled ? null : (
               <>
                 <SectionInfo chapter={chapter} gapLeft={marginGap} />
                 <PageInfoView

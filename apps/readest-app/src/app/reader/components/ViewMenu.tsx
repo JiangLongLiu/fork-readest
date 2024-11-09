@@ -18,13 +18,13 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
   setIsDropdownOpen,
   onSetSettingsDialogOpen,
 }) => {
-  const { getConfig, setConfig, getView } = useReaderStore();
-  const config = getConfig(bookKey)!;
+  const { getView, getViewSettings, setViewSettings } = useReaderStore();
+  const viewSettings = getViewSettings(bookKey);
 
-  const [isDarkMode, setDarkMode] = useState(config.viewSettings!.theme === 'dark');
-  const [isScrolledMode, setScrolledMode] = useState(config.viewSettings!.scrolled);
-  const [isInvertedColors, setInvertedColors] = useState(config.viewSettings!.invert);
-  const [zoomLevel, setZoomLevel] = useState(config.viewSettings!.zoomLevel!);
+  const [isDarkMode, setDarkMode] = useState(viewSettings!.theme === 'dark');
+  const [isScrolledMode, setScrolledMode] = useState(viewSettings!.scrolled);
+  const [isInvertedColors, setInvertedColors] = useState(viewSettings!.invert);
+  const [zoomLevel, setZoomLevel] = useState(viewSettings!.zoomLevel!);
 
   const zoomIn = () => setZoomLevel((prev) => Math.min(prev + 10, 200));
   const zoomOut = () => setZoomLevel((prev) => Math.max(prev - 10, 50));
@@ -40,8 +40,8 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
 
   useEffect(() => {
     getView(bookKey)?.renderer.setAttribute('flow', isScrolledMode ? 'scrolled' : 'paginated');
-    config.viewSettings!.scrolled = isScrolledMode;
-    setConfig(bookKey, config);
+    viewSettings!.scrolled = isScrolledMode;
+    setViewSettings(bookKey, viewSettings!);
   }, [isScrolledMode]);
 
   useEffect(() => {
@@ -52,11 +52,11 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
     const view = getView(bookKey);
     if (!view) return;
     // FIXME: zoom level is not working in paginated mode
-    if (config.viewSettings?.scrolled) {
-      view.renderer.setStyles?.(getStyles(config));
+    if (viewSettings?.scrolled) {
+      view.renderer.setStyles?.(getStyles(viewSettings!));
     }
-    config.viewSettings!.zoomLevel = zoomLevel;
-    setConfig(bookKey, config);
+    viewSettings!.zoomLevel = zoomLevel;
+    setViewSettings(bookKey, viewSettings!);
   }, [zoomLevel]);
 
   return (

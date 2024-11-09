@@ -14,9 +14,8 @@ const useBookShortcuts = ({
   openSplitView,
   getNextBookKey,
 }: UseBookShortcutsProps) => {
-  const { getView, getConfig, toggleSideBar, setSideBarBookKey } = useReaderStore();
-  const config = getConfig(sideBarBookKey);
-  const viewSettings = config?.viewSettings;
+  const { getView, toggleSideBar, setSideBarBookKey, getViewSettings } = useReaderStore();
+  const viewSettings = getViewSettings(sideBarBookKey ?? '');
   const fontSize = viewSettings?.defaultFontSize ?? 16;
   const lineHeight = viewSettings?.lineHeight ?? 1.6;
   const distance = fontSize * lineHeight * 3;

@@ -1,6 +1,14 @@
 import { create } from 'zustand';
 
-import { BookNote, BookContent, Book, BookConfig, PageInfo, BookProgress } from '@/types/book';
+import {
+  BookNote,
+  BookContent,
+  Book,
+  BookConfig,
+  PageInfo,
+  BookProgress,
+  ViewSettings,
+} from '@/types/book';
 import { EnvConfigType } from '@/services/environment';
 import { SystemSettings } from '@/types/settings';
 import { FoliateView } from '@/app/reader/components/FoliateViewer';
@@ -25,6 +33,11 @@ export interface ViewState {
   error: string | null;
   progress: BookProgress | null;
   ribbonVisible: boolean;
+  /* View settings for the view: 
+    generally view settings have a hirarchy of global settings < book settings < view settings
+    view settings for primary view are saved to book config which is persisted to config file
+    ommitting settings that are not changed from global settings */
+  viewSettings: ViewSettings | null;
 }
 
 interface ReaderStore {
@@ -71,6 +84,8 @@ interface ReaderStore {
   setView: (key: string, view: FoliateView) => void;
   getView: (key: string | null) => FoliateView | null;
   getViewsById: (id: string) => FoliateView[];
+  setViewSettings: (key: string, viewSettings: ViewSettings) => void;
+  getViewSettings: (key: string) => ViewSettings | null;
 
   deleteBook: (envConfig: EnvConfigType, book: Book) => void;
   saveConfig: (
@@ -208,6 +223,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
           error: null,
           progress: null,
           ribbonVisible: false,
+          viewSettings: null,
         },
       },
     }));
@@ -232,6 +248,9 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
           },
         }));
       }
+      const config = get().booksData[id]?.config as BookConfig;
+      const configViewSettings = config.viewSettings!;
+      console.log('Initializing book view settings', configViewSettings);
       set((state) => ({
         viewStates: {
           ...state.viewStates,
@@ -244,6 +263,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
             error: null,
             progress: null,
             ribbonVisible: false,
+            viewSettings: JSON.parse(JSON.stringify(configViewSettings)) as ViewSettings,
           },
         },
       }));
@@ -261,6 +281,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
             error: 'Failed to load book.',
             progress: null,
             ribbonVisible: false,
+            viewSettings: null,
           },
         },
       }));
@@ -271,6 +292,37 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
     return get().booksData[id] || null;
   },
   getViewState: (key: string) => get().viewStates[key] || null,
+  setViewSettings: (key: string, viewSettings: ViewSettings) => {
+    const id = key.split('-')[0]!;
+    const bookData = get().booksData[id];
+    const viewState = get().viewStates[key];
+    if (!viewState || !bookData) return;
+    if (viewState.isPrimary) {
+      set((state) => ({
+        booksData: {
+          ...state.booksData,
+          [id]: {
+            ...bookData,
+            config: {
+              ...bookData.config,
+              lastUpdated: Date.now(),
+              viewSettings,
+            },
+          },
+        },
+      }));
+    }
+    set((state) => ({
+      viewStates: {
+        ...state.viewStates,
+        [key]: {
+          ...state.viewStates[key]!,
+          viewSettings,
+        },
+      },
+    }));
+  },
+  getViewSettings: (key: string) => get().viewStates[key]?.viewSettings || null,
   setProgress: (
     key: string,
     location: string,

@@ -49,8 +49,7 @@ const FoliateViewer: React.FC<{
   const [view, setView] = useState<FoliateView | null>(null);
   const [viewInited, setViewInited] = useState(false);
   const isViewCreated = useRef(false);
-  const { setView: setFoliateView } = useReaderStore();
-  const setProgress = useReaderStore((state) => state.setProgress);
+  const { setView: setFoliateView, setProgress, getViewSettings } = useReaderStore();
 
   const progressRelocateHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;
@@ -118,8 +117,8 @@ const FoliateViewer: React.FC<{
       setFoliateView(bookKey, view);
 
       await view.open(bookDoc);
-      const viewSettings = config.viewSettings!;
-      view.renderer.setStyles?.(getStyles(config));
+      const viewSettings = getViewSettings(bookKey)!;
+      view.renderer.setStyles?.(getStyles(viewSettings));
       const isScrolled = viewSettings.scrolled!;
       const marginPx = viewSettings.marginPx!;
       const gapPercent = viewSettings.gapPercent!;

@@ -37,86 +37,86 @@ const FontFace = ({ className, family, label, options, selected, onSelect }: Fon
 
 const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { settings, isFontLayoutSettingsGlobal } = useReaderStore();
-  const { setSettings, getConfig, setConfig, getView } = useReaderStore();
-  const config = getConfig(bookKey)!;
+  const { setSettings, getView, getViewSettings, setViewSettings } = useReaderStore();
   const view = getView(bookKey);
+  const viewSettings = getViewSettings(bookKey)!;
 
-  const [defaultFontSize, setDefaultFontSize] = useState(config.viewSettings!.defaultFontSize!);
-  const [minFontSize, setMinFontSize] = useState(config.viewSettings!.minimumFontSize!);
-  const [overrideFont, setOverrideFont] = useState(config.viewSettings!.overrideFont!);
-  const [defaultFont, setDefaultFont] = useState(config.viewSettings!.defaultFont!);
-  const [serifFont, setSerifFont] = useState(config.viewSettings!.serifFont!);
-  const [sansSerifFont, setSansSerifFont] = useState(config.viewSettings!.sansSerifFont!);
-  const [monospaceFont, setMonospaceFont] = useState(config.viewSettings!.monospaceFont!);
+  const [defaultFontSize, setDefaultFontSize] = useState(viewSettings.defaultFontSize!);
+  const [minFontSize, setMinFontSize] = useState(viewSettings.minimumFontSize!);
+  const [overrideFont, setOverrideFont] = useState(viewSettings.overrideFont!);
+  const [defaultFont, setDefaultFont] = useState(viewSettings.defaultFont!);
+  const [serifFont, setSerifFont] = useState(viewSettings.serifFont!);
+  const [sansSerifFont, setSansSerifFont] = useState(viewSettings.sansSerifFont!);
+  const [monospaceFont, setMonospaceFont] = useState(viewSettings.monospaceFont!);
 
   useEffect(() => {
-    config.viewSettings!.defaultFont = defaultFont;
-    setConfig(bookKey, config);
+    viewSettings.defaultFont = defaultFont;
+    setViewSettings(bookKey, viewSettings);
     if (isFontLayoutSettingsGlobal) {
       settings.globalViewSettings.defaultFont = defaultFont;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(viewSettings));
   }, [defaultFont]);
 
   useEffect(() => {
-    config.viewSettings!.defaultFontSize = defaultFontSize;
-    setConfig(bookKey, config);
+    viewSettings.defaultFontSize = defaultFontSize;
+    setViewSettings(bookKey, viewSettings);
     if (isFontLayoutSettingsGlobal) {
       settings.globalViewSettings.defaultFontSize = defaultFontSize;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(viewSettings));
   }, [defaultFontSize]);
 
   useEffect(() => {
-    config.viewSettings!.minimumFontSize = minFontSize;
-    setConfig(bookKey, config);
+    viewSettings.minimumFontSize = minFontSize;
+    setViewSettings(bookKey, viewSettings);
     if (isFontLayoutSettingsGlobal) {
       settings.globalViewSettings.minimumFontSize = minFontSize;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(viewSettings));
   }, [minFontSize]);
 
   useEffect(() => {
-    config.viewSettings!.serifFont = serifFont;
-    setConfig(bookKey, config);
+    viewSettings.serifFont = serifFont;
+    setViewSettings(bookKey, viewSettings);
     if (isFontLayoutSettingsGlobal) {
       settings.globalViewSettings.serifFont = serifFont;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(viewSettings));
   }, [serifFont]);
 
   useEffect(() => {
-    config.viewSettings!.sansSerifFont = sansSerifFont;
-    setConfig(bookKey, config);
+    viewSettings.sansSerifFont = sansSerifFont;
+    setViewSettings(bookKey, viewSettings);
     if (isFontLayoutSettingsGlobal) {
       settings.globalViewSettings.sansSerifFont = sansSerifFont;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(viewSettings));
   }, [sansSerifFont]);
 
   useEffect(() => {
-    config.viewSettings!.monospaceFont = monospaceFont;
-    setConfig(bookKey, config);
+    viewSettings.monospaceFont = monospaceFont;
+    setViewSettings(bookKey, viewSettings);
     if (isFontLayoutSettingsGlobal) {
       settings.globalViewSettings.monospaceFont = monospaceFont;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(viewSettings));
   }, [monospaceFont]);
 
   useEffect(() => {
-    config.viewSettings!.overrideFont = overrideFont;
-    setConfig(bookKey, config);
+    viewSettings.overrideFont = overrideFont;
+    setViewSettings(bookKey, viewSettings);
     if (isFontLayoutSettingsGlobal) {
       settings.globalViewSettings.overrideFont = overrideFont;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(config));
+    view?.renderer.setStyles?.(getStyles(viewSettings));
   }, [overrideFont]);
 
   const handleFontFamilyFont = (option: string) => {

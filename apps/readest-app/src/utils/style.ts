@@ -1,5 +1,5 @@
 import { MONOSPACE_FONTS, SANS_SERIF_FONTS, SERIF_FONTS } from '@/services/constants';
-import { BookConfig } from '@/types/book';
+import { ViewSettings } from '@/types/book';
 
 import fontfacesCSS from '!!raw-loader!../styles/fonts.css';
 
@@ -76,8 +76,7 @@ const getLayoutStyles = (
   }
 `;
 
-export const getStyles = (config: BookConfig) => {
-  const viewSettings = config.viewSettings!;
+export const getStyles = (viewSettings: ViewSettings) => {
   const layoutStyles = getLayoutStyles(
     viewSettings.lineHeight!,
     viewSettings.fullJustification!,
