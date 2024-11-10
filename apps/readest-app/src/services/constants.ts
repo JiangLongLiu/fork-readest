@@ -7,6 +7,7 @@ export const CLOUD_BOOKS_SUBDIR = 'Readest/Books';
 export const DEFAULT_READSETTINGS: ReadSettings = {
   sideBarWidth: '25%',
   isSideBarPinned: true,
+  sideBarTab: 'toc',
   notebookWidth: '25%',
   isNotebookPinned: false,
   autohideCursor: true,

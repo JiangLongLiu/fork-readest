@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import React, { useState, useEffect } from 'react';
 
+import { useEnv } from '@/context/EnvContext';
 import { useReaderStore } from '@/store/readerStore';
 import SidebarHeader from './Header';
 import SidebarContent from './Content';
@@ -18,10 +19,11 @@ const SideBar: React.FC<{
   onGoToLibrary: () => void;
   onOpenSplitView: () => void;
 }> = ({ width, isPinned, onGoToLibrary, onOpenSplitView }) => {
-  const { getBookData, getProgress } = useReaderStore();
-  const [activeTab, setActiveTab] = useState('toc');
+  const { envConfig } = useEnv();
+  const { sideBarBookKey, settings } = useReaderStore();
+  const { saveSettings, getBookData, getProgress } = useReaderStore();
+  const [activeTab, setActiveTab] = useState(settings.globalReadSettings.sideBarTab);
   const [currentHref, setCurrentHref] = useState<string | null>(null);
-  const { sideBarBookKey } = useReaderStore();
   const {
     sideBarWidth,
     isSideBarVisible,
@@ -45,6 +47,12 @@ const SideBar: React.FC<{
 
   const handleClickOverlay = () => {
     setSideBarVisible(false);
+  };
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    settings.globalReadSettings.sideBarTab = tab;
+    saveSettings(envConfig, settings);
   };
 
   if (!sideBarBookKey) return null;
@@ -84,7 +92,7 @@ const SideBar: React.FC<{
           currentHref={currentHref}
           sideBarBookKey={sideBarBookKey!}
         />
-        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
         <div
           className='drag-bar absolute right-0 top-0 h-full w-0.5 cursor-col-resize'
           onMouseDown={handleMouseDown}
