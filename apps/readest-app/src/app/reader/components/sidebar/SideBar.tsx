@@ -9,7 +9,7 @@ import BookCard from './BookCard';
 import useSidebar from '../../hooks/useSidebar';
 import useDragBar from '../../hooks/useDragBar';
 
-const MIN_SIDEBAR_WIDTH = 0.15;
+const MIN_SIDEBAR_WIDTH = 0.05;
 const MAX_SIDEBAR_WIDTH = 0.45;
 
 const SideBar: React.FC<{
@@ -25,11 +25,17 @@ const SideBar: React.FC<{
   const {
     sideBarWidth,
     isSideBarVisible,
+    setSideBarVisible,
     handleSideBarResize,
     handleSideBarTogglePin,
-    setSideBarVisibility,
   } = useSidebar(width, isPinned);
-  const { handleMouseDown } = useDragBar(handleSideBarResize, MIN_SIDEBAR_WIDTH, MAX_SIDEBAR_WIDTH);
+
+  const handleDragMove = (e: MouseEvent) => {
+    const widthFraction = e.clientX / window.innerWidth;
+    const newWidth = Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, widthFraction));
+    handleSideBarResize(`${Math.round(newWidth * 10000) / 100}%`);
+  };
+  const { handleMouseDown } = useDragBar(handleDragMove);
 
   useEffect(() => {
     if (!sideBarBookKey) return;
@@ -38,7 +44,7 @@ const SideBar: React.FC<{
   }, [sideBarBookKey]);
 
   const handleClickOverlay = () => {
-    setSideBarVisibility(false);
+    setSideBarVisible(false);
   };
 
   if (!sideBarBookKey) return null;
@@ -67,7 +73,7 @@ const SideBar: React.FC<{
           isPinned={isPinned}
           onGoToLibrary={onGoToLibrary}
           onOpenSplitView={onOpenSplitView}
-          handleSideBarTogglePin={handleSideBarTogglePin}
+          handleTogglePin={handleSideBarTogglePin}
         />
         <div className='border-b px-3'>
           <BookCard cover={book.coverImageUrl!} title={book.title} author={book.author} />

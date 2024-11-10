@@ -12,6 +12,7 @@ import SideBar from './sidebar/SideBar';
 import useBooks from '../hooks/useBooks';
 import BookGrid from './BookGrid';
 import useBookShortcuts from '../hooks/useBookShortcuts';
+import Notebook from './notebook/Notebook';
 
 const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => {
   const router = useRouter();
@@ -76,8 +77,11 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
         onGoToLibrary={handleCloseBooks}
         onOpenSplitView={openSplitView}
       />
-
       <BookGrid bookKeys={bookKeys} onCloseBook={handleCloseBook} />
+      <Notebook
+        width={settings.globalReadSettings.notebookWidth}
+        isPinned={settings.globalReadSettings.isNotebookPinned}
+      />
     </div>
   );
 };

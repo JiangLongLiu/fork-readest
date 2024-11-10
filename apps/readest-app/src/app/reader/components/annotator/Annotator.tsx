@@ -11,22 +11,17 @@ import { useEnv } from '@/context/EnvContext';
 import { BookNote, HighlightColor, HighlightStyle } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
 import { useFoliateEvents } from '../../hooks/useFoliateEvents';
-import { getPopupPosition, getPosition, Position } from '@/utils/sel';
+import { getPopupPosition, getPosition, Position, TextSelection } from '@/utils/sel';
 import Toast from '@/components/Toast';
 import useOutsideClick from '@/hooks/useOutsideClick';
 import AnnotationPopup from './AnnotationPopup';
-
-interface TextSelection {
-  annotated?: boolean;
-  text: string;
-  range: Range;
-  index: number;
-}
+import { uniqueId } from '@/utils/misc';
 
 const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { envConfig } = useEnv();
   const { settings, saveConfig, getProgress, updateBooknotes } = useReaderStore();
   const { getConfig, getView, getViewsById } = useReaderStore();
+  const { notebookNewAnnotation, setNotebookVisible, setNotebookNewAnnotation } = useReaderStore();
   const globalReadSettings = settings.globalReadSettings;
   const config = getConfig(bookKey)!;
   const progress = getProgress(bookKey)!;
@@ -55,8 +50,8 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     const { doc, index } = detail;
     const handlePointerup = () => {
       const sel = doc.getSelection();
-      if (sel && sel.toString().trim().length > 0) {
-        setSelection({ text: sel.toString(), range: sel.getRangeAt(0), index });
+      if (sel && sel.toString().trim().length > 0 && sel.rangeCount > 0) {
+        setSelection({ key: bookKey, text: sel.toString(), range: sel.getRangeAt(0), index });
       }
     };
     detail.doc?.addEventListener('pointerup', handlePointerup);
@@ -84,10 +79,10 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     const annotations = booknotes.filter((booknote) => booknote.type === 'annotation');
     const annotation = annotations.find((annotation) => annotation.cfi === cfi);
     if (!annotation) return;
-    const selection = { annotated: true, text: annotation.text, range, index };
+    const selection = { key: bookKey, annotated: true, text: annotation.text ?? '', range, index };
     setSelectedStyle(annotation.style!);
     setSelectedColor(annotation.color!);
-    setSelection(selection as TextSelection);
+    setSelection(selection);
   };
 
   useFoliateEvents(view, { onLoad, onDrawAnnotation, onShowAnnotation }, [config]);
@@ -117,9 +112,39 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   }, [toastMessage]);
 
   const handleCopy = () => {
+    if (!selection || !selection.text) return;
     setShowPopup(false);
-    setToastMessage('Copied to clipboard');
+    setToastMessage('Copied to notebook');
+
+    const { booknotes: annotations = [] } = config;
     if (selection) navigator.clipboard.writeText(selection.text);
+    const { tocHref: href } = progress;
+    const cfi = view?.getCFI(selection.index, selection.range);
+    if (!cfi) return;
+    const annotation: BookNote = {
+      id: uniqueId(),
+      type: 'excerpt',
+      cfi,
+      href,
+      text: selection.text,
+      note: '',
+      created: Date.now(),
+    };
+
+    const existingIndex = annotations.findIndex(
+      (annotation) => annotation.cfi === cfi && annotation.type === 'excerpt',
+    );
+    if (existingIndex !== -1) {
+      annotations[existingIndex] = annotation;
+    } else {
+      annotations.push(annotation);
+    }
+    const updatedConfig = updateBooknotes(bookKey, annotations);
+    if (updatedConfig) {
+      saveConfig(envConfig, bookKey, updatedConfig, settings);
+    }
+    setHighlightOptionsVisible(false);
+    setNotebookVisible(true);
   };
 
   const handleHighlight = (update = false) => {
@@ -131,11 +156,17 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     if (!cfi) return;
     const style = globalReadSettings.highlightStyle;
     const color = globalReadSettings.highlightStyles[style];
-    const text = selection.text;
-    const type = 'annotation';
-    const created = Date.now();
-    const note = '';
-    const annotation: BookNote = { type, cfi, href, style, color, text, note, created };
+    const annotation: BookNote = {
+      id: uniqueId(),
+      type: 'annotation',
+      cfi,
+      href,
+      style,
+      color,
+      text: selection.text,
+      note: '',
+      created: Date.now(),
+    };
     const existingIndex = annotations.findIndex(
       (annotation) => annotation.cfi === cfi && annotation.type === 'annotation',
     );
@@ -155,15 +186,20 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSelection({ ...selection, annotated: true });
     }
 
-    const dedupedAnnotations = Array.from(
-      new Map(annotations.map((item) => [`${item.type}-${item.cfi}`, item])).values(),
-    );
-    const updatedConfig = updateBooknotes(bookKey, dedupedAnnotations);
+    const updatedConfig = updateBooknotes(bookKey, annotations);
     if (updatedConfig) {
       saveConfig(envConfig, bookKey, updatedConfig, settings);
     }
   };
-  const handleAnnotate = () => {};
+  const handleAnnotate = () => {
+    if (!selection || !selection.text) return;
+    const { tocHref: href } = progress;
+    selection.href = href;
+    setHighlightOptionsVisible(false);
+    setNotebookVisible(true);
+    setNotebookNewAnnotation(selection);
+    handleHighlight(true);
+  };
   const handleSearch = () => {};
   const handleDictionary = () => {};
 
@@ -181,7 +217,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   ];
 
   return (
-    <div ref={popupRef}>
+    <div ref={notebookNewAnnotation ? null : popupRef}>
       {showPopup && trianglePosition && popupPosition && (
         <AnnotationPopup
           buttons={buttons}

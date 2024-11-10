@@ -1,5 +1,5 @@
 export type BookFormat = 'EPUB' | 'PDF' | 'MOBI' | 'CBZ' | 'FB2' | 'FBZ';
-export type BookNoteType = 'bookmark' | 'highlight' | 'annotation';
+export type BookNoteType = 'bookmark' | 'annotation' | 'excerpt';
 export type HighlightStyle = 'highlight' | 'underline' | 'squiggly';
 export type HighlightColor = 'red' | 'yellow' | 'green' | 'blue' | 'violet';
 
@@ -22,6 +22,7 @@ export interface PageInfo {
 }
 
 export interface BookNote {
+  id: string;
   type: BookNoteType;
   cfi: string;
   href: string;

@@ -14,6 +14,7 @@ import { SystemSettings } from '@/types/settings';
 import { FoliateView } from '@/app/reader/components/FoliateViewer';
 import { BookDoc, DocumentLoader, TOCItem } from '@/libs/document';
 import { updateTocID } from '@/utils/toc';
+import { TextSelection } from '@/utils/sel';
 
 export interface BookData {
   /* Persistent data shared with different views of the same book */
@@ -58,8 +59,21 @@ interface ReaderStore {
   setSideBarWidth: (width: string) => void;
   toggleSideBar: () => void;
   toggleSideBarPin: () => void;
-  setSideBarVisibility: (visible: boolean) => void;
+  setSideBarVisible: (visible: boolean) => void;
   setSideBarPin: (pinned: boolean) => void;
+
+  notebookWidth: string;
+  isNotebookVisible: boolean;
+  isNotebookPinned: boolean;
+  notebookNewAnnotation: TextSelection | null;
+  notebookEditAnnotation: BookNote | null;
+  setNotebookWidth: (width: string) => void;
+  toggleNotebook: () => void;
+  toggleNotebookPin: () => void;
+  setNotebookVisible: (visible: boolean) => void;
+  setNotebookPin: (pinned: boolean) => void;
+  setNotebookNewAnnotation: (selection: TextSelection | null) => void;
+  setNotebookEditAnnotation: (note: BookNote | null) => void;
 
   setBookmarkRibbonVisibility: (key: string, visible: boolean) => void;
 
@@ -120,8 +134,22 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
   setSideBarWidth: (width: string) => set({ sideBarWidth: width }),
   toggleSideBar: () => set((state) => ({ isSideBarVisible: !state.isSideBarVisible })),
   toggleSideBarPin: () => set((state) => ({ isSideBarPinned: !state.isSideBarPinned })),
-  setSideBarVisibility: (visible: boolean) => set({ isSideBarVisible: visible }),
+  setSideBarVisible: (visible: boolean) => set({ isSideBarVisible: visible }),
   setSideBarPin: (pinned: boolean) => set({ isSideBarPinned: pinned }),
+
+  notebookWidth: '',
+  isNotebookVisible: false,
+  isNotebookPinned: false,
+  notebookNewAnnotation: null,
+  notebookEditAnnotation: null,
+  setNotebookWidth: (width: string) => set({ notebookWidth: width }),
+  toggleNotebook: () => set((state) => ({ isNotebookVisible: !state.isNotebookVisible })),
+  toggleNotebookPin: () => set((state) => ({ isNotebookPinned: !state.isNotebookPinned })),
+  setNotebookVisible: (visible: boolean) => set({ isNotebookVisible: visible }),
+  setNotebookPin: (pinned: boolean) => set({ isNotebookPinned: pinned }),
+  setNotebookNewAnnotation: (selection: TextSelection | null) =>
+    set({ notebookNewAnnotation: selection }),
+  setNotebookEditAnnotation: (note: BookNote | null) => set({ notebookEditAnnotation: note }),
 
   isFontLayoutSettingsDialogOpen: false,
   isFontLayoutSettingsGlobal: true,
@@ -389,10 +417,13 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
       const id = key.split('-')[0]!;
       const book = state.booksData[id];
       if (!book) return state;
+      const dedupedBooknotes = Array.from(
+        new Map(booknotes.map((item) => [`${item.id}-${item.type}-${item.cfi}`, item])).values(),
+      );
       updatedConfig = {
         ...book.config,
         lastUpdated: Date.now(),
-        booknotes,
+        booknotes: dedupedBooknotes,
       };
       return {
         booksData: {
@@ -402,7 +433,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
             config: {
               ...book.config,
               lastUpdated: Date.now(),
-              booknotes,
+              booknotes: dedupedBooknotes,
             },
           },
         },

@@ -1,30 +1,26 @@
 import { useCallback } from 'react';
 
-const useDragBar = (
-  handleSideBarResize: (width: string) => void,
-  minWidth: number,
-  maxWidth: number,
-) => {
+const useDragBar = (handleDragMove: (e: MouseEvent) => void) => {
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      const newWidthPx = e.clientX;
-      const width = `${Math.round((newWidthPx / window.innerWidth) * 10000) / 100}%`;
-      const minWidthPx = minWidth * window.innerWidth;
-      const maxWidthPx = maxWidth * window.innerWidth;
-      if (newWidthPx >= minWidthPx && newWidthPx <= maxWidthPx) {
-        handleSideBarResize(width);
-      }
+      handleDragMove(e);
     },
-    [handleSideBarResize, minWidth, maxWidth],
+    [handleDragMove],
   );
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-    });
-  };
+  const handleMouseUp = useCallback(() => {
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  }, [handleMouseMove]);
+
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    },
+    [handleMouseMove, handleMouseUp],
+  );
 
   return { handleMouseDown };
 };

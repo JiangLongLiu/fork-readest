@@ -10,8 +10,8 @@ const SidebarHeader: React.FC<{
   isPinned: boolean;
   onGoToLibrary: () => void;
   onOpenSplitView: () => void;
-  handleSideBarTogglePin: () => void;
-}> = ({ isPinned, onGoToLibrary, onOpenSplitView, handleSideBarTogglePin }) => (
+  handleTogglePin: () => void;
+}> = ({ isPinned, onGoToLibrary, onOpenSplitView, handleTogglePin }) => (
   <div className='sidebar-header flex h-11 items-center justify-between pl-1.5 pr-3'>
     <div className='flex items-center'>
       <button className='btn btn-ghost h-8 min-h-8 w-8 p-0' onClick={onGoToLibrary}>
@@ -30,7 +30,7 @@ const SidebarHeader: React.FC<{
         <BookMenu openSplitView={onOpenSplitView} />
       </Dropdown>
       <button
-        onClick={handleSideBarTogglePin}
+        onClick={handleTogglePin}
         className={`${isPinned ? 'bg-gray-300' : 'bg-base-300'} btn btn-ghost btn-circle right-0 h-6 min-h-6 w-6`}
       >
         {isPinned ? <MdPushPin size={14} /> : <MdOutlinePushPin size={14} />}

@@ -7,6 +7,7 @@ import WindowButtons from '@/components/WindowButtons';
 import Dropdown from '@/components/Dropdown';
 import SidebarToggler from './SidebarToggler';
 import BookmarkToggler from './BookmarkToggler';
+import NotebookToggler from './NotebookToggler';
 import ViewMenu from './ViewMenu';
 
 interface HeaderBarProps {
@@ -57,6 +58,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
       </div>
 
       <div className='flex h-full items-center space-x-2'>
+        <NotebookToggler bookKey={bookKey} />
         <Dropdown
           className='dropdown-bottom dropdown-end'
           buttonClassName='btn btn-ghost h-8 min-h-8 w-8 p-0'

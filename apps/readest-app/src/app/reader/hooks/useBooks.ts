@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEnv } from '@/context/EnvContext';
 import { useReaderStore } from '@/store/readerStore';
-
-const uniqueId = () => Math.random().toString(36).substring(2, 9);
+import { uniqueId } from '@/utils/misc';
 
 const useBooks = () => {
   const { envConfig } = useEnv();

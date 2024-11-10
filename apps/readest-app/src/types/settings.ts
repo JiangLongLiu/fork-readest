@@ -5,6 +5,8 @@ export type ThemeType = 'light' | 'dark' | 'auto';
 export interface ReadSettings {
   sideBarWidth: string;
   isSideBarPinned: boolean;
+  notebookWidth: string;
+  isNotebookPinned: boolean;
   autohideCursor: boolean;
 
   highlightStyle: HighlightStyle;

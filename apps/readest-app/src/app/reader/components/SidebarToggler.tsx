@@ -8,7 +8,7 @@ interface SidebarTogglerProps {
 }
 
 const SidebarToggler: React.FC<SidebarTogglerProps> = ({ bookKey }) => {
-  const { isSideBarVisible, setSideBarBookKey, sideBarBookKey, toggleSideBar } = useReaderStore();
+  const { sideBarBookKey, isSideBarVisible, setSideBarBookKey, toggleSideBar } = useReaderStore();
   const handleToggleSidebar = () => {
     if (sideBarBookKey === bookKey) {
       toggleSideBar();

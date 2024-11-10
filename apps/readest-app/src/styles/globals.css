@@ -157,3 +157,7 @@ foliate-view {
   @apply rounded-b-2xl;
 }
 
+.collapse-arrow > .collapse-title:after {
+  top: var(--top-override, default-value);
+  inset-inline-end: var(--end-override, default-value);
+}

@@ -5,19 +5,19 @@ const useSidebar = (initialWidth: string, isPinned: boolean) => {
   const { settings } = useReaderStore();
   const {
     sideBarWidth,
-    setSideBarWidth,
     isSideBarVisible,
-    setSideBarVisibility,
-    toggleSideBar,
     isSideBarPinned,
+    setSideBarWidth,
+    setSideBarVisible,
     setSideBarPin,
+    toggleSideBar,
     toggleSideBarPin,
   } = useReaderStore();
 
   useEffect(() => {
     setSideBarWidth(initialWidth);
     setSideBarPin(isPinned);
-    setSideBarVisibility(isPinned);
+    setSideBarVisible(isPinned);
   }, []);
 
   const handleSideBarResize = (newWidth: string) => {
@@ -28,7 +28,7 @@ const useSidebar = (initialWidth: string, isPinned: boolean) => {
   const handleSideBarTogglePin = () => {
     toggleSideBarPin();
     settings.globalReadSettings.isSideBarPinned = !isSideBarPinned;
-    if (isSideBarPinned && isSideBarVisible) setSideBarVisibility(false);
+    if (isSideBarPinned && isSideBarVisible) setSideBarVisible(false);
   };
 
   return {
@@ -37,7 +37,7 @@ const useSidebar = (initialWidth: string, isPinned: boolean) => {
     isSideBarVisible,
     handleSideBarResize,
     handleSideBarTogglePin,
-    setSideBarVisibility,
+    setSideBarVisible,
     toggleSideBar,
   };
 };

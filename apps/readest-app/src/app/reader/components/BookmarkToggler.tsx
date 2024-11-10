@@ -5,6 +5,7 @@ import * as CFI from 'foliate-js/epubcfi.js';
 import { useReaderStore } from '@/store/readerStore';
 import { useEnv } from '@/context/EnvContext';
 import { BookNote } from '@/types/book';
+import { uniqueId } from '@/utils/misc';
 
 interface BookmarkTogglerProps {
   bookKey: string;
@@ -28,6 +29,7 @@ const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
       const text = range?.startContainer.textContent?.slice(0, 128) || '';
       const truncatedText = text.length === 128 ? text + '...' : text;
       const bookmark: BookNote = {
+        id: uniqueId(),
         type: 'bookmark',
         cfi,
         href,
@@ -46,7 +48,11 @@ const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
       const end = CFI.collapse(cfi, true);
       const updatedConfig = updateBooknotes(
         bookKey,
-        bookmarks.filter((item) => CFI.compare(start, item.cfi) * CFI.compare(end, item.cfi) > 0),
+        bookmarks.filter(
+          (item) =>
+            item.type !== 'bookmark' ||
+            CFI.compare(start, item.cfi) * CFI.compare(end, item.cfi) > 0,
+        ),
       );
       if (updatedConfig) {
         saveConfig(envConfig, bookKey, updatedConfig, settings);

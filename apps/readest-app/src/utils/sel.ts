@@ -22,6 +22,15 @@ export interface Position {
   dir?: PositionDir;
 }
 
+export interface TextSelection {
+  key: string;
+  text: string;
+  range: Range;
+  index: number;
+  href?: string;
+  annotated?: boolean;
+}
+
 const frameRect = (frame: Frame, rect: Rect, sx = 1, sy = 1) => {
   const left = sx * rect.left + frame.left;
   const right = sx * rect.right + frame.left;
