@@ -3,6 +3,7 @@ import React, { useRef, useState } from 'react';
 import { PiDotsThreeVerticalBold } from 'react-icons/pi';
 
 import { useReaderStore } from '@/store/readerStore';
+import useFullScreen from '@/hooks/useFullScreen';
 import WindowButtons from '@/components/WindowButtons';
 import Dropdown from '@/components/Dropdown';
 import SidebarToggler from './SidebarToggler';
@@ -26,6 +27,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   onSetSettingsDialogOpen,
 }) => {
   const headerRef = useRef<HTMLDivElement>(null);
+  const { isFullScreen } = useFullScreen();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { hoveredBookKey, isSideBarVisible, setHoveredBookKey } = useReaderStore();
 
@@ -38,7 +40,8 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
     <div
       ref={headerRef}
       className={clsx(
-        `header-bar absolute top-0 z-10 flex h-11 w-full items-center px-4`,
+        `header-bar absolute top-0 z-10 flex h-11 w-full items-center pr-4`,
+        isFullScreen ? 'pl-4' : 'pl-16',
         `shadow-xs bg-base-100 rounded-window-top-right transition-opacity duration-300`,
         !isSideBarVisible && 'rounded-window-top-left',
         isHoveredAnim && 'hover-bar-anim',
