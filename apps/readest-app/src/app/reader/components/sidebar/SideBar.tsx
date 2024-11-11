@@ -14,22 +14,24 @@ const MIN_SIDEBAR_WIDTH = 0.05;
 const MAX_SIDEBAR_WIDTH = 0.45;
 
 const SideBar: React.FC<{
-  width: string;
-  isPinned: boolean;
   onGoToLibrary: () => void;
   onOpenSplitView: () => void;
-}> = ({ width, isPinned, onGoToLibrary, onOpenSplitView }) => {
+}> = ({ onGoToLibrary, onOpenSplitView }) => {
   const { envConfig } = useEnv();
   const { sideBarBookKey, settings } = useReaderStore();
   const { saveSettings, getBookData } = useReaderStore();
   const [activeTab, setActiveTab] = useState(settings.globalReadSettings.sideBarTab);
   const {
     sideBarWidth,
+    isSideBarPinned,
     isSideBarVisible,
     setSideBarVisible,
     handleSideBarResize,
     handleSideBarTogglePin,
-  } = useSidebar(width, isPinned);
+  } = useSidebar(
+    settings.globalReadSettings.sideBarWidth,
+    settings.globalReadSettings.isSideBarPinned,
+  );
 
   const handleDragMove = (e: MouseEvent) => {
     const widthFraction = e.clientX / window.innerWidth;
@@ -62,16 +64,16 @@ const SideBar: React.FC<{
         className={clsx(
           'sidebar-container bg-base-200 z-20 h-full min-w-60 select-none',
           'rounded-window-top-left rounded-window-bottom-left',
-          !isPinned && 'shadow-2xl',
+          !isSideBarPinned && 'shadow-2xl',
         )}
         style={{
           width: `${sideBarWidth}`,
           maxWidth: `${MAX_SIDEBAR_WIDTH * 100}%`,
-          position: isPinned ? 'relative' : 'absolute',
+          position: isSideBarPinned ? 'relative' : 'absolute',
         }}
       >
         <SidebarHeader
-          isPinned={isPinned}
+          isPinned={isSideBarPinned}
           onGoToLibrary={onGoToLibrary}
           onOpenSplitView={onOpenSplitView}
           handleTogglePin={handleSideBarTogglePin}
@@ -86,7 +88,7 @@ const SideBar: React.FC<{
           onMouseDown={handleMouseDown}
         ></div>
       </div>
-      {!isPinned && (
+      {!isSideBarPinned && (
         <div className='overlay fixed inset-0 z-10 bg-black/20' onClick={handleClickOverlay} />
       )}
     </>

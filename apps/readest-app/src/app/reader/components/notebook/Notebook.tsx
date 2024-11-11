@@ -11,10 +11,10 @@ import { BookNote } from '@/types/book';
 import { uniqueId } from '@/utils/misc';
 import BooknoteItem from '../sidebar/BooknoteItem';
 
-const MIN_NOTEBOOK_WIDTH = 0.05;
+const MIN_NOTEBOOK_WIDTH = 0.15;
 const MAX_NOTEBOOK_WIDTH = 0.45;
 
-const Notebook: React.FC<{ width: string; isPinned: boolean }> = ({ width, isPinned }) => {
+const Notebook: React.FC = ({}) => {
   const { envConfig } = useEnv();
   const { settings, sideBarBookKey, notebookWidth } = useReaderStore();
   const { isNotebookVisible, isNotebookPinned } = useReaderStore();
@@ -22,6 +22,12 @@ const Notebook: React.FC<{ width: string; isPinned: boolean }> = ({ width, isPin
   const { setNotebookWidth, setNotebookPin, toggleNotebookPin } = useReaderStore();
   const { getConfig, saveConfig, getView, setNotebookVisible, updateBooknotes } = useReaderStore();
   const { setNotebookNewAnnotation, setNotebookEditAnnotation } = useReaderStore();
+
+  useEffect(() => {
+    setNotebookWidth(settings.globalReadSettings.notebookWidth);
+    setNotebookPin(settings.globalReadSettings.isNotebookPinned);
+    setNotebookVisible(settings.globalReadSettings.isNotebookPinned);
+  }, []);
 
   const handleNotebookResize = (newWidth: string) => {
     setNotebookWidth(newWidth);
@@ -86,12 +92,6 @@ const Notebook: React.FC<{ width: string; isPinned: boolean }> = ({ width, isPin
     setNotebookEditAnnotation(null);
   };
 
-  useEffect(() => {
-    setNotebookWidth(width);
-    setNotebookPin(isPinned);
-    setNotebookVisible(isPinned);
-  }, []);
-
   const { handleMouseDown } = useDragBar(handleDragMove);
   const deleteNote = (note: BookNote) => {
     if (!sideBarBookKey) return;
@@ -118,26 +118,26 @@ const Notebook: React.FC<{ width: string; isPinned: boolean }> = ({ width, isPin
 
   return isNotebookVisible ? (
     <>
-      {!isPinned && (
+      {!isNotebookPinned && (
         <div className='overlay fixed inset-0 z-10 bg-black/20' onClick={handleClickOverlay} />
       )}
       <div
         className={clsx(
           'notebook-container bg-base-200 right-0 z-20 h-full min-w-60 select-none',
           'rounded-window-top-right rounded-window-bottom-right',
-          !isPinned && 'shadow-2xl',
+          !isNotebookPinned && 'shadow-2xl',
         )}
         style={{
           width: `${notebookWidth}`,
           maxWidth: `${MAX_NOTEBOOK_WIDTH * 100}%`,
-          position: isPinned ? 'relative' : 'absolute',
+          position: isNotebookPinned ? 'relative' : 'absolute',
         }}
       >
         <div
           className='drag-bar absolute left-0 top-0 h-full w-0.5 cursor-col-resize'
           onMouseDown={handleMouseDown}
         />
-        <NotebookHeader isPinned={isPinned} handleTogglePin={handleTogglePin} />
+        <NotebookHeader isPinned={isNotebookPinned} handleTogglePin={handleTogglePin} />
         <div className='max-h-[calc(100vh-44px)] overflow-y-auto px-3'>
           <div>{excerptNotes.length > 0 && <p className='pt-1 text-sm'>Excerpts</p>}</div>
           <ul className=''>

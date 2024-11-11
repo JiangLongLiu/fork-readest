@@ -17,22 +17,19 @@ interface BookGridProps {
 }
 
 const BookGrid: React.FC<BookGridProps> = ({ bookKeys, onCloseBook }) => {
-  const { isSideBarPinned, isSideBarVisible, sideBarWidth } = useReaderStore();
   const { getConfig, getProgress, getBookData, getViewState, getViewSettings } = useReaderStore();
   const { isFontLayoutSettingsDialogOpen, setFontLayoutSettingsDialogOpen } = useReaderStore();
-  const gridWidth = isSideBarPinned && isSideBarVisible ? `calc(100% - ${sideBarWidth})` : '100%';
   const gridTemplate = getGridTemplate(bookKeys.length, window.innerWidth / window.innerHeight);
 
   return (
     <div
-      className='grid h-full'
+      className='grid h-full flex-grow'
       style={{
-        width: gridWidth,
         gridTemplateColumns: gridTemplate.columns,
         gridTemplateRows: gridTemplate.rows,
       }}
     >
-      {bookKeys.map((bookKey) => {
+      {bookKeys.map((bookKey, index) => {
         const bookData = getBookData(bookKey);
         const config = getConfig(bookKey);
         const progress = getProgress(bookKey);
@@ -54,6 +51,7 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, onCloseBook }) => {
             <HeaderBar
               bookKey={bookKey}
               bookTitle={book.title}
+              isTopLeft={index === 0}
               isHoveredAnim={bookKeys.length > 2}
               onCloseBook={onCloseBook}
               onSetSettingsDialogOpen={setFontLayoutSettingsDialogOpen}

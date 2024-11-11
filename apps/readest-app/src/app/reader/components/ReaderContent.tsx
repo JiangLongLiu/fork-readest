@@ -18,9 +18,8 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
   const router = useRouter();
   const { envConfig } = useEnv();
   const { bookKeys, dismissBook, getNextBookKey, openSplitView } = useBooks();
-  const { sideBarBookKey, getConfig, setSideBarBookKey } = useReaderStore();
-  const { getView, getBookData, getViewState, clearViewState, saveConfig, saveSettings } =
-    useReaderStore();
+  const { sideBarBookKey, getView, getConfig, setSideBarBookKey } = useReaderStore();
+  const { getBookData, getViewState, clearViewState, saveConfig, saveSettings } = useReaderStore();
 
   useBookShortcuts({ sideBarBookKey, bookKeys, openSplitView, getNextBookKey });
 
@@ -71,17 +70,9 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
 
   return (
     <div className='flex h-screen'>
-      <SideBar
-        width={settings.globalReadSettings.sideBarWidth}
-        isPinned={settings.globalReadSettings.isSideBarPinned}
-        onGoToLibrary={handleCloseBooks}
-        onOpenSplitView={openSplitView}
-      />
+      <SideBar onGoToLibrary={handleCloseBooks} onOpenSplitView={openSplitView} />
       <BookGrid bookKeys={bookKeys} onCloseBook={handleCloseBook} />
-      <Notebook
-        width={settings.globalReadSettings.notebookWidth}
-        isPinned={settings.globalReadSettings.isNotebookPinned}
-      />
+      <Notebook />
     </div>
   );
 };

@@ -14,6 +14,7 @@ import ViewMenu from './ViewMenu';
 interface HeaderBarProps {
   bookKey: string;
   bookTitle: string;
+  isTopLeft: boolean;
   isHoveredAnim: boolean;
   onCloseBook: (bookKey: string) => void;
   onSetSettingsDialogOpen: (open: boolean) => void;
@@ -22,6 +23,7 @@ interface HeaderBarProps {
 const HeaderBar: React.FC<HeaderBarProps> = ({
   bookKey,
   bookTitle,
+  isTopLeft,
   isHoveredAnim,
   onCloseBook,
   onSetSettingsDialogOpen,
@@ -41,7 +43,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
       ref={headerRef}
       className={clsx(
         `header-bar absolute top-0 z-10 flex h-11 w-full items-center pr-4`,
-        isFullScreen ? 'pl-4' : 'pl-16',
+        !isFullScreen && isTopLeft && !isSideBarVisible ? 'pl-16' : 'pl-4',
         `shadow-xs bg-base-100 rounded-window-top-right transition-opacity duration-300`,
         !isSideBarVisible && 'rounded-window-top-left',
         isHoveredAnim && 'hover-bar-anim',
