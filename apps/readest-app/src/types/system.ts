@@ -18,6 +18,8 @@ export interface FileSystem {
 
 export interface AppService {
   fs: FileSystem;
+  isNativeWindow: boolean;
+  isAppDataSandbox: boolean;
 
   selectDirectory(title: string): Promise<string>;
   selectFiles(name: string, extensions: string[]): Promise<string[]>;

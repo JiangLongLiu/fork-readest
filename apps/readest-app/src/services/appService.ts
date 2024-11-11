@@ -26,6 +26,7 @@ import {
 export abstract class BaseAppService implements AppService {
   localBooksDir: string = '';
   abstract isAppDataSandbox: boolean;
+  abstract isNativeWindow: boolean;
   abstract fs: FileSystem;
 
   abstract resolvePath(fp: string, base: BaseDir): { baseDir: number; base: BaseDir; fp: string };

@@ -72,6 +72,10 @@ const LibraryPage = () => {
     setIsSelectMode(!isSelectMode);
   };
 
+  if (!appService) {
+    return <Spinner loading />;
+  }
+
   return (
     <div className='rounded-window min-h-screen select-none bg-gray-100'>
       <LibraryHeader

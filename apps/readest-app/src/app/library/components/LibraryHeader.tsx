@@ -1,8 +1,11 @@
+import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { PiPlus } from 'react-icons/pi';
 import { PiSelectionAllDuotone } from 'react-icons/pi';
 
+import { useEnv } from '@/context/EnvContext';
+import useFullScreen from '@/hooks/useFullScreen';
 import WindowButtons from '@/components/WindowButtons';
 
 interface LibraryHeaderProps {
@@ -16,7 +19,10 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
   onImportBooks,
   onToggleSelectMode,
 }) => {
+  const { appService } = useEnv();
+  const { isFullScreen } = useFullScreen();
   const headerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.shiftKey) {
@@ -45,10 +51,16 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
   };
 
   return (
-    <div ref={headerRef} className='titlebar fixed top-2 z-10 w-full bg-gray-100 px-6 py-4'>
+    <div
+      ref={headerRef}
+      className={clsx(
+        'titlebar fixed z-10 w-full bg-gray-100 py-2 pr-6',
+        isFullScreen ? 'pl-2' : 'pl-16',
+      )}
+    >
       <div className='flex items-center justify-between'>
-        <div className='sm:w relative flex w-full items-center'>
-          <span className='absolute left-4 text-gray-500'>
+        <div className='sm:w relative flex w-full items-center pl-4'>
+          <span className='absolute left-8 text-gray-500'>
             <FaSearch className='h-4 w-4' />
           </span>
           <input
@@ -81,12 +93,14 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
             </button>
           </div>
         </div>
-        <WindowButtons
-          headerRef={headerRef}
-          onMinimize={handleMinimize}
-          onToggleMaximize={handleToggleMaximize}
-          onClose={handleClose}
-        />
+        {!appService?.isNativeWindow && (
+          <WindowButtons
+            headerRef={headerRef}
+            onMinimize={handleMinimize}
+            onToggleMaximize={handleToggleMaximize}
+            onClose={handleClose}
+          />
+        )}
       </div>
     </div>
   );
