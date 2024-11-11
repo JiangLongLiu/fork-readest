@@ -278,7 +278,6 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
       }
       const config = get().booksData[id]?.config as BookConfig;
       const configViewSettings = config.viewSettings!;
-      console.log('Initializing book view settings', configViewSettings);
       set((state) => ({
         viewStates: {
           ...state.viewStates,

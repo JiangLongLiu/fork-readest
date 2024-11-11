@@ -14,11 +14,11 @@ interface BooknoteItemProps {
 
 const BooknoteItem: React.FC<BooknoteItemProps> = ({ bookKey, item, editable = false }) => {
   const { envConfig } = useEnv();
-  const { settings, getProgress, getView } = useReaderStore();
-  const { getConfig, saveConfig, updateBooknotes, setNotebookEditAnnotation } = useReaderStore();
+  const { settings, getConfig, saveConfig, getProgress, getView } = useReaderStore();
+  const { updateBooknotes, setNotebookEditAnnotation, setNotebookVisible } = useReaderStore();
   const [isCurrent, setIsCurrent] = useState(false);
 
-  const { text, cfi } = item;
+  const { text, cfi, note } = item;
   const progress = getProgress(bookKey);
 
   useEffect(() => {
@@ -32,6 +32,9 @@ const BooknoteItem: React.FC<BooknoteItemProps> = ({ bookKey, item, editable = f
   const handleClickItem = (event: React.MouseEvent) => {
     event.preventDefault();
     getView(bookKey)?.goTo(cfi);
+    if (note) {
+      setNotebookVisible(true);
+    }
   };
 
   const deleteNote = (note: BookNote) => {

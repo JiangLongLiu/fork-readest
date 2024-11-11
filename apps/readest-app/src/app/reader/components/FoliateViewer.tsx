@@ -160,7 +160,7 @@ const FoliateViewer: React.FC<{
 
   const initAnnotations = () => {
     const { booknotes = [] } = config;
-    const annotations = booknotes.filter((item) => item.type === 'annotation');
+    const annotations = booknotes.filter((item) => item.type === 'annotation' && item.style);
     try {
       Promise.all(annotations.map((annotation) => view?.addAnnotation(annotation)));
     } catch (e) {
