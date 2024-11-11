@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import { useEnv } from '@/context/EnvContext';
 import { useReaderStore } from '@/store/readerStore';
@@ -21,9 +21,8 @@ const SideBar: React.FC<{
 }> = ({ width, isPinned, onGoToLibrary, onOpenSplitView }) => {
   const { envConfig } = useEnv();
   const { sideBarBookKey, settings } = useReaderStore();
-  const { saveSettings, getBookData, getProgress } = useReaderStore();
+  const { saveSettings, getBookData } = useReaderStore();
   const [activeTab, setActiveTab] = useState(settings.globalReadSettings.sideBarTab);
-  const [currentHref, setCurrentHref] = useState<string | null>(null);
   const {
     sideBarWidth,
     isSideBarVisible,
@@ -38,12 +37,6 @@ const SideBar: React.FC<{
     handleSideBarResize(`${Math.round(newWidth * 10000) / 100}%`);
   };
   const { handleMouseDown } = useDragBar(handleDragMove);
-
-  useEffect(() => {
-    if (!sideBarBookKey) return;
-    const progress = getProgress(sideBarBookKey);
-    setCurrentHref(progress?.tocHref || null);
-  }, [sideBarBookKey]);
 
   const handleClickOverlay = () => {
     setSideBarVisible(false);
@@ -86,12 +79,7 @@ const SideBar: React.FC<{
         <div className='border-b px-3'>
           <BookCard cover={book.coverImageUrl!} title={book.title} author={book.author} />
         </div>
-        <SidebarContent
-          activeTab={activeTab}
-          bookDoc={bookDoc}
-          currentHref={currentHref}
-          sideBarBookKey={sideBarBookKey!}
-        />
+        <SidebarContent activeTab={activeTab} bookDoc={bookDoc} sideBarBookKey={sideBarBookKey!} />
         <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
         <div
           className='drag-bar absolute right-0 top-0 h-full w-0.5 cursor-col-resize'

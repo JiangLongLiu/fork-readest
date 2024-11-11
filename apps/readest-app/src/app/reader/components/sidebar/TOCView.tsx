@@ -1,12 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { md5 } from 'js-md5';
 import { TOCItem } from '@/libs/document';
 import { useReaderStore } from '@/store/readerStore';
 import { findParentPath } from '@/utils/toc';
-import { useFoliateEvents } from '../../hooks/useFoliateEvents';
-
-const getHrefMd5 = (href: string) => md5(JSON.stringify(href));
+import { getContentMd5 } from '@/utils/misc';
 
 const createExpanderIcon = (isExpanded: boolean) => {
   return (
@@ -26,12 +23,11 @@ const TOCItemView: React.FC<{
   bookKey: string;
   item: TOCItem;
   depth: number;
-  setCurrentHref: (href: string) => void;
-  currentHref: string | null;
   expandedItems: string[];
-}> = ({ bookKey, item, depth, setCurrentHref, currentHref, expandedItems }) => {
+}> = ({ bookKey, item, depth, expandedItems }) => {
   const [isExpanded, setIsExpanded] = useState(expandedItems.includes(item.href || ''));
-  const { getView } = useReaderStore();
+  const { getView, getProgress } = useReaderStore();
+  const progress = getProgress(bookKey);
 
   const handleToggleExpand = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -43,11 +39,10 @@ const TOCItemView: React.FC<{
     event.preventDefault();
     if (item.href) {
       getView(bookKey)?.goTo(item.href);
-      setCurrentHref(item.href);
     }
   };
 
-  const isActive = currentHref === item.href;
+  const isActive = progress ? progress.tocHref === item.href : false;
 
   useEffect(() => {
     setIsExpanded(expandedItems.includes(item.href || ''));
@@ -62,7 +57,7 @@ const TOCItemView: React.FC<{
         style={{ paddingInlineStart: `${(depth + 1) * 12}px` }}
         aria-expanded={isExpanded ? 'true' : 'false'}
         aria-selected={isActive ? 'true' : 'false'}
-        data-href={item.href ? getHrefMd5(item.href) : undefined}
+        data-href={item.href ? getContentMd5(item.href) : undefined}
         className={`flex w-full cursor-pointer items-center rounded-md py-2 ${
           isActive ? 'bg-gray-300 hover:bg-gray-400' : 'hover:bg-gray-300'
         }`}
@@ -91,8 +86,6 @@ const TOCItemView: React.FC<{
               key={`${index}-${subitem.href}`}
               item={subitem}
               depth={depth + 1}
-              setCurrentHref={setCurrentHref}
-              currentHref={currentHref}
               expandedItems={expandedItems}
             />
           ))}
@@ -105,26 +98,12 @@ const TOCItemView: React.FC<{
 const TOCView: React.FC<{
   bookKey: string;
   toc: TOCItem[];
-  currentHref: string | null;
-}> = ({ bookKey, toc, currentHref: href }) => {
-  const [currentHref, setCurrentHref] = useState<string | null>(href);
+}> = ({ bookKey, toc }) => {
+  const { sideBarBookKey, getProgress } = useReaderStore();
+  const progress = getProgress(bookKey);
+
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const { getView } = useReaderStore();
-  const tocRef = useRef<HTMLUListElement | null>(null);
-
-  const tocRelocateHandler = (event: Event) => {
-    const detail = (event as CustomEvent).detail;
-    const { tocItem } = detail;
-    if (tocItem?.href) {
-      setCurrentHref(tocItem.href);
-    }
-  };
-
-  useFoliateEvents(getView(bookKey), { onRelocate: tocRelocateHandler });
-
-  useEffect(() => {
-    setCurrentHref(href);
-  }, [href]);
+  const viewRef = useRef<HTMLUListElement | null>(null);
 
   const expandParents = (toc: TOCItem[], href: string) => {
     const parentPath = findParentPath(toc, href).map((item) => item.href);
@@ -132,8 +111,10 @@ const TOCView: React.FC<{
   };
 
   useEffect(() => {
-    const hrefMd5 = currentHref ? getHrefMd5(currentHref) : '';
-    const currentItem = tocRef.current?.querySelector(`[data-href="${hrefMd5}"]`);
+    if (!progress) return;
+    const { tocHref: currentHref } = progress;
+    const hrefMd5 = currentHref ? getContentMd5(currentHref) : '';
+    const currentItem = viewRef.current?.querySelector(`[data-href="${hrefMd5}"]`);
     if (currentItem) {
       const rect = currentItem.getBoundingClientRect();
       const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
@@ -145,12 +126,12 @@ const TOCView: React.FC<{
     if (currentHref) {
       expandParents(toc, currentHref);
     }
-  }, [toc, currentHref]);
+  }, [toc, progress, sideBarBookKey]);
 
   return (
     <div className='relative'>
       <div className='max-h-[calc(100vh-173px)] overflow-y-auto rounded pt-2'>
-        <ul role='tree' ref={tocRef} className='overflow-y-auto px-2'>
+        <ul role='tree' ref={viewRef} className='overflow-y-auto px-2'>
           {toc &&
             toc.map((item, index) => (
               <TOCItemView
@@ -158,8 +139,6 @@ const TOCView: React.FC<{
                 key={`${index}-${item.href}`}
                 item={item}
                 depth={0}
-                setCurrentHref={setCurrentHref}
-                currentHref={currentHref}
                 expandedItems={expandedItems}
               />
             ))}

@@ -7,18 +7,15 @@ import BooknoteView from './BooknoteView';
 const SidebarContent: React.FC<{
   activeTab: string;
   bookDoc: BookDoc;
-  currentHref: string | null;
   sideBarBookKey: string;
-}> = ({ activeTab, bookDoc, currentHref, sideBarBookKey }) => (
+}> = ({ activeTab, bookDoc, sideBarBookKey }) => (
   <div className='sidebar-content overflow-y-auto font-sans text-sm font-light shadow-inner'>
-    {activeTab === 'toc' && bookDoc.toc && (
-      <TOCView toc={bookDoc.toc} bookKey={sideBarBookKey} currentHref={currentHref} />
-    )}
+    {activeTab === 'toc' && bookDoc.toc && <TOCView toc={bookDoc.toc} bookKey={sideBarBookKey} />}
     {activeTab === 'annotations' && (
-      <BooknoteView type={'annotation'} toc={bookDoc.toc} bookKey={sideBarBookKey} />
+      <BooknoteView type='annotation' toc={bookDoc.toc} bookKey={sideBarBookKey} />
     )}
     {activeTab === 'bookmarks' && (
-      <BooknoteView type={'bookmark'} toc={bookDoc.toc} bookKey={sideBarBookKey} />
+      <BooknoteView type='bookmark' toc={bookDoc.toc} bookKey={sideBarBookKey} />
     )}
   </div>
 );
