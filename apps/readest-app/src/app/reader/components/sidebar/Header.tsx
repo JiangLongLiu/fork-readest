@@ -27,13 +27,13 @@ const SidebarHeader: React.FC<{
           <GiBookshelf size={20} className='fill-base-content' />
         </button>
       </div>
-      <div className='flex size-[50%] min-w-20 items-center justify-between'>
-        <button className='btn btn-ghost left-0 h-8 min-h-8 w-8 p-0'>
+      <div className='flex size-[50%] min-w-20 max-w-32 items-center justify-between'>
+        <button className='btn btn-ghost left-0 h-6 min-h-6 w-6 p-0'>
           <FiSearch size={18} />
         </button>
         <Dropdown
           className='dropdown-bottom flex justify-center'
-          buttonClassName='btn btn-ghost h-8 min-h-8 w-8 p-0'
+          buttonClassName='btn btn-ghost h-6 min-h-6 w-6 p-0'
           toggleButton={<MdOutlineMenu size={20} />}
         >
           <BookMenu openSplitView={onOpenSplitView} />
