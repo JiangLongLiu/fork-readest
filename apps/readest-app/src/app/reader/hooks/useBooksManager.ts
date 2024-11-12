@@ -4,16 +4,12 @@ import { useEnv } from '@/context/EnvContext';
 import { useReaderStore } from '@/store/readerStore';
 import { uniqueId } from '@/utils/misc';
 
-const useBooks = () => {
-  const { envConfig } = useEnv();
-  const searchParams = useSearchParams();
+const useBooksManager = () => {
   const router = useRouter();
-  const { sideBarBookKey, initViewState, getViewState, setSideBarBookKey } = useReaderStore();
-
-  const initialIds = (searchParams.get('ids') || '').split(',').filter(Boolean);
-  const [bookKeys, setBookKeys] = useState<string[]>(() => {
-    return initialIds.map((id) => `${id}-${uniqueId()}`);
-  });
+  const searchParams = useSearchParams();
+  const { envConfig } = useEnv();
+  const { bookKeys, sideBarBookKey } = useReaderStore();
+  const { setBookKeys, initViewState, setSideBarBookKey } = useReaderStore();
 
   const [shouldUpdateSearchParams, setShouldUpdateSearchParams] = useState(false);
   useEffect(() => {
@@ -32,22 +28,18 @@ const useBooks = () => {
   const appendBook = (id: string, isPrimary: boolean) => {
     const newKey = `${id}-${uniqueId()}`;
     initViewState(envConfig, id, newKey, isPrimary);
-    setBookKeys((prevKeys) => {
-      if (!prevKeys.includes(newKey)) {
-        prevKeys.push(newKey);
-      }
-      return prevKeys;
-    });
+    if (!bookKeys.includes(newKey)) {
+      const updatedKeys = [...bookKeys, newKey];
+      setBookKeys(updatedKeys);
+    }
     setSideBarBookKey(newKey);
     setShouldUpdateSearchParams(true);
   };
 
   // Close a book and sync with bookKeys and URL
   const dismissBook = (bookKey: string) => {
-    setBookKeys((prevKeys) => {
-      const updatedKeys = prevKeys.filter((key) => key !== bookKey);
-      return updatedKeys;
-    });
+    const updatedKeys = bookKeys.filter((key) => key !== bookKey);
+    setBookKeys(updatedKeys);
     setShouldUpdateSearchParams(true);
   };
 
@@ -57,33 +49,18 @@ const useBooks = () => {
     return bookKeys[nextIndex]!;
   };
 
-  const openSplitView = () => {
+  const openParallelView = () => {
     const sideBarBookId = sideBarBookKey?.split('-')[0];
     if (sideBarBookId) appendBook(sideBarBookId, false);
   };
-
-  // Initialize all book states on first load
-  useEffect(() => {
-    const uniqueIds = new Set<string>();
-    console.log('Initialize books', bookKeys);
-    bookKeys.forEach((key, index) => {
-      const id = key.split('-')[0]!;
-      const isPrimary = !uniqueIds.has(id);
-      uniqueIds.add(id);
-      if (!getViewState(key)) {
-        initViewState(envConfig, id, key, isPrimary);
-        if (index === 0) setSideBarBookKey(key);
-      }
-    });
-  }, []);
 
   return {
     bookKeys,
     appendBook,
     dismissBook,
     getNextBookKey,
-    openSplitView,
+    openParallelView,
   };
 };
 
-export default useBooks;
+export default useBooksManager;

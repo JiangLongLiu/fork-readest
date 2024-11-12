@@ -48,8 +48,10 @@ interface ReaderStore {
   booksData: { [id: string]: BookData };
   viewStates: { [key: string]: ViewState };
 
+  bookKeys: string[];
   hoveredBookKey: string | null;
   sideBarBookKey: string | null;
+  setBookKeys: (keys: string[]) => void;
   setHoveredBookKey: (key: string) => void;
   setSideBarBookKey: (key: string) => void;
 
@@ -123,8 +125,10 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
   booksData: {},
   viewStates: {},
 
+  bookKeys: [],
   hoveredBookKey: null,
   sideBarBookKey: null,
+  setBookKeys: (keys: string[]) => set({ bookKeys: keys }),
   setHoveredBookKey: (key: string) => set({ hoveredBookKey: key }),
   setSideBarBookKey: (key: string) => set({ sideBarBookKey: key }),
 

@@ -1,27 +1,48 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { useEnv } from '@/context/EnvContext';
 import { useReaderStore } from '@/store/readerStore';
 import { SystemSettings } from '@/types/settings';
+import { uniqueId } from '@/utils/misc';
 
+import useBooksManager from '../hooks/useBooksManager';
+import useBookShortcuts from '../hooks/useBookShortcuts';
 import Spinner from '@/components/Spinner';
 import SideBar from './sidebar/SideBar';
-import useBooks from '../hooks/useBooks';
-import BookGrid from './BookGrid';
-import useBookShortcuts from '../hooks/useBookShortcuts';
 import Notebook from './notebook/Notebook';
+import BooksGrid from './BooksGrid';
 
 const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { envConfig } = useEnv();
-  const { bookKeys, dismissBook, getNextBookKey, openSplitView } = useBooks();
-  const { sideBarBookKey, getView, getConfig, setSideBarBookKey } = useReaderStore();
-  const { getBookData, getViewState, clearViewState, saveConfig, saveSettings } = useReaderStore();
+  const { bookKeys, dismissBook, getNextBookKey } = useBooksManager();
+  const { sideBarBookKey, getView, getConfig, saveConfig, saveSettings, setSideBarBookKey } =
+    useReaderStore();
+  const { setBookKeys, getBookData, initViewState, getViewState, clearViewState } =
+    useReaderStore();
 
-  useBookShortcuts({ sideBarBookKey, bookKeys, openSplitView, getNextBookKey });
+  useBookShortcuts({ sideBarBookKey, bookKeys });
+
+  React.useEffect(() => {
+    const initialIds = (searchParams.get('ids') || '').split(',').filter(Boolean);
+    const initialBookKeys = initialIds.map((id) => `${id}-${uniqueId()}`);
+    setBookKeys(initialBookKeys);
+    const uniqueIds = new Set<string>();
+    console.log('Initialize books', initialBookKeys);
+    initialBookKeys.forEach((key, index) => {
+      const id = key.split('-')[0]!;
+      const isPrimary = !uniqueIds.has(id);
+      uniqueIds.add(id);
+      if (!getViewState(key)) {
+        initViewState(envConfig, id, key, isPrimary);
+        if (index === 0) setSideBarBookKey(key);
+      }
+    });
+  }, []);
 
   const saveConfigAndCloseBook = (bookKey: string) => {
     getView(bookKey)?.close();
@@ -70,8 +91,8 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
 
   return (
     <div className='flex h-screen'>
-      <SideBar onGoToLibrary={handleCloseBooks} onOpenSplitView={openSplitView} />
-      <BookGrid bookKeys={bookKeys} onCloseBook={handleCloseBook} />
+      <SideBar onGoToLibrary={handleCloseBooks} />
+      <BooksGrid bookKeys={bookKeys} onCloseBook={handleCloseBook} />
       <Notebook />
     </div>
   );

@@ -1,21 +1,16 @@
 import { useReaderStore } from '@/store/readerStore';
 import useShortcuts from '@/hooks/useShortcuts';
+import useBooksManager from './useBooksManager';
 
 interface UseBookShortcutsProps {
   sideBarBookKey: string | null;
   bookKeys: string[];
-  openSplitView: () => void;
-  getNextBookKey: (bookKey: string) => string;
 }
 
-const useBookShortcuts = ({
-  sideBarBookKey,
-  bookKeys,
-  openSplitView,
-  getNextBookKey,
-}: UseBookShortcutsProps) => {
+const useBookShortcuts = ({ sideBarBookKey, bookKeys }: UseBookShortcutsProps) => {
   const { getView, setSideBarBookKey, getViewSettings } = useReaderStore();
   const { toggleSideBar, toggleNotebook } = useReaderStore();
+  const { getNextBookKey, openParallelView } = useBooksManager();
   const viewSettings = getViewSettings(sideBarBookKey ?? '');
   const fontSize = viewSettings?.defaultFontSize ?? 16;
   const lineHeight = viewSettings?.lineHeight ?? 1.6;
@@ -47,7 +42,7 @@ const useBookShortcuts = ({
 
   useShortcuts(
     {
-      onOpenSplitView: openSplitView,
+      onOpenParallelView: openParallelView,
       onSwitchSideBar: switchSideBar,
       onToggleSideBar: toggleSideBar,
       onToggleNotebook: toggleNotebook,

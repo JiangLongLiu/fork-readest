@@ -11,9 +11,8 @@ import BookMenu from './BookMenu';
 const SidebarHeader: React.FC<{
   isPinned: boolean;
   onGoToLibrary: () => void;
-  onOpenSplitView: () => void;
   handleTogglePin: () => void;
-}> = ({ isPinned, onGoToLibrary, onOpenSplitView, handleTogglePin }) => {
+}> = ({ isPinned, onGoToLibrary, handleTogglePin }) => {
   const { isTrafficLightVisible } = useTrafficLight();
   return (
     <div
@@ -36,7 +35,7 @@ const SidebarHeader: React.FC<{
           buttonClassName='btn btn-ghost h-8 min-h-8 w-8 p-0'
           toggleButton={<MdOutlineMenu size={20} />}
         >
-          <BookMenu openSplitView={onOpenSplitView} />
+          <BookMenu />
         </Dropdown>
         <div className='right-0 flex h-8 w-8 items-center justify-center'>
           <button

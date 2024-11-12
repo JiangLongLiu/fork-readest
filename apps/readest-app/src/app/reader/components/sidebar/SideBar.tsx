@@ -15,8 +15,7 @@ const MAX_SIDEBAR_WIDTH = 0.45;
 
 const SideBar: React.FC<{
   onGoToLibrary: () => void;
-  onOpenSplitView: () => void;
-}> = ({ onGoToLibrary, onOpenSplitView }) => {
+}> = ({ onGoToLibrary }) => {
   const { envConfig } = useEnv();
   const { sideBarBookKey, settings } = useReaderStore();
   const { saveSettings, getBookData } = useReaderStore();
@@ -75,7 +74,6 @@ const SideBar: React.FC<{
         <SidebarHeader
           isPinned={isSideBarPinned}
           onGoToLibrary={onGoToLibrary}
-          onOpenSplitView={onOpenSplitView}
           handleTogglePin={handleSideBarTogglePin}
         />
         <div className='border-b px-3'>

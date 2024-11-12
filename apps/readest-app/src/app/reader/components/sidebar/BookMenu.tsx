@@ -1,13 +1,14 @@
 import React from 'react';
+import useBooksManager from '../../hooks/useBooksManager';
 
 interface BookMenuProps {
-  openSplitView: () => void;
   setIsDropdownOpen?: (isOpen: boolean) => void;
 }
 
-const BookMenu: React.FC<BookMenuProps> = ({ openSplitView, setIsDropdownOpen }) => {
+const BookMenu: React.FC<BookMenuProps> = ({ setIsDropdownOpen }) => {
+  const { openParallelView } = useBooksManager();
   const handleOpenSplitView = () => {
-    openSplitView();
+    openParallelView();
     setIsDropdownOpen?.(false);
   };
   const handleReloadPage = () => {

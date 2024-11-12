@@ -11,12 +11,12 @@ import Ribbon from './Ribbon';
 import SettingsDialog from './settings/SettingsDialog';
 import Annotator from './annotator/Annotator';
 
-interface BookGridProps {
+interface BooksGridProps {
   bookKeys: string[];
   onCloseBook: (bookKey: string) => void;
 }
 
-const BookGrid: React.FC<BookGridProps> = ({ bookKeys, onCloseBook }) => {
+const BooksGrid: React.FC<BooksGridProps> = ({ bookKeys, onCloseBook }) => {
   const { getConfig, getProgress, getBookData, getViewState, getViewSettings } = useReaderStore();
   const { isFontLayoutSettingsDialogOpen, setFontLayoutSettingsDialogOpen } = useReaderStore();
   const gridTemplate = getGridTemplate(bookKeys.length, window.innerWidth / window.innerHeight);
@@ -78,4 +78,4 @@ const BookGrid: React.FC<BookGridProps> = ({ bookKeys, onCloseBook }) => {
   );
 };
 
-export default BookGrid;
+export default BooksGrid;
