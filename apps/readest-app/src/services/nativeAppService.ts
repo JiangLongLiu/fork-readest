@@ -115,7 +115,7 @@ export const nativeFileSystem: FileSystem = {
 export class NativeAppService extends BaseAppService {
   fs = nativeFileSystem;
   isAppDataSandbox = isMobile;
-  isNativeWindow = osType() === 'macos';
+  hasTrafficLight = osType() === 'macos';
 
   override resolvePath(fp: string, base: BaseDir): { baseDir: number; base: BaseDir; fp: string } {
     return resolvePath(fp, base);

@@ -18,7 +18,7 @@ export interface FileSystem {
 
 export interface AppService {
   fs: FileSystem;
-  isNativeWindow: boolean;
+  hasTrafficLight: boolean;
   isAppDataSandbox: boolean;
 
   selectDirectory(title: string): Promise<string>;

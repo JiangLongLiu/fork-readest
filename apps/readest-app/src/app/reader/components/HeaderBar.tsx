@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react';
 import { PiDotsThreeVerticalBold } from 'react-icons/pi';
 
 import { useReaderStore } from '@/store/readerStore';
-import useFullScreen from '@/hooks/useFullScreen';
+import useTrafficLight from '@/hooks/useTrafficLight';
 import WindowButtons from '@/components/WindowButtons';
 import Dropdown from '@/components/Dropdown';
 import SidebarToggler from './SidebarToggler';
@@ -29,7 +29,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   onSetSettingsDialogOpen,
 }) => {
   const headerRef = useRef<HTMLDivElement>(null);
-  const { isFullScreen } = useFullScreen();
+  const { isTrafficLightVisible } = useTrafficLight();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { hoveredBookKey, isSideBarVisible, setHoveredBookKey } = useReaderStore();
 
@@ -43,7 +43,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
       ref={headerRef}
       className={clsx(
         `header-bar absolute top-0 z-10 flex h-11 w-full items-center pr-4`,
-        !isFullScreen && isTopLeft && !isSideBarVisible ? 'pl-16' : 'pl-4',
+        isTrafficLightVisible && isTopLeft && !isSideBarVisible ? 'pl-16' : 'pl-4',
         `shadow-xs bg-base-100 rounded-window-top-right transition-opacity duration-300`,
         !isSideBarVisible && 'rounded-window-top-left',
         isHoveredAnim && 'hover-bar-anim',

@@ -4,7 +4,7 @@ import { GiBookshelf } from 'react-icons/gi';
 import { FiSearch } from 'react-icons/fi';
 import { MdOutlineMenu, MdOutlinePushPin, MdPushPin } from 'react-icons/md';
 
-import useFullScreen from '@/hooks/useFullScreen';
+import useTrafficLight from '@/hooks/useTrafficLight';
 import Dropdown from '@/components/Dropdown';
 import BookMenu from './BookMenu';
 
@@ -14,12 +14,12 @@ const SidebarHeader: React.FC<{
   onOpenSplitView: () => void;
   handleTogglePin: () => void;
 }> = ({ isPinned, onGoToLibrary, onOpenSplitView, handleTogglePin }) => {
-  const { isFullScreen } = useFullScreen();
+  const { isTrafficLightVisible } = useTrafficLight();
   return (
     <div
       className={clsx(
         'sidebar-header flex h-11 items-center justify-between pr-2',
-        isFullScreen ? 'pl-1.5' : 'pl-20',
+        isTrafficLightVisible ? 'pl-20' : 'pl-1.5',
       )}
     >
       <div className='flex items-center'>

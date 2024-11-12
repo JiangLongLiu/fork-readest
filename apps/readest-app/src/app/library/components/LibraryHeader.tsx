@@ -4,8 +4,7 @@ import { FaSearch } from 'react-icons/fa';
 import { PiPlus } from 'react-icons/pi';
 import { PiSelectionAllDuotone } from 'react-icons/pi';
 
-import { useEnv } from '@/context/EnvContext';
-import useFullScreen from '@/hooks/useFullScreen';
+import useTrafficLight from '@/hooks/useTrafficLight';
 import WindowButtons from '@/components/WindowButtons';
 
 interface LibraryHeaderProps {
@@ -19,8 +18,7 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
   onImportBooks,
   onToggleSelectMode,
 }) => {
-  const { appService } = useEnv();
-  const { isFullScreen } = useFullScreen();
+  const { isTrafficLightVisible } = useTrafficLight();
   const headerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,7 +53,7 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
       ref={headerRef}
       className={clsx(
         'titlebar fixed z-10 w-full bg-gray-100 py-2 pr-6',
-        isFullScreen ? 'pl-2' : 'pl-16',
+        isTrafficLightVisible ? 'pl-16' : 'pl-2',
       )}
     >
       <div className='flex items-center justify-between'>
@@ -93,14 +91,15 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
             </button>
           </div>
         </div>
-        {!appService?.isNativeWindow && (
-          <WindowButtons
-            headerRef={headerRef}
-            onMinimize={handleMinimize}
-            onToggleMaximize={handleToggleMaximize}
-            onClose={handleClose}
-          />
-        )}
+        <WindowButtons
+          headerRef={headerRef}
+          showMinimize={!isTrafficLightVisible}
+          showMaximize={!isTrafficLightVisible}
+          showClose={!isTrafficLightVisible}
+          onMinimize={handleMinimize}
+          onToggleMaximize={handleToggleMaximize}
+          onClose={handleClose}
+        />
       </div>
     </div>
   );

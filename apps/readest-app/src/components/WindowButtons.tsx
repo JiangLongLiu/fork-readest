@@ -70,7 +70,11 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
   return (
     <div
       ref={parentRef}
-      className={clsx('window-buttons ml-6 flex h-8 items-center justify-end space-x-2', className)}
+      className={clsx(
+        'window-buttons flex h-8 items-center justify-end space-x-2 pl-6',
+        showClose || showMaximize || showMinimize ? 'visible' : 'hidden',
+        className,
+      )}
     >
       {showMinimize && (
         <button

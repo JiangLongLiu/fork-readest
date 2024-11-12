@@ -1,6 +1,8 @@
-import { useReaderStore } from '@/store/readerStore';
 import clsx from 'clsx';
 import React from 'react';
+
+import { useReaderStore } from '@/store/readerStore';
+import useTrafficLight from '@/hooks/useTrafficLight';
 
 interface SectionInfoProps {
   chapter?: string;
@@ -9,11 +11,12 @@ interface SectionInfoProps {
 
 const SectionInfo: React.FC<SectionInfoProps> = ({ chapter, gapLeft }) => {
   const { isSideBarVisible } = useReaderStore();
+  const { isTrafficLightVisible } = useTrafficLight();
   return (
     <div
       className={clsx(
         'pageinfo absolute right-0 top-0 flex items-end',
-        isSideBarVisible ? 'h-[30px]' : 'h-[44px]',
+        isTrafficLightVisible && !isSideBarVisible ? 'h-[44px]' : 'h-[30px]',
       )}
       style={{ left: gapLeft }}
     >
