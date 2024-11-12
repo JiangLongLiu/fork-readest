@@ -11,7 +11,7 @@ import LibraryHeader from '@/app/library/components/LibraryHeader';
 import Bookshelf from '@/app/library/components/Bookshelf';
 
 const LibraryPage = () => {
-  const { envConfig, appService, getAppService } = useEnv();
+  const { envConfig, appService } = useEnv();
   const { library: libraryBooks, setLibrary } = useReaderStore();
   const [loading, setLoading] = useState(true);
   const isInitiating = useRef(false);
@@ -21,7 +21,7 @@ const LibraryPage = () => {
     if (isInitiating.current) return;
     isInitiating.current = true;
     setLoading(true);
-    getAppService(envConfig).then(async (appService) => {
+    envConfig.getAppService().then(async (appService) => {
       console.log('Loading library books...');
       setLibrary(await appService.loadLibraryBooks());
       setLoading(false);

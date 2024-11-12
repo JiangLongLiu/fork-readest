@@ -8,7 +8,6 @@ import { AppService } from '@/types/system';
 interface EnvContextType {
   envConfig: EnvConfigType;
   appService: AppService | null;
-  getAppService: (envConfig: EnvConfigType) => Promise<AppService>;
 }
 
 const EnvContext = createContext<EnvContextType | undefined>(undefined);
@@ -17,17 +16,11 @@ export const EnvProvider = ({ children }: { children: ReactNode }) => {
   const [envConfig] = useState<EnvConfigType>(env);
   const [appService, setAppService] = useState<AppService | null>(null);
 
-  const getAppService = async (envConfig: EnvConfigType): Promise<AppService> => {
-    const service = await envConfig.getAppService();
-    setAppService(service);
-    return service;
-  };
+  React.useEffect(() => {
+    envConfig.getAppService().then((service) => setAppService(service));
+  }, [envConfig]);
 
-  return (
-    <EnvContext.Provider value={{ envConfig, appService, getAppService }}>
-      {children}
-    </EnvContext.Provider>
-  );
+  return <EnvContext.Provider value={{ envConfig, appService }}>{children}</EnvContext.Provider>;
 };
 
 export const useEnv = (): EnvContextType => {
