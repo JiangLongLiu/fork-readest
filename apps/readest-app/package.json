@@ -16,9 +16,9 @@
     "setup-pdfjs": "pnpm prepare-public-vendor && pnpm copy-pdfjs"
   },
   "dependencies": {
-    "@tauri-apps/api": "2.0.3",
+    "@tauri-apps/api": "2.1.1",
     "@tauri-apps/plugin-dialog": "^2.0.1",
-    "@tauri-apps/plugin-fs": "^2.0.1",
+    "@tauri-apps/plugin-fs": "^2.0.2",
     "@tauri-apps/plugin-http": "^2.0.1",
     "@tauri-apps/plugin-log": "^2.0.0",
     "@tauri-apps/plugin-os": "^2.0.0",
@@ -36,7 +36,7 @@
     "zustand": "5.0.0-rc.2"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "2.0.4",
+    "@tauri-apps/cli": "2.1.0",
     "@types/cssbeautify": "^0.3.5",
     "@types/node": "^20",
     "@types/react": "18.3.12",
