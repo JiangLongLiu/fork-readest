@@ -17,7 +17,7 @@ Readest is an open-source ebook reading software designed for immersive and deep
 - **Node.js** and **pnpm** for Next.js development
 - **Rust and Cargo** for Tauri development
 
-It is recommended to use a recent version of Node.js and Rust.
+For the best experience, use a recent version of Node.js and Rust. Refer to the [Tauri documentation](https://v2.tauri.app/start/prerequisites/) for details on setting up the development environment prerequisites on different platforms.
 
 ```bash
 nvm use v22
@@ -39,6 +39,7 @@ git submodule update --init --recursive
 ### 2. Install Dependencies
 
 ```bash
+npm install -g pnpm
 pnpm install
 # copy pdfjs-dist to Next.js public directory
 pnpm --filter @readest/readest-app setup-pdfjs
@@ -62,7 +63,7 @@ Readest is open-source, and contributions are welcome! Feel free to open issues,
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the AGPL V3 License. See the LICENSE file for details.
 
 ---
 
