@@ -5,11 +5,11 @@ import { useReaderStore } from '@/store/readerStore';
 import useTrafficLight from '@/hooks/useTrafficLight';
 
 interface SectionInfoProps {
-  chapter?: string;
+  section?: string;
   gapLeft: string;
 }
 
-const SectionInfo: React.FC<SectionInfoProps> = ({ chapter, gapLeft }) => {
+const SectionInfo: React.FC<SectionInfoProps> = ({ section, gapLeft }) => {
   const { isSideBarVisible } = useReaderStore();
   const { isTrafficLightVisible } = useTrafficLight();
   return (
@@ -20,7 +20,7 @@ const SectionInfo: React.FC<SectionInfoProps> = ({ chapter, gapLeft }) => {
       )}
       style={{ left: gapLeft }}
     >
-      <h2 className='text-center font-sans text-xs font-light text-slate-500'>{chapter || ''}</h2>
+      <h2 className='text-center font-sans text-xs font-light text-slate-500'>{section || ''}</h2>
     </div>
   );
 };

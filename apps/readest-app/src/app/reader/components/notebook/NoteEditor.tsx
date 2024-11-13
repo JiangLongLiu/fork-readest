@@ -33,11 +33,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ onSave, onEdit }) => {
     }
   };
 
-  const handleInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     adjustHeight();
     setNote(e.currentTarget.value);
@@ -67,7 +62,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ onSave, onEdit }) => {
             rows={1}
             spellCheck={false}
             onChange={handleChange}
-            onKeyDown={handleInput}
             placeholder='Add your notes here...'
           ></textarea>
         </div>

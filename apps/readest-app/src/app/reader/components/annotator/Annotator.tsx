@@ -12,6 +12,7 @@ import { BookNote, HighlightColor, HighlightStyle } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
 import { useFoliateEvents } from '../../hooks/useFoliateEvents';
 import { getPopupPosition, getPosition, Position, TextSelection } from '@/utils/sel';
+import { eventDispatcher } from '@/utils/event';
 import Toast from '@/components/Toast';
 import useOutsideClick from '@/hooks/useOutsideClick';
 import AnnotationPopup from './AnnotationPopup';
@@ -118,7 +119,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
 
     const { booknotes: annotations = [] } = config;
     if (selection) navigator.clipboard.writeText(selection.text);
-    const { tocHref: href } = progress;
+    const { sectionHref: href } = progress;
     const cfi = view?.getCFI(selection.index, selection.range);
     if (!cfi) return;
     const annotation: BookNote = {
@@ -151,7 +152,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     if (!selection || !selection.text) return;
     setHighlightOptionsVisible(true);
     const { booknotes: annotations = [] } = config;
-    const { tocHref: href } = progress;
+    const { sectionHref: href } = progress;
     const cfi = view?.getCFI(selection.index, selection.range);
     if (!cfi) return;
     const style = globalReadSettings.highlightStyle;
@@ -191,16 +192,23 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       saveConfig(envConfig, bookKey, updatedConfig, settings);
     }
   };
+
   const handleAnnotate = () => {
     if (!selection || !selection.text) return;
-    const { tocHref: href } = progress;
+    const { sectionHref: href } = progress;
     selection.href = href;
     setHighlightOptionsVisible(false);
     setNotebookVisible(true);
     setNotebookNewAnnotation(selection);
     handleHighlight(true);
   };
-  const handleSearch = () => {};
+
+  const handleSearch = () => {
+    if (!selection || !selection.text) return;
+    setShowPopup(false);
+    eventDispatcher.dispatch('search', { term: selection.text });
+  };
+
   const handleDictionary = () => {};
 
   const selectionAnnotated = selection?.annotated;

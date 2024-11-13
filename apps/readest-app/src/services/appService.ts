@@ -21,6 +21,7 @@ import {
   DEFAULT_BOOK_FONT,
   DEFAULT_READSETTINGS,
   SYSTEM_SETTINGS_VERSION,
+  DEFAULT_BOOK_SEARCH_CONFIG,
 } from './constants';
 
 export abstract class BaseAppService implements AppService {
@@ -183,6 +184,7 @@ export abstract class BaseAppService implements AppService {
       const { globalViewSettings } = settings;
       const { viewSettings } = config;
       config.viewSettings = { ...globalViewSettings, ...viewSettings };
+      config.searchConfig ??= DEFAULT_BOOK_SEARCH_CONFIG;
       return config;
     } catch {
       return INIT_BOOK_CONFIG;

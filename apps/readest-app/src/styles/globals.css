@@ -55,7 +55,7 @@ foliate-view {
 
 .window-button {
   @apply inline-flex h-6 w-6 items-center justify-center rounded-full;
-  @apply transition duration-200 ease-in-out transform hover:scale-105;
+  @apply transform transition duration-200 ease-in-out hover:scale-105;
   @apply bg-base-300 hover:bg-gray-300;
 }
 
@@ -137,8 +137,10 @@ foliate-view {
   display: none;
 }
 
-.dropdown-content, .settings-content {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+.dropdown-content,
+.settings-content {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
   font-size: 14px;
   font-weight: 400;
   @apply text-gray-700;
@@ -160,4 +162,16 @@ foliate-view {
 .collapse-arrow > .collapse-title:after {
   top: var(--top-override, default-value);
   inset-inline-end: var(--end-override, default-value);
+}
+
+.search-bar {
+  max-height: 0;
+  visibility: hidden;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.search-bar-visible {
+  max-height: 48px;
+  visibility: visible;
 }

@@ -1,4 +1,4 @@
-import { BookFont, BookLayout, BookStyle } from '@/types/book';
+import { BookFont, BookLayout, BookSearchConfig, BookStyle } from '@/types/book';
 import { ReadSettings } from '@/types/settings';
 
 export const LOCAL_BOOKS_SUBDIR = 'Readest/Books';
@@ -49,6 +49,13 @@ export const DEFAULT_BOOK_STYLE: BookStyle = {
   theme: 'light',
   overrideFont: false,
   userStylesheet: '',
+};
+
+export const DEFAULT_BOOK_SEARCH_CONFIG: BookSearchConfig = {
+  scope: 'book',
+  matchCase: false,
+  matchWholeWords: false,
+  matchDiacritics: false,
 };
 
 export const SYSTEM_SETTINGS_VERSION = 1;

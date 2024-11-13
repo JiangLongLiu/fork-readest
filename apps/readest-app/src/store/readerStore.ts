@@ -389,9 +389,9 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
             progress: {
               ...viewState.progress,
               location,
-              tocHref: tocItem?.href,
-              tocLabel: tocItem?.label,
-              tocId: tocItem?.id,
+              sectionHref: tocItem?.href,
+              sectionLabel: tocItem?.label,
+              sectionId: tocItem?.id,
               section,
               pageinfo,
               range,

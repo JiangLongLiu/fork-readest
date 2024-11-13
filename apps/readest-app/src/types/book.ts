@@ -69,12 +69,38 @@ export interface ViewSettings extends BookLayout, BookStyle, BookFont {}
 
 export interface BookProgress {
   location: string;
-  tocHref: string;
-  tocLabel: string;
-  tocId: number;
+  sectionId: number;
+  sectionHref: string;
+  sectionLabel: string;
   section: PageInfo;
   pageinfo: PageInfo;
   range: Range;
+}
+
+export interface BookSearchConfig {
+  scope: 'book' | 'section';
+  matchCase: boolean;
+  matchWholeWords: boolean;
+  matchDiacritics: boolean;
+  index?: number;
+  query?: string;
+}
+
+export interface SearchExcerpt {
+  pre: string;
+  match: string;
+  post: string;
+}
+
+export interface BookSearchMatch {
+  cfi: string;
+  excerpt: SearchExcerpt;
+}
+
+export interface BookSearchResult {
+  label: string;
+  subitems: BookSearchMatch[];
+  progress?: number;
 }
 
 export interface BookConfig {
@@ -85,6 +111,7 @@ export interface BookConfig {
   booknotes?: BookNote[];
   removedNotesTimestamps?: Record<string, number>;
 
+  searchConfig?: BookSearchConfig;
   viewSettings?: Partial<ViewSettings>;
 }
 

@@ -10,9 +10,11 @@ import BookMenu from './BookMenu';
 
 const SidebarHeader: React.FC<{
   isPinned: boolean;
+  isSearchBarVisible: boolean;
   onGoToLibrary: () => void;
-  handleTogglePin: () => void;
-}> = ({ isPinned, onGoToLibrary, handleTogglePin }) => {
+  onTogglePin: () => void;
+  onToggleSearchBar: () => void;
+}> = ({ isPinned, isSearchBarVisible, onGoToLibrary, onTogglePin, onToggleSearchBar }) => {
   const { isTrafficLightVisible } = useTrafficLight();
   return (
     <div
@@ -27,7 +29,13 @@ const SidebarHeader: React.FC<{
         </button>
       </div>
       <div className='flex size-[70%] min-w-24 max-w-32 items-center justify-between'>
-        <button className='btn btn-ghost left-0 h-8 min-h-8 w-8 p-0'>
+        <button
+          onClick={onToggleSearchBar}
+          className={clsx(
+            'btn btn-ghost left-0 h-8 min-h-8 w-8 p-0',
+            isSearchBarVisible ? 'bg-gray-300 hover:bg-gray-300' : 'bg-base-200 hover:bg-base-200',
+          )}
+        >
           <FiSearch size={18} />
         </button>
         <Dropdown
@@ -39,7 +47,7 @@ const SidebarHeader: React.FC<{
         </Dropdown>
         <div className='right-0 flex h-8 w-8 items-center justify-center'>
           <button
-            onClick={handleTogglePin}
+            onClick={onTogglePin}
             className={`${isPinned ? 'bg-gray-300' : 'bg-base-300'} btn btn-ghost btn-circle h-6 min-h-6 w-6`}
           >
             {isPinned ? <MdPushPin size={14} /> : <MdOutlinePushPin size={14} />}

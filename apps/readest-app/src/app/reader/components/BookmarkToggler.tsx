@@ -22,7 +22,7 @@ const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
 
   const toggleBookmark = () => {
     const { booknotes: bookmarks = [] } = config;
-    const { location: cfi, tocHref: href, range } = progress;
+    const { location: cfi, sectionHref: href, range } = progress;
     if (!cfi) return;
     if (!isBookmarked) {
       setIsBookmarked(true);

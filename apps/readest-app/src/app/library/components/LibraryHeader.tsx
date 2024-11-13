@@ -64,7 +64,10 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
           <input
             type='text'
             placeholder='Search books...'
-            className='input input-sm rounded-badge w-full bg-gray-200 pl-10 pr-10 text-base focus:border-none focus:outline-none'
+            className={clsx(
+              'input input-sm rounded-badge w-full bg-gray-200 pl-10 pr-10',
+              'font-sans text-base font-light focus:border-none focus:outline-none',
+            )}
           />
           <div className='absolute right-4 flex items-center space-x-4 text-gray-500'>
             <span className='mx-2 h-5 w-[1px] bg-gray-300'></span>

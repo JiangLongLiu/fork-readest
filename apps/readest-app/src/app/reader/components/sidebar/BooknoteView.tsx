@@ -50,21 +50,19 @@ const BooknoteView: React.FC<{
   });
 
   return (
-    <div className='relative'>
-      <div className='max-h-[calc(100vh-173px)] overflow-y-auto rounded pt-2'>
-        <ul role='tree' className='overflow-y-auto px-2'>
-          {sortedGroups.map((group) => (
-            <li key={group.href} className='p-2'>
-              <h3 className='line-clamp-1 font-normal'>{group.label}</h3>
-              <ul>
-                {group.booknotes.map((item, index) => (
-                  <BooknoteItem key={`${index}-${item.cfi}`} bookKey={bookKey} item={item} />
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <div className='rounded pt-2'>
+      <ul role='tree' className='px-2'>
+        {sortedGroups.map((group) => (
+          <li key={group.href} className='p-2'>
+            <h3 className='line-clamp-1 font-normal'>{group.label}</h3>
+            <ul>
+              {group.booknotes.map((item, index) => (
+                <BooknoteItem key={`${index}-${item.cfi}`} bookKey={bookKey} item={item} />
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

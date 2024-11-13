@@ -24,11 +24,6 @@ const NumberInput: React.FC<NumberInputProps> = ({
   const [localValue, setLocalValue] = useState(value);
   const numberStep = step || 1;
 
-  const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value === '' ? 0 : parseFloat(e.target.value);
     setLocalValue(newValue);
@@ -66,9 +61,6 @@ const NumberInput: React.FC<NumberInputProps> = ({
           type='text'
           value={localValue}
           onChange={handleChange}
-          onInput={handleInput}
-          onKeyDown={handleInput}
-          onKeyUp={handleInput}
           onBlur={handleOnBlur}
           className='input input-ghost settings-content w-20 max-w-xs rounded border-0 bg-transparent px-3 py-1 text-right !outline-none'
           onFocus={(e) => e.target.select()}

@@ -42,7 +42,7 @@ const TOCItemView: React.FC<{
     }
   };
 
-  const isActive = progress ? progress.tocHref === item.href : false;
+  const isActive = progress ? progress.sectionHref === item.href : false;
 
   useEffect(() => {
     setIsExpanded(expandedItems.includes(item.href || ''));
@@ -112,7 +112,7 @@ const TOCView: React.FC<{
 
   useEffect(() => {
     if (!progress) return;
-    const { tocHref: currentHref } = progress;
+    const { sectionHref: currentHref } = progress;
     const hrefMd5 = currentHref ? getContentMd5(currentHref) : '';
     const currentItem = viewRef.current?.querySelector(`[data-href="${hrefMd5}"]`);
     if (currentItem) {
@@ -129,21 +129,19 @@ const TOCView: React.FC<{
   }, [toc, progress, sideBarBookKey]);
 
   return (
-    <div className='relative'>
-      <div className='max-h-[calc(100vh-173px)] overflow-y-auto rounded pt-2'>
-        <ul role='tree' ref={viewRef} className='overflow-y-auto px-2'>
-          {toc &&
-            toc.map((item, index) => (
-              <TOCItemView
-                bookKey={bookKey}
-                key={`${index}-${item.href}`}
-                item={item}
-                depth={0}
-                expandedItems={expandedItems}
-              />
-            ))}
-        </ul>
-      </div>
+    <div className='rounded pt-2'>
+      <ul role='tree' ref={viewRef} className='px-2'>
+        {toc &&
+          toc.map((item, index) => (
+            <TOCItemView
+              bookKey={bookKey}
+              key={`${index}-${item.href}`}
+              item={item}
+              depth={0}
+              expandedItems={expandedItems}
+            />
+          ))}
+      </ul>
     </div>
   );
 };

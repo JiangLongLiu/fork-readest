@@ -5,7 +5,7 @@ const TabNavigation: React.FC<{
   activeTab: string;
   onTabChange: (tab: string) => void;
 }> = ({ activeTab, onTabChange }) => (
-  <div className='bottom-tab absolute bottom-0 flex w-full border-t'>
+  <div className='bottom-tab flex w-full border-t'>
     {['toc', 'annotations', 'bookmarks'].map((tab) => (
       <button
         key={tab}

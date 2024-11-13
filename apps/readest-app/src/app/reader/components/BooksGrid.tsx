@@ -37,7 +37,7 @@ const BooksGrid: React.FC<BooksGridProps> = ({ bookKeys, onCloseBook }) => {
         const { book, bookDoc } = bookData || {};
         if (!book || !config || !bookDoc || !viewSettings) return null;
 
-        const { section, pageinfo, tocLabel: chapter } = progress || {};
+        const { section, pageinfo, sectionLabel } = progress || {};
         const isBookmarked = getViewState(bookKey)?.ribbonVisible;
         const marginGap = `${viewSettings.gapPercent}%`;
 
@@ -59,7 +59,7 @@ const BooksGrid: React.FC<BooksGridProps> = ({ bookKeys, onCloseBook }) => {
             <FoliateViewer bookKey={bookKey} bookDoc={bookDoc} config={config} />
             {viewSettings.scrolled ? null : (
               <>
-                <SectionInfo chapter={chapter} gapLeft={marginGap} />
+                <SectionInfo section={sectionLabel} gapLeft={marginGap} />
                 <PageInfoView
                   bookFormat={book.format}
                   section={section ?? null}

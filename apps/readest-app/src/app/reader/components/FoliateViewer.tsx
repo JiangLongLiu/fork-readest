@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useFoliateEvents } from '../hooks/useFoliateEvents';
 import { BookDoc } from '@/libs/document';
-import { BookConfig, BookNote } from '@/types/book';
+import { BookConfig, BookNote, BookSearchConfig, BookSearchResult } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
 import { getStyles } from '@/utils/style';
 import { ONE_COLUMN_MAX_INLINE_SIZE } from '@/services/constants';
@@ -18,6 +18,8 @@ export interface FoliateView extends HTMLElement {
   goRight: () => void;
   getCFI: (index: number, range: Range) => string;
   addAnnotation: (note: BookNote, remove?: boolean) => { index: number; label: string };
+  search: (config: BookSearchConfig) => AsyncGenerator<BookSearchResult | string, void, void>;
+  clearSearch: () => void;
   renderer: {
     setStyles?: (css: string) => void;
     setAttribute: (name: string, value: string | number) => void;
@@ -32,8 +34,8 @@ const wrappedFoliateView = (originalView: FoliateView): FoliateView => {
   originalView.addAnnotation = (note: BookNote, remove = false) => {
     // transform BookNote to foliate annotation
     const annotation = {
-      ...note,
       value: note.cfi,
+      ...note,
     };
     return originalAddAnnotation(annotation, remove);
   };

@@ -1,14 +1,17 @@
 import clsx from 'clsx';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useEnv } from '@/context/EnvContext';
 import { useReaderStore } from '@/store/readerStore';
+import { BookSearchResult } from '@/types/book';
+import { eventDispatcher } from '@/utils/event';
 import SidebarHeader from './Header';
 import SidebarContent from './Content';
-import TabNavigation from './TabNavigation';
 import BookCard from './BookCard';
 import useSidebar from '../../hooks/useSidebar';
 import useDragBar from '../../hooks/useDragBar';
+import SearchBar from './SearchBar';
+import SearchResults from './SearchResults';
 
 const MIN_SIDEBAR_WIDTH = 0.05;
 const MAX_SIDEBAR_WIDTH = 0.45;
@@ -18,7 +21,10 @@ const SideBar: React.FC<{
 }> = ({ onGoToLibrary }) => {
   const { envConfig } = useEnv();
   const { sideBarBookKey, settings } = useReaderStore();
-  const { saveSettings, getBookData } = useReaderStore();
+  const { saveSettings, getBookData, getView } = useReaderStore();
+  const [isSearchBarVisible, setIsSearchBarVisible] = useState(false);
+  const [searchResults, setSearchResults] = useState<BookSearchResult[] | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState(settings.globalReadSettings.sideBarTab);
   const {
     sideBarWidth,
@@ -31,6 +37,20 @@ const SideBar: React.FC<{
     settings.globalReadSettings.sideBarWidth,
     settings.globalReadSettings.isSideBarPinned,
   );
+
+  const onSearchEvent = (event: CustomEvent) => {
+    const { term } = event.detail;
+    setSideBarVisible(true);
+    setIsSearchBarVisible(true);
+    setSearchTerm(term);
+  };
+
+  useEffect(() => {
+    eventDispatcher.on('search', onSearchEvent);
+    return () => {
+      eventDispatcher.off('search', onSearchEvent);
+    };
+  }, []);
 
   const handleDragMove = (e: MouseEvent) => {
     const widthFraction = e.clientX / window.innerWidth;
@@ -49,6 +69,19 @@ const SideBar: React.FC<{
     saveSettings(envConfig, settings);
   };
 
+  const handleToggleSearchBar = () => {
+    setIsSearchBarVisible((prev) => !prev);
+    if (isSearchBarVisible) {
+      setSearchResults(null);
+      setSearchTerm('');
+      getView(sideBarBookKey)?.clearSearch();
+    }
+  };
+
+  const handleSearchResultClick = (cfi: string) => {
+    getView(sideBarBookKey)?.goTo(cfi);
+  };
+
   if (!sideBarBookKey) return null;
 
   const bookData = getBookData(sideBarBookKey);
@@ -61,8 +94,8 @@ const SideBar: React.FC<{
     <>
       <div
         className={clsx(
-          'sidebar-container bg-base-200 z-20 h-full min-w-60 select-none',
-          'rounded-window-top-left rounded-window-bottom-left',
+          'sidebar-container bg-base-200 z-20 flex h-full min-w-60 flex-col',
+          'rounded-window-top-left rounded-window-bottom-left select-none',
           !isSideBarPinned && 'shadow-2xl',
         )}
         style={{
@@ -71,16 +104,43 @@ const SideBar: React.FC<{
           position: isSideBarPinned ? 'relative' : 'absolute',
         }}
       >
-        <SidebarHeader
-          isPinned={isSideBarPinned}
-          onGoToLibrary={onGoToLibrary}
-          handleTogglePin={handleSideBarTogglePin}
-        />
-        <div className='border-b px-3'>
-          <BookCard cover={book.coverImageUrl!} title={book.title} author={book.author} />
+        <div className='flex-shrink-0'>
+          <SidebarHeader
+            isPinned={isSideBarPinned}
+            isSearchBarVisible={isSearchBarVisible}
+            onGoToLibrary={onGoToLibrary}
+            onTogglePin={handleSideBarTogglePin}
+            onToggleSearchBar={handleToggleSearchBar}
+          />
+          <div
+            className={clsx('search-bar', {
+              'search-bar-visible': isSearchBarVisible,
+            })}
+          >
+            <SearchBar
+              bookKey={sideBarBookKey!}
+              searchTerm={searchTerm}
+              onSearchResultChange={setSearchResults}
+            />
+          </div>
+          <div className='border-b px-3'>
+            <BookCard cover={book.coverImageUrl!} title={book.title} author={book.author} />
+          </div>
         </div>
-        <SidebarContent activeTab={activeTab} bookDoc={bookDoc} sideBarBookKey={sideBarBookKey!} />
-        <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
+        {isSearchBarVisible && searchResults ? (
+          <SearchResults
+            bookKey={sideBarBookKey!}
+            results={searchResults}
+            onSelectResult={handleSearchResultClick}
+          />
+        ) : (
+          <SidebarContent
+            activeTab={activeTab}
+            bookDoc={bookDoc}
+            sideBarBookKey={sideBarBookKey!}
+            onTabChange={handleTabChange}
+          />
+        )}
         <div
           className='drag-bar absolute right-0 top-0 h-full w-0.5 cursor-col-resize'
           onMouseDown={handleMouseDown}

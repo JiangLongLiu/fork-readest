@@ -1,10 +1,10 @@
 import clsx from 'clsx';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
-import * as CFI from 'foliate-js/epubcfi.js';
 import { useEnv } from '@/context/EnvContext';
 import { BookNote } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
+import useScrollToItem from '../../hooks/useScrollToItem';
 
 interface BooknoteItemProps {
   bookKey: string;
@@ -16,29 +16,10 @@ const BooknoteItem: React.FC<BooknoteItemProps> = ({ bookKey, item, editable = f
   const { envConfig } = useEnv();
   const { settings, getConfig, saveConfig, getProgress, getView } = useReaderStore();
   const { updateBooknotes, setNotebookEditAnnotation, setNotebookVisible } = useReaderStore();
-  const [isCurrent, setIsCurrent] = useState(false);
-  const viewRef = useRef<HTMLLIElement | null>(null);
 
   const { text, cfi, note } = item;
   const progress = getProgress(bookKey);
-
-  useEffect(() => {
-    if (!progress) return;
-    const { location } = progress;
-    const start = CFI.collapse(location);
-    const end = CFI.collapse(location, true);
-    const isCurrent = CFI.compare(cfi, start) >= 0 && CFI.compare(cfi, end) <= 0;
-    setIsCurrent(isCurrent);
-
-    if (isCurrent && viewRef.current) {
-      const rect = viewRef.current.getBoundingClientRect();
-      const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
-      if (!isVisible) {
-        (viewRef.current as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      (viewRef.current as HTMLElement).setAttribute('aria-current', 'page');
-    }
-  }, [progress]);
+  const { isCurrent, viewRef } = useScrollToItem(cfi, progress);
 
   const handleClickItem = (event: React.MouseEvent) => {
     event.preventDefault();
