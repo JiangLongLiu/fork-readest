@@ -9,16 +9,22 @@ extern crate objc;
 #[cfg(target_os = "macos")]
 mod tauri_traffic_light_positioner_plugin;
 
-use tauri::{TitleBarStyle, WebviewUrl, WebviewWindowBuilder};
+#[cfg(target_os = "macos")]
+use tauri::TitleBarStyle;
+use tauri::{WebviewUrl, WebviewWindowBuilder};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_traffic_light_positioner_plugin::init())
+        .plugin(tauri_plugin_fs::init());
+
+    #[cfg(target_os = "macos")]
+    let builder = builder.plugin(tauri_traffic_light_positioner_plugin::init());
+
+    builder
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
@@ -34,7 +40,12 @@ pub fn run() {
                 .maximized(true);
 
             #[cfg(target_os = "macos")]
-            let win_builder = win_builder.title_bar_style(TitleBarStyle::Overlay);
+            let win_builder = win_builder
+                .decorations(true)
+                .title_bar_style(TitleBarStyle::Overlay);
+
+            #[cfg(not(target_os = "macos"))]
+            let win_builder = win_builder.decorations(false).transparent(true);
 
             let _ = win_builder.build().unwrap();
 
