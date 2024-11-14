@@ -17,9 +17,7 @@ export const findParentPath = (toc: TOCItem[], href: string): TOCItem[] => {
 
 export const updateTocID = (items: TOCItem[], index = 0): number => {
   items.forEach((item) => {
-    if (item.id === undefined) {
-      item.id = index++;
-    }
+    item.id ??= index++;
     if (item.subitems) {
       index = updateTocID(item.subitems, index);
     }

@@ -175,3 +175,12 @@ foliate-view {
   max-height: 48px;
   visibility: visible;
 }
+
+.scroll-container {
+  overflow-y: scroll;
+  scrollbar-width: thin;
+}
+
+.scroll-container.hidden-scrollbar {
+  scrollbar-width: none;
+}

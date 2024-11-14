@@ -272,7 +272,9 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
         console.log('Loading book', key);
         const { book: loadedBookDoc } = await new DocumentLoader(file).open();
         const bookDoc = loadedBookDoc as BookDoc;
-        updateTocID(bookDoc.toc);
+        if (bookDoc.toc) {
+          updateTocID(bookDoc.toc);
+        }
         set((state) => ({
           booksData: {
             ...state.booksData,

@@ -31,7 +31,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   const queuedSearchTerm = useRef('');
   const isSearchPending = useRef(false);
-  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     handleSearchTermChange(searchTerm);

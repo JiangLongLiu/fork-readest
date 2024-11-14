@@ -77,13 +77,13 @@ const LibraryPage = () => {
   }
 
   return (
-    <div className='rounded-window min-h-screen select-none bg-gray-100'>
+    <div className='rounded-window min-h-screen select-none overflow-hidden bg-gray-100'>
       <LibraryHeader
         isSelectMode={isSelectMode}
         onImportBooks={handleImportBooks}
         onToggleSelectMode={handleToggleSelectMode}
       />
-      <div className='flex-grow pt-12'>
+      <div className='flex-grow'>
         {loading || libraryBooks.length > 0 ? (
           <div className='hero-content h-full overflow-y-auto px-2 py-4'>
             <Spinner loading={loading} />

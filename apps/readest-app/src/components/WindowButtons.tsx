@@ -27,11 +27,7 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
   const handleMouseDown = async (e: MouseEvent) => {
     const target = e.target as HTMLElement;
 
-    if (
-      target.closest('#titlebar-minimize') ||
-      target.closest('#titlebar-maximize') ||
-      target.closest('#titlebar-close')
-    ) {
+    if (target !== e.currentTarget) {
       return;
     }
 
@@ -80,7 +76,7 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
     <div
       ref={parentRef}
       className={clsx(
-        'window-buttons flex h-8 items-center justify-end space-x-2 pl-6',
+        'window-buttons flex h-8 items-center justify-end space-x-2',
         showClose || showMaximize || showMinimize ? 'visible' : 'hidden',
         className,
       )}
