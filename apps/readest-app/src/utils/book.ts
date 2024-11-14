@@ -1,5 +1,6 @@
 import { EXTS } from '@/libs/document';
 import { Book, BookConfig } from '@/types/book';
+import { makeSafeFilename } from './misc';
 
 export const getDir = (book: Book) => {
   return `${book.hash}`;
@@ -8,7 +9,7 @@ export const getLibraryFilename = () => {
   return 'library.json';
 };
 export const getFilename = (book: Book) => {
-  return `${book.hash}/${book.title}.${EXTS[book.format]}`;
+  return `${book.hash}/${makeSafeFilename(book.title)}.${EXTS[book.format]}`;
 };
 export const getCoverFilename = (book: Book) => {
   return `${book.hash}/cover.png`;
