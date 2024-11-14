@@ -52,7 +52,7 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
     <div
       ref={headerRef}
       className={clsx(
-        'titlebar fixed z-10 w-full bg-gray-100 py-2 pr-6',
+        'titlebar z-10 w-full bg-gray-100 py-2 pr-6',
         isTrafficLightVisible ? 'pl-16' : 'pl-2',
       )}
     >

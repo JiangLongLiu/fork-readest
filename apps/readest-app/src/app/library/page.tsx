@@ -83,17 +83,18 @@ const LibraryPage = () => {
         onImportBooks={handleImportBooks}
         onToggleSelectMode={handleToggleSelectMode}
       />
-      <div className='min-h-screen pt-12'>
-        <div className='hero-content px-2 py-4'>
-          <Spinner loading={loading} />
-          <Bookshelf
-            libraryBooks={libraryBooks}
-            isSelectMode={isSelectMode}
-            onImportBooks={handleImportBooks}
-          />
-        </div>
-        {!loading && libraryBooks.length === 0 && (
-          <div className='hero min-h-screen'>
+      <div className='flex-grow pt-12'>
+        {loading || libraryBooks.length > 0 ? (
+          <div className='hero-content h-full overflow-y-auto px-2 py-4'>
+            <Spinner loading={loading} />
+            <Bookshelf
+              libraryBooks={libraryBooks}
+              isSelectMode={isSelectMode}
+              onImportBooks={handleImportBooks}
+            />
+          </div>
+        ) : (
+          <div className='hero h-full items-center justify-center'>
             <div className='hero-content text-neutral-content text-center'>
               <div className='max-w-md'>
                 <h1 className='mb-5 text-5xl font-bold'>Your Library</h1>
