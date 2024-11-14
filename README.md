@@ -20,6 +20,7 @@ Readest is an open-source ebook reading software designed for immersive and deep
 For the best experience, use a recent version of Node.js and Rust. Refer to the [Tauri documentation](https://v2.tauri.app/start/prerequisites/) for details on setting up the development environment prerequisites on different platforms.
 
 ```bash
+nvm install v22
 nvm use v22
 rustup update
 ```
@@ -45,13 +46,25 @@ pnpm install
 pnpm --filter @readest/readest-app setup-pdfjs
 ```
 
-### 3. Build the Development
+### 3. Verify Dependencies Installation
+
+To confirm that all dependencies are correctly installed, run the following command:
+
+```bash
+pnpm tauri info
+```
+
+This command will display information about the installed Tauri dependencies and configuration on your platform. Note that the output may vary depending on the operating system and environment setup. Please review the output specific to your platform for any potential issues.
+
+For Windows targets, “Build Tools for Visual Studio 2022” (or a higher edition of Visual Studio) and the “Desktop development with C++” workflow must be installed. For Windows ARM64 targets, the “VS 2022 C++ ARM64 build tools” and "C++ Clang Compiler for Windows" components must be installed. And make sure `clang` can be found in the path by adding `C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\Llvm\x64\bin` for example in the environment variable `Path`.
+
+### 4. Build the Development
 
 ```bash
 pnpm tauri dev
 ```
 
-### 4. Build for Production
+### 5. Build for Production
 
 ```bash
 pnpm tauri build
