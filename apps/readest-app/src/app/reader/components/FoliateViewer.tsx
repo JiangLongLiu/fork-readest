@@ -5,6 +5,13 @@ import { BookConfig, BookNote, BookSearchConfig, BookSearchResult } from '@/type
 import { useReaderStore } from '@/store/readerStore';
 import { getStyles } from '@/utils/style';
 import { ONE_COLUMN_MAX_INLINE_SIZE } from '@/services/constants';
+import {
+  handleKeydown,
+  handleMousedown,
+  handleClick,
+  handleMouseup,
+} from '../utils/iframeEventHandlers';
+import { eventDispatcher } from '@/utils/event';
 
 export interface FoliateView extends HTMLElement {
   open: (book: BookDoc) => Promise<void>;
@@ -20,6 +27,8 @@ export interface FoliateView extends HTMLElement {
   addAnnotation: (note: BookNote, remove?: boolean) => { index: number; label: string };
   search: (config: BookSearchConfig) => AsyncGenerator<BookSearchResult | string, void, void>;
   clearSearch: () => void;
+  select: (target: string | number | { fraction: number }) => void;
+  deselect: () => void;
   renderer: {
     setStyles?: (css: string) => void;
     setAttribute: (name: string, value: string | number) => void;
@@ -47,8 +56,8 @@ const FoliateViewer: React.FC<{
   bookDoc: BookDoc;
   config: BookConfig;
 }> = ({ bookKey, bookDoc, config }) => {
-  const viewRef = useRef<HTMLDivElement>(null);
-  const [view, setView] = useState<FoliateView | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const viewRef = useRef<FoliateView | null>(null);
   const [viewInited, setViewInited] = useState(false);
   const isViewCreated = useRef(false);
   const { setView: setFoliateView, setProgress, getViewSettings } = useReaderStore();
@@ -59,41 +68,6 @@ const FoliateViewer: React.FC<{
     setProgress(bookKey, detail.cfi, detail.tocItem, detail.section, detail.location, detail.range);
   };
 
-  const handleKeydown = (event: KeyboardEvent) => {
-    // prevent default navigation keys in iframes
-    if (['Backspace', 'ArrowDown', 'ArrowUp'].includes(event.key)) {
-      event.preventDefault();
-    }
-    window.postMessage(
-      {
-        type: 'iframe-keydown',
-        key: event.key,
-        code: event.code,
-        ctrlKey: event.ctrlKey,
-        shiftKey: event.shiftKey,
-        altKey: event.altKey,
-        metaKey: event.metaKey,
-      },
-      '*',
-    );
-  };
-
-  const handleMousedown = (event: MouseEvent) => {
-    window.postMessage(
-      {
-        type: 'iframe-mousedown',
-        button: event.button,
-        clientX: event.clientX,
-        clientY: event.clientY,
-        ctrlKey: event.ctrlKey,
-        shiftKey: event.shiftKey,
-        altKey: event.altKey,
-        metaKey: event.metaKey,
-      },
-      '*',
-    );
-  };
-
   const docLoadHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;
     if (detail.doc) {
@@ -101,11 +75,35 @@ const FoliateViewer: React.FC<{
         detail.doc.isEventListenersAdded = true;
         detail.doc.addEventListener('keydown', handleKeydown);
         detail.doc.addEventListener('mousedown', handleMousedown);
+        detail.doc.addEventListener('mouseup', handleMouseup);
+        detail.doc.addEventListener('click', handleClick);
       }
     }
   };
 
-  useFoliateEvents(view, { onLoad: docLoadHandler, onRelocate: progressRelocateHandler });
+  const handleClickTurnPage = (msg: MessageEvent) => {
+    if (msg.data && msg.data.type === 'iframe-single-click') {
+      const viewElement = containerRef.current;
+      if (viewElement) {
+        const rect = viewElement.getBoundingClientRect();
+        const { screenX } = msg.data;
+
+        const eventConsumed = eventDispatcher.dispatchSync('iframe-single-click', { screenX });
+        if (!eventConsumed) {
+          if (screenX >= rect.left + rect.width / 2) {
+            viewRef.current?.goRight();
+          } else if (screenX < rect.left + rect.width / 2) {
+            viewRef.current?.goLeft();
+          }
+        }
+      }
+    }
+  };
+
+  useFoliateEvents(viewRef.current, {
+    onLoad: docLoadHandler,
+    onRelocate: progressRelocateHandler,
+  });
 
   useEffect(() => {
     if (isViewCreated.current) return;
@@ -114,8 +112,8 @@ const FoliateViewer: React.FC<{
       await import('foliate-js/view.js');
       const view = wrappedFoliateView(document.createElement('foliate-view') as FoliateView);
       document.body.append(view);
-      viewRef.current?.appendChild(view);
-      setView(view);
+      containerRef.current?.appendChild(view);
+      viewRef.current = view;
       setFoliateView(bookKey, view);
 
       await view.open(bookDoc);
@@ -148,6 +146,8 @@ const FoliateViewer: React.FC<{
         await view.goToFraction(0);
       }
       setViewInited(true);
+
+      window.addEventListener('message', handleClickTurnPage);
     };
 
     openBook();
@@ -155,8 +155,8 @@ const FoliateViewer: React.FC<{
 
     return () => {
       console.log('Closing book', bookKey);
-      view?.close();
-      view?.remove();
+      viewRef.current?.close();
+      viewRef.current?.remove();
     };
   }, []);
 
@@ -164,7 +164,7 @@ const FoliateViewer: React.FC<{
     const { booknotes = [] } = config;
     const annotations = booknotes.filter((item) => item.type === 'annotation' && item.style);
     try {
-      Promise.all(annotations.map((annotation) => view?.addAnnotation(annotation)));
+      Promise.all(annotations.map((annotation) => viewRef.current?.addAnnotation(annotation)));
     } catch (e) {
       console.error(e);
     }
@@ -176,7 +176,7 @@ const FoliateViewer: React.FC<{
     }
   }, [viewInited]);
 
-  return <div className='foliate-viewer h-[100%] w-[100%]' ref={viewRef} />;
+  return <div className='foliate-viewer h-[100%] w-[100%]' ref={containerRef} />;
 };
 
 export default FoliateViewer;

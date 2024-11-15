@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FiSearch } from 'react-icons/fi';
 import { FiCopy } from 'react-icons/fi';
 import { PiHighlighterFill } from 'react-icons/pi';
@@ -14,7 +14,6 @@ import { useFoliateEvents } from '../../hooks/useFoliateEvents';
 import { getPopupPosition, getPosition, Position, TextSelection } from '@/utils/sel';
 import { eventDispatcher } from '@/utils/event';
 import Toast from '@/components/Toast';
-import useOutsideClick from '@/hooks/useOutsideClick';
 import AnnotationPopup from './AnnotationPopup';
 import { uniqueId } from '@/utils/misc';
 
@@ -28,6 +27,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const progress = getProgress(bookKey)!;
   const view = getView(bookKey);
 
+  const isShowingPopup = useRef(false);
   const [selection, setSelection] = useState<TextSelection | null>();
   const [showPopup, setShowPopup] = useState(false);
   const [trianglePosition, setTrianglePosition] = useState<Position>();
@@ -84,14 +84,31 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     setSelectedStyle(annotation.style!);
     setSelectedColor(annotation.color!);
     setSelection(selection);
+    console.log('show annotation', selection);
   };
 
   useFoliateEvents(view, { onLoad, onDrawAnnotation, onShowAnnotation }, [config]);
 
-  const popupRef = useOutsideClick<HTMLDivElement>(() => {
+  const handleDismissPopup = () => {
     setShowPopup(false);
     setSelection(null);
-  });
+    view?.deselect();
+    isShowingPopup.current = false;
+  };
+
+  useEffect(() => {
+    const handleSingleClick = (): boolean => {
+      if (showPopup || isShowingPopup.current) {
+        return true;
+      }
+      return false;
+    };
+
+    eventDispatcher.onSync('iframe-single-click', handleSingleClick);
+    return () => {
+      eventDispatcher.offSync('iframe-single-click', handleSingleClick);
+    };
+  }, []);
 
   useEffect(() => {
     setHighlightOptionsVisible(!!(selection && selection.annotated));
@@ -101,9 +118,11 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       const rect = gridFrame.getBoundingClientRect();
       const triangPos = getPosition(selection.range, rect);
       const popupPos = getPopupPosition(triangPos, rect, popupWidth, popupHeight, popupPadding);
+      if (triangPos.point.x == 0 || triangPos.point.y == 0) return;
       setShowPopup(true);
       setPopupPosition(popupPos);
       setTrianglePosition(triangPos);
+      isShowingPopup.current = true;
     }
   }, [selection, bookKey]);
 
@@ -225,7 +244,10 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   ];
 
   return (
-    <div ref={notebookNewAnnotation ? null : popupRef}>
+    <div>
+      {showPopup && !notebookNewAnnotation && (
+        <div className='fixed inset-0' onClick={handleDismissPopup} />
+      )}
       {showPopup && trianglePosition && popupPosition && (
         <AnnotationPopup
           buttons={buttons}
@@ -239,6 +261,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
           onHighlight={handleHighlight}
         />
       )}
+
       {toastMessage && <Toast message={toastMessage} />}
     </div>
   );

@@ -1,20 +1,60 @@
 class EventDispatcher {
-  private target: EventTarget;
+  private syncListeners: Map<string, Set<(event: CustomEvent) => boolean>>;
+  private asyncListeners: Map<string, Set<(event: CustomEvent) => Promise<boolean>>>;
 
   constructor() {
-    this.target = new EventTarget();
+    this.syncListeners = new Map();
+    this.asyncListeners = new Map();
   }
 
-  on(event: string, callback: (event: CustomEvent) => void): void {
-    this.target.addEventListener(event, callback as EventListener);
+  on(event: string, callback: (event: CustomEvent) => Promise<boolean>): void {
+    if (!this.asyncListeners.has(event)) {
+      this.asyncListeners.set(event, new Set());
+    }
+    this.asyncListeners.get(event)!.add(callback);
   }
 
-  off(event: string, callback: (event: CustomEvent) => void): void {
-    this.target.removeEventListener(event, callback as EventListener);
+  off(event: string, callback: (event: CustomEvent) => Promise<boolean>): void {
+    this.asyncListeners.get(event)?.delete(callback);
   }
 
-  dispatch(event: string, detail?: unknown): void {
-    this.target.dispatchEvent(new CustomEvent(event, { detail }));
+  async dispatch(event: string, detail?: unknown): Promise<boolean> {
+    const listeners = this.asyncListeners.get(event);
+    if (listeners) {
+      const customEvent = new CustomEvent(event, { detail });
+      for (const listener of listeners) {
+        const consumed = await listener(customEvent);
+        if (consumed) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  onSync(event: string, callback: (event: CustomEvent) => boolean): void {
+    if (!this.syncListeners.has(event)) {
+      this.syncListeners.set(event, new Set());
+    }
+    this.syncListeners.get(event)!.add(callback);
+  }
+
+  offSync(event: string, callback: (event: CustomEvent) => boolean): void {
+    this.syncListeners.get(event)?.delete(callback);
+  }
+
+  dispatchSync(event: string, detail?: unknown): boolean {
+    const listeners = this.syncListeners.get(event);
+    if (listeners) {
+      const customEvent = new CustomEvent(event, { detail });
+      for (const listener of listeners) {
+        const consumed = listener(customEvent);
+        if (consumed) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
 
