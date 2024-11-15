@@ -1,6 +1,5 @@
 import clsx from 'clsx';
 import React, { useState, isValidElement, ReactElement } from 'react';
-import useOutsideClick from '@/hooks/useOutsideClick';
 
 interface DropdownProps {
   className?: string;
@@ -30,33 +29,30 @@ const Dropdown: React.FC<DropdownProps> = ({
     onToggle?.(isOpen);
   };
 
-  const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
-    if (!dropdownRef.current?.contains(event.relatedTarget as Node)) {
-      setIsDropdownOpen(false);
-    }
-  };
-
-  const dropdownRef = useOutsideClick<HTMLDivElement>(() => setIsDropdownOpen(false));
   const childrenWithToggle = isValidElement(children)
     ? React.cloneElement(children, { setIsDropdownOpen })
     : children;
 
   return (
-    <div className={clsx('dropdown', className)} ref={dropdownRef}>
-      <div
-        tabIndex={-1}
-        onClick={toggleDropdown}
-        onBlur={handleBlur}
-        className={clsx(
-          'dropdown-toggle hover:bg-gray-300',
-          buttonClassName,
-          isOpen && 'bg-base-300',
-        )}
-      >
-        {toggleButton}
+    <>
+      {isOpen && (
+        <div className='fixed inset-0 bg-transparent' onClick={() => setIsDropdownOpen(false)} />
+      )}
+      <div className={clsx('dropdown', className)}>
+        <div
+          tabIndex={-1}
+          onClick={toggleDropdown}
+          className={clsx(
+            'dropdown-toggle hover:bg-gray-300',
+            buttonClassName,
+            isOpen && 'bg-base-300',
+          )}
+        >
+          {toggleButton}
+        </div>
+        {isOpen && childrenWithToggle}
       </div>
-      {isOpen && childrenWithToggle}
-    </div>
+    </>
   );
 };
 
