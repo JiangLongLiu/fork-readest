@@ -1,17 +1,19 @@
+'use client';
+
 import * as React from 'react';
-import type { Metadata } from 'next';
+import { usePathname } from 'next/navigation';
 import { AuthProvider } from '@/context/AuthContext';
 import { EnvProvider } from '@/context/EnvContext';
 import { CSPostHogProvider } from '@/context/PHContext';
 import '../styles/globals.css';
 import '../styles/fonts.css';
 
-export const metadata: Metadata = {
-  title: 'Readest',
-  description: 'read to learn',
-};
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  React.useEffect(() => {
+    document.documentElement.setAttribute('data-page', pathname.replace('/', '') || 'default');
+  }, [pathname]);
+
   return (
     <html lang='en'>
       <head>

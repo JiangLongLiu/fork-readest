@@ -30,7 +30,7 @@ const ReaderPage = () => {
   return (
     library.length > 0 &&
     settings.globalReadSettings && (
-      <div className='min-h-screen select-none'>
+      <div className='reader-page min-h-screen select-none bg-white'>
         <Suspense>
           <ReaderContent settings={settings} />
         </Suspense>

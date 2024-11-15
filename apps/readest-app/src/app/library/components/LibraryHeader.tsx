@@ -52,7 +52,7 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
     <div
       ref={headerRef}
       className={clsx(
-        'titlebar z-10 w-full bg-gray-100 py-2 pr-6',
+        'titlebar z-10 h-11 w-full bg-gray-100 py-2 pr-6',
         isTrafficLightVisible ? 'pl-16' : 'pl-2',
       )}
     >
@@ -64,9 +64,11 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
           <input
             type='text'
             placeholder='Search books...'
+            spellCheck='false'
             className={clsx(
-              'input input-sm rounded-badge w-full bg-gray-200 pl-10 pr-10',
-              'font-sans text-base font-light focus:border-none focus:outline-none',
+              'input rounded-badge h-7 w-full bg-gray-200 pl-10 pr-10',
+              'font-sans text-sm font-light',
+              'border-none focus:outline-none focus:ring-0',
             )}
           />
           <div className='absolute right-4 flex items-center space-x-4 text-gray-500'>

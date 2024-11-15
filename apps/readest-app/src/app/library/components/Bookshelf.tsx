@@ -10,6 +10,7 @@ import { Book, BooksGroup } from '@/types/book';
 import Alert from '@/components/Alert';
 import { useReaderStore } from '@/store/readerStore';
 import { useEnv } from '@/context/EnvContext';
+import clsx from 'clsx';
 
 type BookshelfItem = Book | BooksGroup;
 
@@ -96,24 +97,35 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
     <div className='bookshelf'>
       <div className='grid grid-cols-3 gap-0 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8'>
         {bookshelfItems.map((item, index) => (
-          <div
-            key={`library-item-${index}`}
-            className='flex h-full flex-col rounded-md p-4 hover:bg-gray-200'
-          >
+          <div key={`library-item-${index}`} className='flex h-full flex-col p-4 hover:bg-gray-200'>
             <div className='flex-grow'>
               {'format' in item ? (
                 <div
                   className='book-item cursor-pointer'
                   onClick={() => handleBookClick(item.hash)}
                 >
-                  <div key={(item as Book).hash} className='card bg-base-100 shadow-md'>
+                  <div key={(item as Book).hash} className='bg-base-100 shadow-md'>
                     <div className='relative aspect-[28/41]'>
                       <Image
-                        src={(item as Book).coverImageUrl!}
-                        alt={(item as Book).title}
+                        src={item.coverImageUrl!}
+                        alt={item.title}
                         fill={true}
                         className='object-cover'
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove(
+                            'invisible',
+                          );
+                        }}
                       />
+                      <div
+                        className={clsx(
+                          'invisible absolute inset-0 flex items-center justify-center',
+                          'rounded-none text-center font-sans text-lg font-medium text-gray-600',
+                        )}
+                      >
+                        {item.title}
+                      </div>
                       {(selectedBooks.includes(item.hash) || clickedImage === item.hash) && (
                         <div className='absolute inset-0 bg-black opacity-30 transition-opacity duration-300'></div>
                       )}

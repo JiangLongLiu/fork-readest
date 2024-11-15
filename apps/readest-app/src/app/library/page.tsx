@@ -77,22 +77,26 @@ const LibraryPage = () => {
   }
 
   return (
-    <div className='rounded-window min-h-screen select-none overflow-hidden bg-gray-100'>
-      <LibraryHeader
-        isSelectMode={isSelectMode}
-        onImportBooks={handleImportBooks}
-        onToggleSelectMode={handleToggleSelectMode}
-      />
-      <div className='flex-grow'>
-        {loading || libraryBooks.length > 0 ? (
-          <div className='hero-content h-full overflow-y-auto px-2 py-4'>
-            <Spinner loading={loading} />
-            <Bookshelf
-              libraryBooks={libraryBooks}
-              isSelectMode={isSelectMode}
-              onImportBooks={handleImportBooks}
-            />
-          </div>
+    <div className='library-page rounded-window flex h-full min-h-screen select-none flex-col overflow-hidden bg-gray-100'>
+      <div className='fixed top-0 z-40 w-full'>
+        <LibraryHeader
+          isSelectMode={isSelectMode}
+          onImportBooks={handleImportBooks}
+          onToggleSelectMode={handleToggleSelectMode}
+        />
+      </div>
+      {loading && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-white/50'>
+          <Spinner loading />
+        </div>
+      )}
+      <div className='mt-12 flex-grow overflow-auto px-2'>
+        {libraryBooks.length > 0 ? (
+          <Bookshelf
+            libraryBooks={libraryBooks}
+            isSelectMode={isSelectMode}
+            onImportBooks={handleImportBooks}
+          />
         ) : (
           <div className='hero h-full items-center justify-center'>
             <div className='hero-content text-neutral-content text-center'>

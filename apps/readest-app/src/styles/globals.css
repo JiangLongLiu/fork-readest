@@ -5,15 +5,30 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  border-radius: 10px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
-    border-radius: 10px;
   }
+}
+
+:root {
+  background: var(--background);
+  border-radius: 10px;
+}
+
+html[data-page="default"] {
+  background: #ffffff;
+}
+
+html[data-page="library"] {
+  background: #f3f4f6;
+}
+
+html[data-page="reader"] {
+  background: #f3f4f6;
 }
 
 body {
@@ -28,6 +43,14 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+library-page {
+  --background: #f3f4f6;
+}
+
+reader-page {
+  --background: #ffffff;
 }
 
 foliate-view {
