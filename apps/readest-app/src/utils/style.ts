@@ -34,10 +34,20 @@ const getLayoutStyles = (
   justify: boolean,
   hyphenate: boolean,
   zoomLevel: number,
+  bg: string,
+  fg: string,
+  primary: string,
 ) => `
   @namespace epub "http://www.idpf.org/2007/ops";
   html {
     color-scheme: light dark;
+    color: ${fg};
+  }
+  a:any-link {
+    color: ${primary};
+  }
+  aside[epub|type~="footnote"] {
+    display: none;
   }
   /* https://github.com/whatwg/html/issues/5426 */
   @media (prefers-color-scheme: dark) {
@@ -45,11 +55,34 @@ const getLayoutStyles = (
         color: lightblue;
     }
   }
+  
+  html {
+    line-height: ${spacing};
+    hanging-punctuation: allow-end last;
+    orphans: 2;
+    widows: 2;
+  }
+  [align="left"] { text-align: left; }
+  [align="right"] { text-align: right; }
+  [align="center"] { text-align: center; }
+  [align="justify"] { text-align: justify; }
+  :is(hgroup, header) p {
+      text-align: unset;
+      hyphens: unset;
+  }
+  pre {
+      white-space: pre-wrap !important;
+      tab-size: 2;
+  }
   body {
     zoom: ${zoomLevel}%; 
+    background-color: ${bg} !important;
+  }
+  svg, img {
+    background-color: transparent !important;
+    mix-blend-mode: multiply;
   }
   p, li, blockquote, dd {
-    line-height: ${spacing};
     text-align: ${justify ? 'justify' : 'start'};
     -webkit-hyphens: ${hyphenate ? 'auto' : 'manual'};
     hyphens: ${hyphenate ? 'auto' : 'manual'};
@@ -76,13 +109,22 @@ const getLayoutStyles = (
   }
 `;
 
-export const getStyles = (viewSettings: ViewSettings) => {
+export interface ThemeCode {
+  bg: string;
+  fg: string;
+  primary: string;
+}
+
+export const getStyles = (viewSettings: ViewSettings, themeCode: ThemeCode) => {
   const layoutStyles = getLayoutStyles(
     viewSettings.lineHeight!,
     viewSettings.fullJustification!,
     viewSettings.hyphenation!,
     // FIXME: zoom level is not working in paginated mode
     viewSettings.scrolled ? viewSettings.zoomLevel! : 100,
+    themeCode.bg,
+    themeCode.fg,
+    themeCode.primary,
   );
   const fontStyles = getFontStyles(
     viewSettings.serifFont!,

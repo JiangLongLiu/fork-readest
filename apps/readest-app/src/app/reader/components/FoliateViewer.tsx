@@ -4,6 +4,7 @@ import { BookDoc } from '@/libs/document';
 import { BookConfig, BookNote, BookSearchConfig, BookSearchResult } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
 import { getStyles } from '@/utils/style';
+import { useTheme } from '@/hooks/useTheme';
 import { ONE_COLUMN_MAX_INLINE_SIZE } from '@/services/constants';
 import {
   handleKeydown,
@@ -61,6 +62,7 @@ const FoliateViewer: React.FC<{
   const [viewInited, setViewInited] = useState(false);
   const isViewCreated = useRef(false);
   const { setView: setFoliateView, setProgress, getViewSettings } = useReaderStore();
+  const { themeCode } = useTheme();
 
   const progressRelocateHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;
@@ -118,7 +120,6 @@ const FoliateViewer: React.FC<{
 
       await view.open(bookDoc);
       const viewSettings = getViewSettings(bookKey)!;
-      view.renderer.setStyles?.(getStyles(viewSettings));
       const isScrolled = viewSettings.scrolled!;
       const marginPx = viewSettings.marginPx!;
       const gapPercent = viewSettings.gapPercent!;
@@ -146,6 +147,7 @@ const FoliateViewer: React.FC<{
         await view.goToFraction(0);
       }
       setViewInited(true);
+      view.renderer.setStyles?.(getStyles(viewSettings, themeCode));
 
       window.addEventListener('message', handleClickTurnPage);
     };

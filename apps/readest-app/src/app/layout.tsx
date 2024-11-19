@@ -5,10 +5,12 @@ import { usePathname } from 'next/navigation';
 import { AuthProvider } from '@/context/AuthContext';
 import { EnvProvider } from '@/context/EnvContext';
 import { CSPostHogProvider } from '@/context/PHContext';
+import { useTheme } from '@/hooks/useTheme';
 import '../styles/globals.css';
 import '../styles/fonts.css';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  useTheme();
   const pathname = usePathname();
   React.useEffect(() => {
     document.documentElement.setAttribute('data-page', pathname.replace('/', '') || 'default');

@@ -23,7 +23,9 @@ const PageInfoView: React.FC<PageInfoProps> = ({ bookFormat, section, pageinfo, 
       className='pageinfo absolute bottom-0 left-0 right-0 flex h-12 items-center justify-end'
       style={{ paddingRight: gapRight }}
     >
-      <h2 className='text-right font-sans text-xs font-extralight text-slate-500'>{pageInfo}</h2>
+      <h2 className='text-neutral-content text-right font-sans text-xs font-extralight'>
+        {pageInfo}
+      </h2>
     </div>
   );
 };

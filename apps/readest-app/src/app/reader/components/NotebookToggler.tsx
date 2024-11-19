@@ -20,9 +20,9 @@ const NotebookToggler: React.FC<NotebookTogglerProps> = ({ bookKey }) => {
   return (
     <button onClick={handleToggleSidebar} className='p-2'>
       {sideBarBookKey == bookKey && isNotebookVisible ? (
-        <TbLayoutSidebarRightFilled size={20} />
+        <TbLayoutSidebarRightFilled size={20} className='text-base-content' />
       ) : (
-        <TbLayoutSidebarRight size={20} />
+        <TbLayoutSidebarRight size={20} className='text-base-content' />
       )}
     </button>
   );

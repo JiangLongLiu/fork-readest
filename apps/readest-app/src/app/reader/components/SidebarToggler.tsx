@@ -20,9 +20,9 @@ const SidebarToggler: React.FC<SidebarTogglerProps> = ({ bookKey }) => {
   return (
     <button onClick={handleToggleSidebar} className='p-2'>
       {sideBarBookKey == bookKey && isSideBarVisible ? (
-        <TbLayoutSidebarFilled size={20} />
+        <TbLayoutSidebarFilled size={20} className='text-base-content' />
       ) : (
-        <TbLayoutSidebar size={20} />
+        <TbLayoutSidebar size={20} className='text-base-content' />
       )}
     </button>
   );

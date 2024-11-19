@@ -17,10 +17,10 @@ const DialogMenu: React.FC<DialogMenuProps> = ({ toggleDropdown }) => {
   return (
     <div
       tabIndex={0}
-      className='dropdown-content dropdown-right no-triangle z-20 mt-1 w-44 border bg-white shadow-2xl'
+      className='dropdown-content dropdown-right no-triangle border-base-200 z-20 mt-1 w-44 border shadow-2xl'
     >
       <button
-        className='flex w-full items-center justify-between rounded-md p-2 hover:bg-gray-100'
+        className='hover:bg-base-200 text-base-content flex w-full items-center justify-between rounded-md p-2'
         onClick={handleToggleGlobal}
       >
         <div className='flex items-center'>

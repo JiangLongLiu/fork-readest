@@ -76,7 +76,11 @@ const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
 
   return (
     <button onClick={toggleBookmark} className='p-2'>
-      {isBookmarked ? <MdOutlineBookmark size={20} /> : <MdOutlineBookmarkAdd size={20} />}
+      {isBookmarked ? (
+        <MdOutlineBookmark size={20} className='text-base-content' />
+      ) : (
+        <MdOutlineBookmarkAdd size={20} className='text-base-content' />
+      )}
     </button>
   );
 };

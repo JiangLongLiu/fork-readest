@@ -2,9 +2,12 @@ import clsx from 'clsx';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { BiMoon, BiSun } from 'react-icons/bi';
+import { TbSunMoon } from 'react-icons/tb';
 import { MdZoomOut, MdZoomIn, MdCheck } from 'react-icons/md';
 
+import MenuItem from '@/components/MenuItem';
 import { useReaderStore } from '@/store/readerStore';
+import { useTheme, ThemeMode } from '@/hooks/useTheme';
 import { getStyles } from '@/utils/style';
 
 interface ViewMenuProps {
@@ -21,7 +24,7 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
   const { getView, getViewSettings, setViewSettings } = useReaderStore();
   const viewSettings = getViewSettings(bookKey);
 
-  const [isDarkMode, setDarkMode] = useState(viewSettings!.theme === 'dark');
+  const { themeMode, isDarkMode, themeCode, updateThemeMode } = useTheme();
   const [isScrolledMode, setScrolledMode] = useState(viewSettings!.scrolled);
   const [isInvertedColors, setInvertedColors] = useState(viewSettings!.invert);
   const [zoomLevel, setZoomLevel] = useState(viewSettings!.zoomLevel!);
@@ -30,13 +33,22 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
   const zoomOut = () => setZoomLevel((prev) => Math.max(prev - 10, 50));
   const resetZoom = () => setZoomLevel(100);
   const toggleScrolledMode = () => setScrolledMode(!isScrolledMode);
-  const toggleDarkMode = () => setDarkMode(!isDarkMode);
   const toggleInvertedColors = () => setInvertedColors(!isInvertedColors);
 
   const openFontLayoutMenu = () => {
     setIsDropdownOpen?.(false);
     onSetSettingsDialogOpen(true);
   };
+
+  const cycleThemeMode = () => {
+    const nextMode: ThemeMode =
+      themeMode === 'auto' ? 'light' : themeMode === 'light' ? 'dark' : 'auto';
+    updateThemeMode(nextMode);
+  };
+
+  useEffect(() => {
+    getView(bookKey)?.renderer.setStyles?.(getStyles(viewSettings!, themeCode));
+  }, [themeCode]);
 
   useEffect(() => {
     getView(bookKey)?.renderer.setAttribute('flow', isScrolledMode ? 'scrolled' : 'paginated');
@@ -46,6 +58,7 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
 
   useEffect(() => {
     document.body.classList.toggle('invert', isInvertedColors);
+    getView(bookKey)?.renderer.setStyles?.(getStyles(viewSettings!, themeCode));
   }, [isInvertedColors]);
 
   useEffect(() => {
@@ -53,7 +66,7 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
     if (!view) return;
     // FIXME: zoom level is not working in paginated mode
     if (viewSettings?.scrolled) {
-      view.renderer.setStyles?.(getStyles(viewSettings!));
+      view.renderer.setStyles?.(getStyles(viewSettings!, themeCode));
     }
     viewSettings!.zoomLevel = zoomLevel;
     setViewSettings(bookKey, viewSettings!);
@@ -63,7 +76,7 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
     <div
       id='exclude-title-bar-mousedown'
       tabIndex={0}
-      className='view-menu dropdown-content dropdown-right no-triangle z-20 mt-1 w-72 border bg-white shadow-2xl'
+      className='view-menu dropdown-content dropdown-right no-triangle border-base-100 z-20 mt-1 w-72 border shadow-2xl'
     >
       <div
         className={clsx(
@@ -73,14 +86,17 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
       >
         <button
           onClick={zoomOut}
-          className={clsx('rounded-full p-2 hover:bg-gray-100', !isScrolledMode && 'btn-disabled')}
+          className={clsx(
+            'hover:bg-base-200 text-base-content rounded-full p-2',
+            !isScrolledMode && 'btn-disabled text-gray-400',
+          )}
         >
           <MdZoomOut size={20} />
         </button>
         <button
           className={clsx(
-            'h-8 min-h-8 w-[50%] rounded-md p-1 text-center hover:bg-gray-100',
-            !isScrolledMode && 'btn-disabled',
+            'hover:bg-base-200 text-base-content h-8 min-h-8 w-[50%] rounded-md p-1 text-center',
+            !isScrolledMode && 'btn-disabled text-gray-400',
           )}
           onClick={resetZoom}
         >
@@ -88,65 +104,49 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
         </button>
         <button
           onClick={zoomIn}
-          className={clsx('rounded-full p-2 hover:bg-gray-100', !isScrolledMode && 'btn-disabled')}
+          className={clsx(
+            'hover:bg-base-200 text-base-content rounded-full p-2',
+            !isScrolledMode && 'btn-disabled text-gray-400',
+          )}
         >
           <MdZoomIn size={20} />
         </button>
       </div>
 
-      <hr className='my-1' />
+      <hr className='border-base-200 my-1' />
 
-      <button
-        className='flex w-full items-center justify-between rounded-md p-2 hover:bg-gray-100'
-        onClick={openFontLayoutMenu}
-      >
-        <div className='flex items-center'>
-          <span style={{ minWidth: '20px' }}></span>
-          <span className='ml-2'>Font & Layout</span>
-        </div>
-        <span className='text-sm text-gray-400'>Shift+F</span>
-      </button>
+      <MenuItem label='Font & Layout' shortcut='Shift+F' onClick={openFontLayoutMenu} />
 
-      <button
-        className='flex w-full items-center justify-between rounded-md p-2 hover:bg-gray-100'
+      <MenuItem
+        label='Scrolled Mode'
+        shortcut='Shift+J'
+        icon={isScrolledMode ? <MdCheck size={20} /> : undefined}
         onClick={toggleScrolledMode}
-      >
-        <div className='flex items-center'>
-          <span style={{ minWidth: '20px' }}>
-            {isScrolledMode && <MdCheck size={20} className='text-base-content' />}
-          </span>
-          <span className='ml-2'>Scrolled Mode</span>
-        </div>
-        <span className='text-sm text-gray-400'>Shift+J</span>
-      </button>
+      />
 
-      <hr className='my-1' />
+      <hr className='border-base-200 my-1' />
 
-      <button
-        className='flex w-full items-center rounded-md p-2 hover:bg-gray-100'
-        onClick={toggleDarkMode}
-      >
-        <div className='flex items-center'>
-          <span style={{ minWidth: '20px' }}>
-            {isDarkMode ? <BiMoon size={20} /> : <BiSun size={20} />}
-          </span>
-        </div>
-        <span className='ml-2'>{isDarkMode ? 'Dark Mode' : 'Light Mode'}</span>
-      </button>
-      <button
-        className={clsx(
-          'flex w-full items-center justify-between rounded-md p-2 hover:bg-gray-100',
-          !isDarkMode && 'btn-disabled text-gray-400',
-        )}
+      <MenuItem
+        label={
+          themeMode === 'dark' ? 'Dark Mode' : themeMode === 'light' ? 'Light Mode' : 'Auto Mode'
+        }
+        icon={
+          themeMode === 'dark' ? (
+            <BiMoon size={20} />
+          ) : themeMode === 'light' ? (
+            <BiSun size={20} />
+          ) : (
+            <TbSunMoon size={20} />
+          )
+        }
+        onClick={cycleThemeMode}
+      />
+      <MenuItem
+        label='Invert Colors in Dark Mode'
+        icon={isInvertedColors ? <MdCheck size={20} className='text-base-content' /> : undefined}
         onClick={toggleInvertedColors}
-      >
-        <div className='flex items-center'>
-          <span style={{ minWidth: '20px' }}>
-            {isInvertedColors && <MdCheck size={20} className='text-base-content' />}
-          </span>
-          <span className='ml-2'>Invert Colors in Dark Mode</span>
-        </div>
-      </button>
+        disabled={!isDarkMode}
+      />
     </div>
   );
 };

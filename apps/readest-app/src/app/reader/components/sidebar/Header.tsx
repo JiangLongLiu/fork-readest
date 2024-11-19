@@ -33,22 +33,22 @@ const SidebarHeader: React.FC<{
           onClick={onToggleSearchBar}
           className={clsx(
             'btn btn-ghost left-0 h-8 min-h-8 w-8 p-0',
-            isSearchBarVisible ? 'bg-gray-300 hover:bg-gray-300' : 'bg-base-200 hover:bg-base-200',
+            isSearchBarVisible ? 'bg-base-300' : '',
           )}
         >
-          <FiSearch size={18} />
+          <FiSearch size={18} className='text-base-content' />
         </button>
         <Dropdown
           className='dropdown-bottom flex justify-center'
           buttonClassName='btn btn-ghost h-8 min-h-8 w-8 p-0'
-          toggleButton={<MdOutlineMenu size={20} />}
+          toggleButton={<MdOutlineMenu size={20} className='fill-base-content' />}
         >
           <BookMenu />
         </Dropdown>
         <div className='right-0 flex h-8 w-8 items-center justify-center'>
           <button
             onClick={onTogglePin}
-            className={`${isPinned ? 'bg-gray-300' : 'bg-base-300'} btn btn-ghost btn-circle h-6 min-h-6 w-6`}
+            className={`${isPinned ? 'bg-base-300' : 'bg-base-300/65'} btn btn-ghost btn-circle h-6 min-h-6 w-6`}
           >
             {isPinned ? <MdPushPin size={14} /> : <MdOutlinePushPin size={14} />}
           </button>

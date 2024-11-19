@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useReaderStore } from '@/store/readerStore';
 import cssbeautify from 'cssbeautify';
 import { getStyles } from '@/utils/style';
+import { useTheme } from '@/hooks/useTheme';
 
 const cssRegex =
   /((?:\s*)([\w#.@*,:\-.:>+~\[\]\"=(),*\s]+)\s*{(?:[\s]*)((?:[A-Za-z\- \s]+[:]\s*['"0-9\w .,\/\()\-!#%]+;?)*)*\s*}(?:\s*))/gim;
@@ -10,6 +11,7 @@ const MiscPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { settings, isFontLayoutSettingsGlobal } = useReaderStore();
   const { setSettings, getView, getViewSettings, setViewSettings } = useReaderStore();
   const viewSettings = getViewSettings(bookKey)!;
+  const { themeCode } = useTheme();
 
   const [animated, setAnimated] = useState(viewSettings.animated!);
   const [userStylesheet, setUserStylesheet] = useState(viewSettings.userStylesheet!);
@@ -43,7 +45,7 @@ const MiscPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
         settings.globalViewSettings.userStylesheet = formattedCSS;
         setSettings(settings);
       }
-      getView(bookKey)?.renderer.setStyles?.(getStyles(viewSettings));
+      getView(bookKey)?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
     } catch (err) {
       setError('Invalid CSS: Please check your input.');
       console.log('CSS Error:', err);

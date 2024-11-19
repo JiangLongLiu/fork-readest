@@ -77,7 +77,7 @@ const LibraryPage = () => {
   }
 
   return (
-    <div className='library-page rounded-window flex h-full min-h-screen select-none flex-col overflow-hidden bg-gray-100'>
+    <div className='library-page rounded-window bg-base-200/50 flex h-full min-h-screen select-none flex-col overflow-hidden'>
       <div className='fixed top-0 z-40 w-full'>
         <LibraryHeader
           isSelectMode={isSelectMode}
@@ -86,7 +86,7 @@ const LibraryPage = () => {
         />
       </div>
       {loading && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-white/50'>
+        <div className='fixed inset-0 z-50 flex items-center justify-center'>
           <Spinner loading />
         </div>
       )}

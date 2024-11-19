@@ -25,28 +25,28 @@ const SettingsDialog: React.FC<{ bookKey: string; config: BookConfig }> = ({ boo
         <div className='dialog-header bg-base-100 sticky top-0 z-10 flex items-center justify-center px-4 pt-2'>
           <div className='dialog-tabs flex h-10 max-w-[80%] flex-grow items-center justify-around'>
             <button
-              className={`btn btn-ghost h-8 min-h-8 px-4 ${activePanel === 'Font' ? 'btn-active' : ''}`}
+              className={`btn btn-ghost text-base-content h-8 min-h-8 px-4 ${activePanel === 'Font' ? 'btn-active' : ''}`}
               onClick={() => setActivePanel('Font')}
             >
               <RiFontSize size={20} className='mr-0' />
               Font
             </button>
             <button
-              className={`btn btn-ghost h-8 min-h-8 px-4 ${activePanel === 'Layout' ? 'btn-active' : ''}`}
+              className={`btn btn-ghost text-base-content h-8 min-h-8 px-4 ${activePanel === 'Layout' ? 'btn-active' : ''}`}
               onClick={() => setActivePanel('Layout')}
             >
               <RiDashboardLine size={20} className='mr-0' />
               Layout
             </button>
             <button
-              className={`btn btn-ghost h-8 min-h-8 px-4 ${activePanel === 'Color' ? 'btn-active' : ''}`}
+              className={`btn btn-ghost text-base-content h-8 min-h-8 px-4 ${activePanel === 'Color' ? 'btn-active' : ''}`}
               onClick={() => setActivePanel('Color')}
             >
               <VscSymbolColor size={20} className='mr-0' />
               Color
             </button>
             <button
-              className={`btn btn-ghost h-8 min-h-8 px-4 ${activePanel === 'Misc' ? 'btn-active' : ''}`}
+              className={`btn btn-ghost text-base-content h-8 min-h-8 px-4 ${activePanel === 'Misc' ? 'btn-active' : ''}`}
               onClick={() => setActivePanel('Misc')}
             >
               <IoAccessibilityOutline size={20} className='mr-0' />
@@ -70,7 +70,7 @@ const SettingsDialog: React.FC<{ bookKey: string; config: BookConfig }> = ({ boo
           </div>
         </div>
 
-        <div className='mt-2 flex-grow overflow-y-auto px-[10%]'>
+        <div className='text-base-content mt-2 flex-grow overflow-y-auto px-[10%]'>
           {activePanel === 'Font' && <FontPanel bookKey={bookKey} />}
           {activePanel === 'Layout' && <LayoutPanel bookKey={bookKey} />}
           {activePanel === 'Color' && <ColorPanel bookKey={bookKey} />}

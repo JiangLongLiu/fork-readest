@@ -7,19 +7,18 @@
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 :root {
-  background: var(--background);
   border-radius: 10px;
 }
 
-html[data-page="default"] {
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #222222;
+    --foreground: #e0e0e0;
+  }
+}
+
+/* html[data-page="default"] {
   background: #ffffff;
 }
 
@@ -29,7 +28,7 @@ html[data-page="library"] {
 
 html[data-page="reader"] {
   background: #f3f4f6;
-}
+} */
 
 body {
   color: var(--foreground);
@@ -43,14 +42,6 @@ body {
   .text-balance {
     text-wrap: balance;
   }
-}
-
-library-page {
-  --background: #f3f4f6;
-}
-
-reader-page {
-  --background: #ffffff;
 }
 
 foliate-view {
@@ -79,7 +70,7 @@ foliate-view {
 .window-button {
   @apply inline-flex h-6 w-6 items-center justify-center rounded-full;
   @apply transform transition duration-200 ease-in-out hover:scale-105;
-  @apply bg-base-300 hover:bg-gray-300;
+  @apply bg-base-200/85 hover:bg-base-200;
 }
 
 .rounded-window {
@@ -100,7 +91,7 @@ foliate-view {
 
 .dropdown-content {
   position: relative;
-  background-color: white;
+  @apply bg-base-100;
   padding: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   border-radius: 14px;
@@ -118,7 +109,7 @@ foliate-view {
 }
 
 .dropdown-content::before {
-  border-bottom: 12px solid white;
+  border-bottom: 12px solid theme('colors.base-100');
   z-index: 1;
 }
 
@@ -166,12 +157,11 @@ foliate-view {
     sans-serif;
   font-size: 14px;
   font-weight: 400;
-  @apply text-gray-700;
 }
 
 .config-item {
   @apply flex h-14 items-center justify-between p-4;
-  @apply hover:bg-gray-50;
+  @apply hover:bg-base-100/50;
 }
 
 .config-item-top {

@@ -38,7 +38,7 @@ const SideBar: React.FC<{
     settings.globalReadSettings.isSideBarPinned,
   );
 
-  const onSearchEvent = (event: CustomEvent) => {
+  const onSearchEvent = async (event: CustomEvent) => {
     const { term } = event.detail;
     setSideBarVisible(true);
     setIsSearchBarVisible(true);
@@ -123,7 +123,7 @@ const SideBar: React.FC<{
               onSearchResultChange={setSearchResults}
             />
           </div>
-          <div className='border-b px-3'>
+          <div className='border-base-300/50 border-b px-3'>
             <BookCard cover={book.coverImageUrl!} title={book.title} author={book.author} />
           </div>
         </div>

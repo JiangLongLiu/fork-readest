@@ -6,6 +6,7 @@ import FontDropdown from './FontDropDown';
 import { MONOSPACE_FONTS, SANS_SERIF_FONTS, SERIF_FONTS } from '@/services/constants';
 import { useReaderStore } from '@/store/readerStore';
 import { getStyles } from '@/utils/style';
+import { useTheme } from '@/hooks/useTheme';
 
 interface FontFaceProps {
   className?: string;
@@ -24,7 +25,7 @@ const handleFontFaceFont = (option: string, family: string) => {
 
 const FontFace = ({ className, family, label, options, selected, onSelect }: FontFaceProps) => (
   <div className={clsx('config-item', className)}>
-    <span className='text-gray-700'>{label}</span>
+    <span className=''>{label}</span>
     <FontDropdown
       family={family}
       options={options}
@@ -40,6 +41,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { setSettings, getView, getViewSettings, setViewSettings } = useReaderStore();
   const view = getView(bookKey);
   const viewSettings = getViewSettings(bookKey)!;
+  const { themeCode } = useTheme();
 
   const [defaultFontSize, setDefaultFontSize] = useState(viewSettings.defaultFontSize!);
   const [minFontSize, setMinFontSize] = useState(viewSettings.minimumFontSize!);
@@ -56,7 +58,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.defaultFont = defaultFont;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(viewSettings));
+    view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
   }, [defaultFont]);
 
   useEffect(() => {
@@ -66,7 +68,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.defaultFontSize = defaultFontSize;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(viewSettings));
+    view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
   }, [defaultFontSize]);
 
   useEffect(() => {
@@ -76,7 +78,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.minimumFontSize = minFontSize;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(viewSettings));
+    view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
   }, [minFontSize]);
 
   useEffect(() => {
@@ -86,7 +88,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.serifFont = serifFont;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(viewSettings));
+    view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
   }, [serifFont]);
 
   useEffect(() => {
@@ -96,7 +98,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.sansSerifFont = sansSerifFont;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(viewSettings));
+    view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
   }, [sansSerifFont]);
 
   useEffect(() => {
@@ -106,7 +108,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.monospaceFont = monospaceFont;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(viewSettings));
+    view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
   }, [monospaceFont]);
 
   useEffect(() => {
@@ -116,7 +118,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.overrideFont = overrideFont;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(viewSettings));
+    view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
   }, [overrideFont]);
 
   const handleFontFamilyFont = (option: string) => {
@@ -136,8 +138,8 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     <div className='my-4 w-full space-y-6'>
       <div className='w-full'>
         <h2 className='mb-2 font-medium'>Font Size</h2>
-        <div className='card bg-base-100 border shadow'>
-          <div className='divide-y'>
+        <div className='card border-base-200 border shadow'>
+          <div className='divide-base-200 divide-y'>
             <NumberInput
               className='config-item-top'
               label='Default Font Size'
@@ -160,10 +162,10 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
 
       <div className='w-full'>
         <h2 className='mb-2 font-medium'>Font Family</h2>
-        <div className='card bg-base-100 border shadow'>
-          <div className='divide-y'>
+        <div className='card border-base-200 border shadow'>
+          <div className='divide-base-200 divide-y'>
             <div className='config-item config-item-top'>
-              <span className='text-gray-700'>Default Font</span>
+              <span className=''>Default Font</span>
               <FontDropdown
                 options={fontFamilyOptions}
                 selected={defaultFont}
@@ -173,7 +175,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
             </div>
 
             <div className='config-item config-item-bottom'>
-              <span className='text-gray-700'>Override Publisher Font</span>
+              <span className=''>Override Publisher Font</span>
               <input
                 type='checkbox'
                 className='toggle'
@@ -187,8 +189,8 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
 
       <div className='w-full'>
         <h2 className='mb-2 font-medium'>Font Face</h2>
-        <div className='card bg-base-100 border shadow'>
-          <div className='divide-y'>
+        <div className='card border-base-200 border shadow'>
+          <div className='divide-base-200 divide-y'>
             <FontFace
               className='config-item-top'
               family='serif'

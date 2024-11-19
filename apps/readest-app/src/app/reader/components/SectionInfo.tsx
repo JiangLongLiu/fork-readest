@@ -20,7 +20,9 @@ const SectionInfo: React.FC<SectionInfoProps> = ({ section, gapLeft }) => {
       )}
       style={{ left: gapLeft }}
     >
-      <h2 className='text-center font-sans text-xs font-light text-slate-500'>{section || ''}</h2>
+      <h2 className='text-neutral-content text-center font-sans text-xs font-light'>
+        {section || ''}
+      </h2>
     </div>
   );
 };

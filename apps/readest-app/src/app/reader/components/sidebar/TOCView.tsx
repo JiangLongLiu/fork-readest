@@ -4,6 +4,7 @@ import { TOCItem } from '@/libs/document';
 import { useReaderStore } from '@/store/readerStore';
 import { findParentPath } from '@/utils/toc';
 import { getContentMd5 } from '@/utils/misc';
+import clsx from 'clsx';
 
 const createExpanderIcon = (isExpanded: boolean) => {
   return (
@@ -11,8 +12,12 @@ const createExpanderIcon = (isExpanded: boolean) => {
       viewBox='0 0 8 10'
       width='8'
       height='10'
-      className={`transform transition-transform ${isExpanded ? 'rotate-90' : 'rotate-0'}`}
+      className={clsx(
+        'text-base-content transform transition-transform',
+        isExpanded ? 'rotate-90' : 'rotate-0',
+      )}
       style={{ transformOrigin: 'center' }}
+      fill='currentColor'
     >
       <polygon points='0 0, 8 5, 0 10' />
     </svg>
@@ -59,7 +64,7 @@ const TOCItemView: React.FC<{
         aria-selected={isActive ? 'true' : 'false'}
         data-href={item.href ? getContentMd5(item.href) : undefined}
         className={`flex w-full cursor-pointer items-center rounded-md py-2 ${
-          isActive ? 'bg-gray-300 hover:bg-gray-400' : 'hover:bg-gray-300'
+          isActive ? 'bg-base-300/85 hover:bg-base-300' : 'hover:bg-base-300/85'
         }`}
       >
         {item.subitems && (

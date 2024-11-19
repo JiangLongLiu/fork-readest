@@ -1,32 +1,87 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
+import { MdOutlineLightMode, MdOutlineDarkMode } from 'react-icons/md';
+import { MdRadioButtonUnchecked, MdRadioButtonChecked } from 'react-icons/md';
+import { TbSunMoon } from 'react-icons/tb';
 
-const ColorPanel: React.FC<{ bookKey: string }> = () => {
-  const [selectedTheme, setSelectedTheme] = useState('Default');
-  const themes = [
-    'Default',
-    'Gray',
-    'Sepia',
-    'Grass',
-    'Cherry',
-    'Sky',
-    'Nord',
-    'Solarized',
-    'Gruvbox',
-  ];
+import { useTheme } from '@/hooks/useTheme';
+import { themes } from '@/styles/themes';
+import { useReaderStore } from '@/store/readerStore';
+import { getStyles } from '@/utils/style';
+
+const ColorPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
+  const { themeMode, themeColor, themeCode, isDarkMode, updateThemeMode, updateThemeColor } =
+    useTheme();
+  const { getView, getViewSettings } = useReaderStore();
+  const view = getView(bookKey);
+  const viewSettings = getViewSettings(bookKey)!;
+
+  useEffect(() => {
+    view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+  }, [themeCode]);
 
   return (
     <div className='my-4 w-full space-y-6'>
-      <div className='w-full'>
-        <h2 className='mb-2 font-medium'>Color Settings</h2>
-        <div className='mt-4 grid grid-cols-3 gap-2'>
-          {themes.map((theme) => (
+      <div className='flex items-center justify-between'>
+        <h2 className='font-medium'>Theme Mode</h2>
+        <div className='flex gap-2'>
+          <div className='tooltip tooltip-bottom' data-tip='Auto Mode'>
             <button
-              key={theme}
-              className={`btn ${selectedTheme === theme ? 'btn-active' : ''}`}
-              onClick={() => setSelectedTheme(theme)}
+              className={`btn btn-ghost btn-circle ${themeMode === 'auto' ? 'btn-active bg-base-300' : ''}`}
+              onClick={() => updateThemeMode('auto')}
             >
-              {theme}
+              <TbSunMoon size={20} />
             </button>
+          </div>
+
+          <div className='tooltip tooltip-bottom' data-tip='Light Mode'>
+            <button
+              className={`btn btn-ghost btn-circle ${themeMode === 'light' ? 'btn-active bg-base-300' : ''}`}
+              onClick={() => updateThemeMode('light')}
+            >
+              <MdOutlineLightMode size={20} />
+            </button>
+          </div>
+
+          <div className='tooltip tooltip-bottom' data-tip='Dark Mode'>
+            <button
+              className={`btn btn-ghost btn-circle ${themeMode === 'dark' ? 'btn-active bg-base-300' : ''}`}
+              onClick={() => updateThemeMode('dark')}
+            >
+              <MdOutlineDarkMode size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h2 className='mb-2 font-medium'>Theme Color</h2>
+        <div className='grid grid-cols-3 gap-4'>
+          {themes.map(({ name, label, colors }) => (
+            <label
+              key={name}
+              className={`relative flex cursor-pointer flex-col items-center justify-center rounded-lg p-4 shadow-md ${
+                themeColor === name ? 'ring-2 ring-indigo-500 ring-offset-2' : ''
+              }`}
+              style={{
+                backgroundColor: isDarkMode ? colors.dark['base-100'] : colors.light['base-100'],
+                color: isDarkMode ? colors.dark['base-content'] : colors.light['base-content'],
+              }}
+            >
+              <input
+                type='radio'
+                name='theme'
+                value={name}
+                checked={themeColor === name}
+                onChange={() => updateThemeColor(name)}
+                className='hidden'
+              />
+              {themeColor === name ? (
+                <MdRadioButtonChecked size={24} />
+              ) : (
+                <MdRadioButtonUnchecked size={24} />
+              )}
+              <span>{label}</span>
+            </label>
           ))}
         </div>
       </div>

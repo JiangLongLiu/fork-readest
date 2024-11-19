@@ -1,4 +1,6 @@
 import React from 'react';
+
+import MenuItem from '@/components/MenuItem';
 import useBooksManager from '../../hooks/useBooksManager';
 
 interface BookMenuProps {
@@ -22,29 +24,12 @@ const BookMenu: React.FC<BookMenuProps> = ({ setIsDropdownOpen }) => {
   return (
     <div
       tabIndex={0}
-      className='book-menu dropdown-content dropdown-center z-20 mt-3 w-56 border bg-white shadow-2xl'
+      className='book-menu dropdown-content dropdown-center border-base-100 z-20 mt-3 w-56 shadow-2xl'
     >
-      <button
-        className='flex w-full items-center justify-between rounded-md p-2 hover:bg-gray-100'
-        onClick={handleOpenSplitView}
-      >
-        <span className='ml-2'>Parallel Read</span>
-        <span className='text-sm text-gray-400'>Shift+P</span>
-      </button>
-      <button
-        className='flex w-full items-center justify-between rounded-md p-2 hover:bg-gray-100'
-        onClick={handleReloadPage}
-      >
-        <span className='ml-2'>Reload Page</span>
-        <span className='text-sm text-gray-400'>Shift+R</span>
-      </button>
-      <hr className='my-1' />
-      <button
-        className='flex w-full items-center rounded-md p-2 hover:bg-gray-100'
-        onClick={showAboutReadest}
-      >
-        <span className='ml-2'>About Readest</span>
-      </button>
+      <MenuItem label='Parallel Read' shortcut='Shift+P' onClick={handleOpenSplitView} />
+      <MenuItem label='Reload Page' shortcut='Shift+R' onClick={handleReloadPage} />
+      <hr className='border-base-200 my-1' />
+      <MenuItem label='About Readest' onClick={showAboutReadest} />
     </div>
   );
 };

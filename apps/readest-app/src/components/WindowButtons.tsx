@@ -84,7 +84,7 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
       {showMinimize && (
         <button
           onClick={handleMinimize}
-          className='window-button'
+          className='window-button text-base-content'
           aria-label='Minimize'
           id='titlebar-minimize'
         >
@@ -97,7 +97,7 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
       {showMaximize && (
         <button
           onClick={handleMaximize}
-          className='window-button'
+          className='window-button text-base-content'
           aria-label='Maximize/Restore'
           id='titlebar-maximize'
         >
@@ -110,7 +110,7 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
       {showClose && (
         <button
           onClick={handleClose}
-          className='window-button'
+          className='window-button text-base-content'
           aria-label='Close'
           id='titlebar-close'
         >

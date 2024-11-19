@@ -14,7 +14,7 @@ const NotebookHeader: React.FC<{
     <div className='z-10 flex items-center space-x-3'>
       <button
         onClick={handleTogglePin}
-        className={`${isPinned ? 'bg-gray-300' : 'bg-base-300'} btn btn-ghost btn-circle h-6 min-h-6 w-6`}
+        className={`${isPinned ? 'bg-base-300' : 'bg-base-300/65'} btn btn-ghost btn-circle h-6 min-h-6 w-6`}
       >
         {isPinned ? <MdPushPin size={14} /> : <MdOutlinePushPin size={14} />}
       </button>

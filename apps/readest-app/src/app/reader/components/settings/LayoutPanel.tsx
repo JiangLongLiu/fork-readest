@@ -3,12 +3,14 @@ import { useReaderStore } from '@/store/readerStore';
 import { getStyles } from '@/utils/style';
 import { ONE_COLUMN_MAX_INLINE_SIZE } from '@/services/constants';
 import NumberInput from './NumberInput';
+import { useTheme } from '@/hooks/useTheme';
 
 const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { settings, isFontLayoutSettingsGlobal } = useReaderStore();
   const { setSettings, getView, getViewSettings, setViewSettings } = useReaderStore();
   const view = getView(bookKey);
   const viewSettings = getViewSettings(bookKey)!;
+  const { themeCode } = useTheme();
 
   const [lineHeight, setLineHeight] = useState(viewSettings.lineHeight!);
   const [fullJustification, setFullJustification] = useState(viewSettings.fullJustification!);
@@ -26,7 +28,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.lineHeight = lineHeight;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(viewSettings));
+    view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
   }, [lineHeight]);
 
   useEffect(() => {
@@ -36,7 +38,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.fullJustification = fullJustification;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(viewSettings));
+    view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
   }, [fullJustification]);
 
   useEffect(() => {
@@ -46,7 +48,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       settings.globalViewSettings.hyphenation = hyphenation;
       setSettings(settings);
     }
-    view?.renderer.setStyles?.(getStyles(viewSettings));
+    view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
   }, [hyphenation]);
 
   useEffect(() => {
@@ -100,8 +102,8 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     <div className='my-4 w-full space-y-6'>
       <div className='w-full'>
         <h2 className='mb-2 font-medium'>Paragraph</h2>
-        <div className='card bg-base-100 border shadow'>
-          <div className='divide-y'>
+        <div className='card bg-base-100 border-base-200 border shadow'>
+          <div className='divide-base-200 divide-y'>
             <NumberInput
               className='config-item-top'
               label='Line Height'
@@ -112,7 +114,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
               step={0.1}
             />
             <div className='config-item config-item-bottom'>
-              <span className='text-gray-700'>Full Justification</span>
+              <span className=''>Full Justification</span>
               <input
                 type='checkbox'
                 className='toggle'
@@ -121,7 +123,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
               />
             </div>
             <div className='config-item config-item-bottom'>
-              <span className='text-gray-700'>Hyphenation</span>
+              <span className=''>Hyphenation</span>
               <input
                 type='checkbox'
                 className='toggle'
@@ -135,8 +137,8 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
 
       <div className='w-full'>
         <h2 className='mb-2 font-medium'>Page</h2>
-        <div className='card bg-base-100 border shadow'>
-          <div className='divide-y'>
+        <div className='card bg-base-100 border-base-200 border shadow'>
+          <div className='divide-base-200 divide-y'>
             <NumberInput
               className='config-item-top'
               label='Margins (px)'

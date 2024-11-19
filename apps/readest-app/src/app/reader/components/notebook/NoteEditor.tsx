@@ -48,7 +48,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ onSave, onEdit }) => {
   };
 
   return (
-    <div className='note-editor-container mt-2 rounded-md bg-white p-2'>
+    <div className='note-editor-container bg-base-100 mt-2 rounded-md p-2'>
       <div className='flex w-full justify-between space-x-2'>
         <div className='settings-content relative w-full'>
           <textarea

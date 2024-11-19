@@ -55,14 +55,14 @@ const NumberInput: React.FC<NumberInputProps> = ({
 
   return (
     <div className={clsx('config-item', className)}>
-      <span className='text-gray-700'>{label}</span>
-      <div className='flex items-center gap-2'>
+      <span className='text-base-content'>{label}</span>
+      <div className='text-base-content flex items-center gap-2'>
         <input
           type='text'
           value={localValue}
           onChange={handleChange}
           onBlur={handleOnBlur}
-          className='input input-ghost settings-content w-20 max-w-xs rounded border-0 bg-transparent px-3 py-1 text-right !outline-none'
+          className='input input-ghost settings-content text-base-content w-20 max-w-xs rounded border-0 bg-transparent px-3 py-1 text-right !outline-none'
           onFocus={(e) => e.target.select()}
         />
         <button

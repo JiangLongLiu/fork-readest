@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FaPlus } from 'react-icons/fa';
+import { PiPlus } from 'react-icons/pi';
 import { MdDelete, MdOpenInNew } from 'react-icons/md';
 import { MdCheckCircle, MdCheckCircleOutline } from 'react-icons/md';
 
@@ -97,7 +97,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
     <div className='bookshelf'>
       <div className='grid grid-cols-3 gap-0 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8'>
         {bookshelfItems.map((item, index) => (
-          <div key={`library-item-${index}`} className='flex h-full flex-col p-4 hover:bg-gray-200'>
+          <div key={`library-item-${index}`} className='hover:bg-base-200 flex h-full flex-col p-4'>
             <div className='flex-grow'>
               {'format' in item ? (
                 <div
@@ -173,16 +173,16 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
 
         {bookshelfItems.length > 0 && (
           <div
-            className='border-1 m-4 flex aspect-[28/41] items-center justify-center bg-white hover:bg-gray-200'
+            className='border-1 bg-base-100 hover:bg-base-200 m-4 flex aspect-[28/41] items-center justify-center'
             role='button'
             onClick={onImportBooks}
           >
-            <FaPlus className='size-8' color='gray' />
+            <PiPlus className='size-10' color='gray' />
           </div>
         )}
       </div>
       {selectedBooks.length > 0 && (
-        <div className='fixed bottom-4 left-1/2 flex -translate-x-1/2 transform space-x-4 rounded-lg bg-gray-800 p-4 text-white shadow-lg'>
+        <div className='text-base-content bg-base-300 fixed bottom-4 left-1/2 flex -translate-x-1/2 transform space-x-4 rounded-lg p-4 shadow-lg'>
           <button onClick={openSelectedBooks} className='flex items-center space-x-2'>
             <MdOpenInNew />
             <span>Open</span>

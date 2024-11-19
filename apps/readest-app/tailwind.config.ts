@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import { themes } from './src/styles/themes';
 import daisyui from 'daisyui';
 
 const config: Config = {
@@ -22,5 +23,19 @@ const config: Config = {
     },
   },
   plugins: [daisyui],
+  daisyui: {
+    themes: themes.reduce(
+      (acc, { name, colors }) => {
+        acc.push({
+          [`${name}-light`]: colors.light,
+        });
+        acc.push({
+          [`${name}-dark`]: colors.dark,
+        });
+        return acc;
+      },
+      ['light', 'dark'] as (Record<string, unknown> | string)[],
+    ),
+  },
 };
 export default config;

@@ -1,35 +1,31 @@
 class EventDispatcher {
   private syncListeners: Map<string, Set<(event: CustomEvent) => boolean>>;
-  private asyncListeners: Map<string, Set<(event: CustomEvent) => Promise<boolean>>>;
+  private asyncListeners: Map<string, Set<(event: CustomEvent) => Promise<void>>>;
 
   constructor() {
     this.syncListeners = new Map();
     this.asyncListeners = new Map();
   }
 
-  on(event: string, callback: (event: CustomEvent) => Promise<boolean>): void {
+  on(event: string, callback: (event: CustomEvent) => Promise<void>): void {
     if (!this.asyncListeners.has(event)) {
       this.asyncListeners.set(event, new Set());
     }
     this.asyncListeners.get(event)!.add(callback);
   }
 
-  off(event: string, callback: (event: CustomEvent) => Promise<boolean>): void {
+  off(event: string, callback: (event: CustomEvent) => Promise<void>): void {
     this.asyncListeners.get(event)?.delete(callback);
   }
 
-  async dispatch(event: string, detail?: unknown): Promise<boolean> {
+  async dispatch(event: string, detail?: unknown): Promise<void> {
     const listeners = this.asyncListeners.get(event);
     if (listeners) {
       const customEvent = new CustomEvent(event, { detail });
       for (const listener of listeners) {
-        const consumed = await listener(customEvent);
-        if (consumed) {
-          return true;
-        }
+        listener(customEvent);
       }
     }
-    return false;
   }
 
   onSync(event: string, callback: (event: CustomEvent) => boolean): void {

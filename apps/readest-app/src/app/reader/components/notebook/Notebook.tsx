@@ -145,7 +145,7 @@ const Notebook: React.FC = ({}) => {
               <li key={`${index}-${item.id}`} className='my-2'>
                 <div
                   tabIndex={0}
-                  className='collapse-arrow border-base-300 collapse border bg-white'
+                  className='collapse-arrow border-base-300 bg-base-100 collapse border'
                 >
                   <div
                     className='collapse-title h-9 min-h-9 p-2 pr-8 text-sm font-medium'

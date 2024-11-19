@@ -42,11 +42,7 @@ const Dropdown: React.FC<DropdownProps> = ({
         <div
           tabIndex={-1}
           onClick={toggleDropdown}
-          className={clsx(
-            'dropdown-toggle hover:bg-gray-300',
-            buttonClassName,
-            isOpen && 'bg-base-300',
-          )}
+          className={clsx('dropdown-toggle', buttonClassName, isOpen && 'bg-base-200')}
         >
           {toggleButton}
         </div>

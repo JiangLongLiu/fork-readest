@@ -42,12 +42,12 @@ const FooterBar: React.FC<FooterBarProps> = ({ bookKey, pageinfo, isHoveredAnim 
       <button className='btn btn-ghost mx-2 h-8 min-h-8 w-8 p-0' onClick={handleGoPrev}>
         <RiArrowLeftWideLine size={20} />
       </button>
-      <span className='mx-2 text-center text-sm text-black'>
+      <span className='mx-2 text-center text-sm'>
         {pageinfoValid ? `${Math.round(progressFraction * 100)}%` : ''}
       </span>
       <input
         type='range'
-        className='mx-2 w-full'
+        className='text-base-content mx-2 w-full'
         min={0}
         max={100}
         value={pageinfoValid ? progressFraction * 100 : 0}
