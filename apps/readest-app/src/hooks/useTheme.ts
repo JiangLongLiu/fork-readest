@@ -73,6 +73,7 @@ export const useTheme = () => {
       localStorage.setItem('themeMode', themeMode);
       localStorage.setItem('themeColor', themeColor);
     }
+    const isDarkMode = themeMode === 'dark' || (themeMode === 'auto' && systemIsDarkMode);
     const theme = themes.find((t) => t.name === themeColor);
     const palette = isDarkMode ? theme!.colors.dark : theme!.colors.light;
     setThemeCode({
@@ -80,7 +81,7 @@ export const useTheme = () => {
       fg: palette['base-content'],
       primary: palette.primary,
     });
-  }, [themeMode, themeColor]);
+  }, [themeMode, themeColor, isDarkMode]);
 
   const updateThemeMode = (mode: ThemeMode) => setThemeMode(mode);
   const updateThemeColor = (color: string) => setThemeColor(color);

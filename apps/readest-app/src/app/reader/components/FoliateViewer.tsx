@@ -108,6 +108,13 @@ const FoliateViewer: React.FC<{
   });
 
   useEffect(() => {
+    if (viewRef.current) {
+      const viewSettings = getViewSettings(bookKey)!;
+      viewRef.current.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+    }
+  }, [themeCode]);
+
+  useEffect(() => {
     if (isViewCreated.current) return;
     const openBook = async () => {
       console.log('Opening book', bookKey);
@@ -120,6 +127,8 @@ const FoliateViewer: React.FC<{
 
       await view.open(bookDoc);
       const viewSettings = getViewSettings(bookKey)!;
+      view.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+
       const isScrolled = viewSettings.scrolled!;
       const marginPx = viewSettings.marginPx!;
       const gapPercent = viewSettings.gapPercent!;
@@ -147,7 +156,6 @@ const FoliateViewer: React.FC<{
         await view.goToFraction(0);
       }
       setViewInited(true);
-      view.renderer.setStyles?.(getStyles(viewSettings, themeCode));
 
       window.addEventListener('message', handleClickTurnPage);
     };
