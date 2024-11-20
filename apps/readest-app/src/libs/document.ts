@@ -43,6 +43,7 @@ export interface BookDoc {
   metadata: {
     title: string;
     author: string;
+    language: string | string[];
     editor?: string;
     publisher?: string;
   };

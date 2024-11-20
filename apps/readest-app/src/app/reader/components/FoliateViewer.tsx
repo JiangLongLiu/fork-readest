@@ -108,7 +108,7 @@ const FoliateViewer: React.FC<{
   });
 
   useEffect(() => {
-    if (viewRef.current) {
+    if (viewRef.current && viewRef.current.renderer) {
       const viewSettings = getViewSettings(bookKey)!;
       viewRef.current.renderer.setStyles?.(getStyles(viewSettings, themeCode));
     }

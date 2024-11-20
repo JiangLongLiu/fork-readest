@@ -1,4 +1,4 @@
-const doubleClickThreshold = 200;
+const doubleClickThreshold = 250;
 const longHoldThreshold = 500;
 let lastClickTime = 0;
 let longHoldTimeout: ReturnType<typeof setTimeout> | null = null;
