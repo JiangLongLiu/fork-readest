@@ -28,6 +28,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const view = getView(bookKey);
 
   const isShowingPopup = useRef(false);
+  const isTextSelected = useRef(false);
   const [selection, setSelection] = useState<TextSelection | null>();
   const [showPopup, setShowPopup] = useState(false);
   const [trianglePosition, setTrianglePosition] = useState<Position>();
@@ -52,6 +53,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     const handlePointerup = () => {
       const sel = doc.getSelection();
       if (sel && sel.toString().trim().length > 0 && sel.rangeCount > 0) {
+        isTextSelected.current = true;
         setSelection({ key: bookKey, text: sel.toString(), range: sel.getRangeAt(0), index });
       }
     };
@@ -92,12 +94,22 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const handleDismissPopup = () => {
     setShowPopup(false);
     setSelection(null);
-    view?.deselect();
     isShowingPopup.current = false;
+  };
+
+  const handleDismissPopupAndSelection = () => {
+    handleDismissPopup();
+    view?.deselect();
+    isTextSelected.current = false;
   };
 
   useEffect(() => {
     const handleSingleClick = (): boolean => {
+      if (isTextSelected.current) {
+        view?.deselect();
+        isTextSelected.current = false;
+        return true;
+      }
       if (showPopup || isShowingPopup.current) {
         return true;
       }
@@ -246,7 +258,11 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   return (
     <div>
       {showPopup && !notebookNewAnnotation && (
-        <div className='fixed inset-0' onClick={handleDismissPopup} />
+        <div
+          className='fixed inset-0'
+          onClick={handleDismissPopupAndSelection}
+          onContextMenu={handleDismissPopup}
+        />
       )}
       {showPopup && trianglePosition && popupPosition && (
         <AnnotationPopup
