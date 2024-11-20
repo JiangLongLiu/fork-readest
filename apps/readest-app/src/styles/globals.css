@@ -5,9 +5,6 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-:root {
   border-radius: 10px;
 }
 
@@ -18,22 +15,22 @@
   }
 }
 
-/* html[data-page="default"] {
+html[data-page="default"] {
   background: #ffffff;
 }
 
 html[data-page="library"] {
-  background: #f3f4f6;
+  background: theme('colors.base-200');
 }
 
 html[data-page="reader"] {
-  background: #f3f4f6;
-} */
+  background: theme('colors.base-100');
+}
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   border-radius: 10px;
   background-color: transparent;
 }
@@ -153,8 +150,6 @@ foliate-view {
 
 .dropdown-content,
 .settings-content {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
   font-size: 14px;
   font-weight: 400;
 }

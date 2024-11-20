@@ -90,7 +90,7 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
   }
 
   return (
-    <div className='text-base-content flex h-screen'>
+    <div className='flex h-screen'>
       <SideBar onGoToLibrary={handleCloseBooks} />
       <BooksGrid bookKeys={bookKeys} onCloseBook={handleCloseBook} />
       <Notebook />

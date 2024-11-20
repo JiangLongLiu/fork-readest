@@ -16,6 +16,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     document.documentElement.setAttribute('data-page', pathname.replace('/', '') || 'default');
   }, [pathname]);
 
+  React.useEffect(() => {
+    if (process.env['NODE_ENV'] === 'production') {
+      document.oncontextmenu = (event) => {
+        event.preventDefault();
+      };
+    }
+  }, []);
+
   return (
     <html lang='en'>
       <head>

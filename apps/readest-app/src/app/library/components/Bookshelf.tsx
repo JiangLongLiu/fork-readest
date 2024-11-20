@@ -97,7 +97,10 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
     <div className='bookshelf'>
       <div className='grid grid-cols-3 gap-0 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8'>
         {bookshelfItems.map((item, index) => (
-          <div key={`library-item-${index}`} className='hover:bg-base-200 flex h-full flex-col p-4'>
+          <div
+            key={`library-item-${index}`}
+            className='hover:bg-base-300/50 flex h-full flex-col p-4'
+          >
             <div className='flex-grow'>
               {'format' in item ? (
                 <div
@@ -173,7 +176,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
 
         {bookshelfItems.length > 0 && (
           <div
-            className='border-1 bg-base-100 hover:bg-base-200 m-4 flex aspect-[28/41] items-center justify-center'
+            className='border-1 bg-base-100 hover:bg-base-300/50 m-4 flex aspect-[28/41] items-center justify-center'
             role='button'
             onClick={onImportBooks}
           >
