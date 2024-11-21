@@ -17,11 +17,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   }, [pathname]);
 
   React.useEffect(() => {
-    if (process.env['NODE_ENV'] === 'production') {
-      document.oncontextmenu = (event) => {
-        event.preventDefault();
-      };
-    }
+    // TODO: disabled for now
+    // if (process.env['NODE_ENV'] === 'production') {
+    //   document.oncontextmenu = (event) => {
+    //     event.preventDefault();
+    //   };
+    // }
   }, []);
 
   return (

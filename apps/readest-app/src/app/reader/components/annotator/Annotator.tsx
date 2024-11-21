@@ -5,6 +5,8 @@ import { PiHighlighterFill } from 'react-icons/pi';
 import { FaWikipediaW } from 'react-icons/fa';
 import { BsPencilSquare } from 'react-icons/bs';
 import { RiDeleteBinLine } from 'react-icons/ri';
+import { BsTranslate } from 'react-icons/bs';
+import { SiDeepl } from 'react-icons/si';
 
 import { Overlayer } from 'foliate-js/overlayer.js';
 import { useEnv } from '@/context/EnvContext';
@@ -17,6 +19,8 @@ import { eventDispatcher } from '@/utils/event';
 import Toast from '@/components/Toast';
 import AnnotationPopup from './AnnotationPopup';
 import WiktionaryPopup from './WiktionaryPopup';
+import WikipediaPopup from './WikipediaPopup';
+import DeepLPopup from './DeepLPopup';
 
 const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { envConfig } = useEnv();
@@ -34,7 +38,8 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const [selection, setSelection] = useState<TextSelection | null>();
   const [showAnnotPopup, setShowAnnotPopup] = useState(false);
   const [showWiktionaryPopup, setShowWiktionaryPopup] = useState(false);
-  const [wiktionaryWord, setWiktionaryWord] = useState('');
+  const [showWikipediaPopup, setShowWikipediaPopup] = useState(false);
+  const [showDeepLPopup, setShowDeepLPopup] = useState(false);
   const [trianglePosition, setTrianglePosition] = useState<Position>();
   const [annotPopupPosition, setAnnotPopupPosition] = useState<Position>();
   const [dictPopupPosition, setDictPopupPosition] = useState<Position>();
@@ -50,7 +55,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
 
   const dictPopupWidth = 400;
   const dictPopupHeight = 300;
-  const annotPopupWidth = 240;
+  const annotPopupWidth = 280;
   const annotPopupHeight = 44;
   const popupPadding = 10;
 
@@ -102,6 +107,8 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     setSelection(null);
     setShowAnnotPopup(false);
     setShowWiktionaryPopup(false);
+    setShowWikipediaPopup(false);
+    setShowDeepLPopup(false);
     isShowingPopup.current = false;
   };
 
@@ -266,7 +273,18 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     if (!selection || !selection.text) return;
     setShowAnnotPopup(false);
     setShowWiktionaryPopup(true);
-    setWiktionaryWord(selection.text);
+  };
+
+  const handleWikipedia = () => {
+    if (!selection || !selection.text) return;
+    setShowAnnotPopup(false);
+    setShowWikipediaPopup(true);
+  };
+
+  const handleTranslation = () => {
+    if (!selection || !selection.text) return;
+    setShowAnnotPopup(false);
+    setShowDeepLPopup(true);
   };
 
   const selectionAnnotated = selection?.annotated;
@@ -279,22 +297,44 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     },
     { tooltipText: 'Annotate', Icon: BsPencilSquare, onClick: handleAnnotate },
     { tooltipText: 'Search', Icon: FiSearch, onClick: handleSearch },
-    { tooltipText: 'Dictionary', Icon: FaWikipediaW, onClick: handleDictionary },
+    { tooltipText: 'Dictionary', Icon: BsTranslate, onClick: handleDictionary },
+    { tooltipText: 'Translate', Icon: SiDeepl, onClick: handleTranslation },
+    { tooltipText: 'Wikipedia', Icon: FaWikipediaW, onClick: handleWikipedia },
   ];
 
   return (
     <div>
-      {(showAnnotPopup || showWiktionaryPopup) && !notebookNewAnnotation && (
-        <div
-          className='fixed inset-0'
-          onClick={handleDismissPopupAndSelection}
-          onContextMenu={handleDismissPopup}
-        />
-      )}
+      {(showAnnotPopup || showWiktionaryPopup || showWikipediaPopup || showDeepLPopup) &&
+        !notebookNewAnnotation && (
+          <div
+            className='fixed inset-0'
+            onClick={handleDismissPopupAndSelection}
+            onContextMenu={handleDismissPopup}
+          />
+        )}
       {showWiktionaryPopup && trianglePosition && dictPopupPosition && (
         <WiktionaryPopup
-          word={wiktionaryWord}
+          word={selection?.text as string}
           lang={bookData.bookDoc?.metadata.language as string}
+          position={dictPopupPosition}
+          trianglePosition={trianglePosition}
+          popupWidth={dictPopupWidth}
+          popupHeight={dictPopupHeight}
+        />
+      )}
+      {showWikipediaPopup && trianglePosition && dictPopupPosition && (
+        <WikipediaPopup
+          text={selection?.text as string}
+          lang={bookData.bookDoc?.metadata.language as string}
+          position={dictPopupPosition}
+          trianglePosition={trianglePosition}
+          popupWidth={dictPopupWidth}
+          popupHeight={dictPopupHeight}
+        />
+      )}
+      {showDeepLPopup && trianglePosition && dictPopupPosition && (
+        <DeepLPopup
+          text={selection?.text as string}
           position={dictPopupPosition}
           trianglePosition={trianglePosition}
           popupWidth={dictPopupWidth}

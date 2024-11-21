@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Position } from '@/utils/sel';
+import Popup from '@/components/Popup';
 
 type Definition = {
   definition: string;
@@ -12,7 +13,7 @@ type Result = {
   language: string;
 };
 
-interface WiktionaryProps {
+interface WiktionaryPopupProps {
   word: string;
   lang?: string;
   position: Position;
@@ -21,7 +22,7 @@ interface WiktionaryProps {
   popupHeight: number;
 }
 
-const WiktionaryPopup: React.FC<WiktionaryProps> = ({
+const WiktionaryPopup: React.FC<WiktionaryPopupProps> = ({
   word,
   lang,
   position,
@@ -39,7 +40,7 @@ const WiktionaryPopup: React.FC<WiktionaryProps> = ({
     const links = container.querySelectorAll<HTMLAnchorElement>('a[rel="mw:WikiLink"]');
 
     links.forEach((link) => {
-      const title = link.getAttribute('title'); // Get the title attribute
+      const title = link.getAttribute('title');
       if (title) {
         link.addEventListener('click', (event) => {
           event.preventDefault();
@@ -157,26 +158,13 @@ const WiktionaryPopup: React.FC<WiktionaryProps> = ({
 
   return (
     <div>
-      <div
-        className='triangle text-neutral absolute z-10'
-        style={{
-          left: `${trianglePosition.point.x}px`,
-          top: `${trianglePosition.point.y}px`,
-          borderLeft: '6px solid transparent',
-          borderRight: '6px solid transparent',
-          borderBottom: trianglePosition.dir === 'up' ? 'none' : `6px solid`,
-          borderTop: trianglePosition.dir === 'up' ? `6px solid` : 'none',
-          transform: 'translateX(-50%)',
-        }}
-      />
-      <div
-        className='bg-neutral absolute overflow-y-auto rounded-xl shadow-lg'
-        style={{
-          width: `${popupWidth}px`,
-          height: `${popupHeight}px`,
-          left: `${position.point.x}px`,
-          top: `${position.point.y}px`,
-        }}
+      <Popup
+        trianglePosition={trianglePosition}
+        width={popupWidth}
+        height={popupHeight}
+        position={position}
+        className='bg-neutral select-text overflow-y-auto'
+        triangleClassName='text-neutral'
       >
         <main className='p-4 font-sans' />
         <footer className='hidden data-[state=loaded]:block data-[state=error]:hidden data-[state=loading]:hidden'>
@@ -185,7 +173,7 @@ const WiktionaryPopup: React.FC<WiktionaryProps> = ({
             <a href='https://creativecommons.org/licenses/by-sa/4.0/'>CC BY-SA License</a>.
           </div>
         </footer>
-      </div>
+      </Popup>
     </div>
   );
 };

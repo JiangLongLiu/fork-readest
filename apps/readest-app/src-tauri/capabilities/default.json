@@ -31,9 +31,12 @@
         }
       ]
     },
+    {
+      "identifier": "http:default",
+      "allow": [{ "url": "https://*.deepl.com" }]
+    },
     "dialog:default",
     "os:default",
-    "http:default",
     "core:window:default",
     "core:window:allow-close",
     "core:window:allow-minimize",

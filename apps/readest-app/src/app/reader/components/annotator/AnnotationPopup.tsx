@@ -1,4 +1,5 @@
 import React from 'react';
+import Popup from '@/components/Popup';
 import PopupButton from './PopupButton';
 import HighlightOptions from './HighlightOptions';
 import { Position } from '@/utils/sel';
@@ -30,29 +31,15 @@ const AnnotationPopup: React.FC<AnnotationPopupProps> = ({
   popupHeight,
   onHighlight,
 }) => {
-  const isPopupAbove = trianglePosition.dir === 'up';
   return (
     <div>
-      <div
-        className='triangle absolute'
-        style={{
-          left: `${trianglePosition.point.x}px`,
-          top: `${trianglePosition.point.y}px`,
-          borderLeft: '6px solid transparent',
-          borderRight: '6px solid transparent',
-          borderBottom: isPopupAbove ? 'none' : '6px solid #465563',
-          borderTop: isPopupAbove ? '6px solid #465563' : 'none',
-          transform: 'translateX(-50%)',
-        }}
-      />
-      <div
-        className='selection-popup absolute rounded-lg bg-gray-600 px-4 text-white shadow-lg'
-        style={{
-          width: `${popupWidth}px`,
-          height: `${popupHeight}px`,
-          left: `${position.point.x}px`,
-          top: `${position.point.y}px`,
-        }}
+      <Popup
+        width={popupWidth}
+        height={popupHeight}
+        position={position}
+        trianglePosition={trianglePosition}
+        className='selection-popup bg-gray-600 px-4 text-white'
+        triangleClassName='text-gray-600'
       >
         <div className='selection-buttons flex h-11 items-center justify-between'>
           {buttons.map((button, index) => (
@@ -64,7 +51,7 @@ const AnnotationPopup: React.FC<AnnotationPopupProps> = ({
             />
           ))}
         </div>
-      </div>
+      </Popup>
       {highlightOptionsVisible && (
         <HighlightOptions
           style={{
@@ -73,7 +60,8 @@ const AnnotationPopup: React.FC<AnnotationPopupProps> = ({
             left: `${position.point.x}px`,
             top: `${
               position.point.y +
-              (highlightOptionsHeightPx + highlightOptionsPaddingPx) * (isPopupAbove ? -1 : 1)
+              (highlightOptionsHeightPx + highlightOptionsPaddingPx) *
+                (trianglePosition.dir === 'up' ? -1 : 1)
             }px`,
           }}
           selectedStyle={selectedStyle}
