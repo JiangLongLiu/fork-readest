@@ -6,6 +6,7 @@ import { useReaderStore } from '@/store/readerStore';
 import { useEnv } from '@/context/EnvContext';
 import { BookNote } from '@/types/book';
 import { uniqueId } from '@/utils/misc';
+import Button from '@/components/Button';
 
 interface BookmarkTogglerProps {
   bookKey: string;
@@ -76,13 +77,18 @@ const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
   }, [config, progress]);
 
   return (
-    <button onClick={toggleBookmark} className='p-2'>
-      {isBookmarked ? (
-        <MdOutlineBookmark size={20} className='text-base-content' />
-      ) : (
-        <MdOutlineBookmarkAdd size={20} className='text-base-content' />
-      )}
-    </button>
+    <Button
+      icon={
+        isBookmarked ? (
+          <MdOutlineBookmark size={20} className='text-base-content' />
+        ) : (
+          <MdOutlineBookmarkAdd size={20} className='text-base-content' />
+        )
+      }
+      onClick={toggleBookmark}
+      tooltip='Bookmark'
+      tooltipDirection='bottom'
+    ></Button>
   );
 };
 

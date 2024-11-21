@@ -30,6 +30,13 @@ export interface FoliateView extends HTMLElement {
   clearSearch: () => void;
   select: (target: string | number | { fraction: number }) => void;
   deselect: () => void;
+  history: {
+    canGoBack: boolean;
+    canGoForward: boolean;
+    back: () => void;
+    forward: () => void;
+    clear: () => void;
+  };
   renderer: {
     setStyles?: (css: string) => void;
     setAttribute: (name: string, value: string | number) => void;

@@ -2,6 +2,7 @@ import React from 'react';
 import { TbLayoutSidebar, TbLayoutSidebarFilled } from 'react-icons/tb';
 
 import { useReaderStore } from '@/store/readerStore';
+import Button from '@/components/Button';
 
 interface SidebarTogglerProps {
   bookKey: string;
@@ -18,13 +19,18 @@ const SidebarToggler: React.FC<SidebarTogglerProps> = ({ bookKey }) => {
     }
   };
   return (
-    <button onClick={handleToggleSidebar} className='p-2'>
-      {sideBarBookKey == bookKey && isSideBarVisible ? (
-        <TbLayoutSidebarFilled size={20} className='text-base-content' />
-      ) : (
-        <TbLayoutSidebar size={20} className='text-base-content' />
-      )}
-    </button>
+    <Button
+      icon={
+        sideBarBookKey === bookKey && isSideBarVisible ? (
+          <TbLayoutSidebarFilled size={20} className='text-base-content' />
+        ) : (
+          <TbLayoutSidebar size={20} className='text-base-content' />
+        )
+      }
+      onClick={handleToggleSidebar}
+      tooltip='Sidebar'
+      tooltipDirection='bottom'
+    />
   );
 };
 

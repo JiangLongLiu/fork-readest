@@ -13,6 +13,7 @@ const config: Config = {
     { pattern: /text-./ },
     { pattern: /fill-./ },
     { pattern: /decoration-./ },
+    { pattern: /tooltip-./ },
   ],
   theme: {
     extend: {

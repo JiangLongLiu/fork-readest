@@ -1,8 +1,10 @@
 import React from 'react';
 import clsx from 'clsx';
 import { RiArrowLeftWideLine, RiArrowRightWideLine } from 'react-icons/ri';
+import { RiArrowGoBackLine, RiArrowGoForwardLine } from 'react-icons/ri';
 
 import { useReaderStore } from '@/store/readerStore';
+import Button from '@/components/Button';
 
 interface FooterBarProps {
   bookKey: string;
@@ -12,19 +14,29 @@ interface FooterBarProps {
 
 const FooterBar: React.FC<FooterBarProps> = ({ bookKey, pageinfo, isHoveredAnim }) => {
   const { isSideBarVisible, hoveredBookKey, setHoveredBookKey, getView } = useReaderStore();
+  const view = getView(bookKey);
 
   const handleProgressChange = (event: React.ChangeEvent) => {
     const newProgress = parseInt((event.target as HTMLInputElement).value, 10);
-    getView(bookKey)?.goToFraction(newProgress / 100.0);
+    view?.goToFraction(newProgress / 100.0);
   };
 
   const handleGoPrev = () => {
-    getView(bookKey)?.goLeft();
+    view?.goLeft();
   };
 
   const handleGoNext = () => {
-    getView(bookKey)?.goRight();
+    view?.goRight();
   };
+
+  const handleGoBack = () => {
+    view?.history.back();
+  };
+
+  const handleGoForward = () => {
+    view?.history.forward();
+  };
+
   const pageinfoValid = pageinfo && pageinfo.total > 0 && pageinfo.current >= 0;
   const progressFraction = pageinfoValid ? pageinfo.current / pageinfo.total : 0;
   return (
@@ -39,9 +51,19 @@ const FooterBar: React.FC<FooterBarProps> = ({ bookKey, pageinfo, isHoveredAnim 
       onMouseEnter={() => setHoveredBookKey(bookKey)}
       onMouseLeave={() => setHoveredBookKey('')}
     >
-      <button className='btn btn-ghost mx-2 h-8 min-h-8 w-8 p-0' onClick={handleGoPrev}>
-        <RiArrowLeftWideLine size={20} />
-      </button>
+      <Button icon={<RiArrowLeftWideLine size={20} />} onClick={handleGoPrev} tooltip='Go Left' />
+      <Button
+        icon={<RiArrowGoBackLine size={20} />}
+        onClick={handleGoBack}
+        tooltip='Go Back'
+        disabled={!view?.history.canGoBack}
+      />
+      <Button
+        icon={<RiArrowGoForwardLine size={20} />}
+        onClick={handleGoForward}
+        tooltip='Go Forward'
+        disabled={!view?.history.canGoForward}
+      />
       <span className='mx-2 text-center text-sm'>
         {pageinfoValid ? `${Math.round(progressFraction * 100)}%` : ''}
       </span>
@@ -53,9 +75,7 @@ const FooterBar: React.FC<FooterBarProps> = ({ bookKey, pageinfo, isHoveredAnim 
         value={pageinfoValid ? progressFraction * 100 : 0}
         onChange={(e) => handleProgressChange(e)}
       />
-      <button className='btn btn-ghost mx-2 h-8 min-h-8 w-8 p-0' onClick={handleGoNext}>
-        <RiArrowRightWideLine size={20} />
-      </button>
+      <Button icon={<RiArrowRightWideLine size={20} />} onClick={handleGoNext} tooltip='Go Right' />
     </div>
   );
 };
