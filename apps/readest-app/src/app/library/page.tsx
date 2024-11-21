@@ -102,7 +102,7 @@ const LibraryPage = () => {
           />
         </div>
       ) : (
-        <div className='hero h-full items-center justify-center'>
+        <div className='hero h-screen items-center justify-center'>
           <div className='hero-content text-neutral-content text-center'>
             <div className='max-w-md'>
               <h1 className='mb-5 text-5xl font-bold'>Your Library</h1>
