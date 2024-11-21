@@ -13,17 +13,19 @@ import Bookshelf from '@/app/library/components/Bookshelf';
 const LibraryPage = () => {
   const { envConfig, appService } = useEnv();
   const { library: libraryBooks, setLibrary } = useReaderStore();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const isInitiating = useRef(false);
   const [isSelectMode, setIsSelectMode] = useState(false);
 
   React.useEffect(() => {
     if (isInitiating.current) return;
     isInitiating.current = true;
-    setLoading(true);
+
+    const loadingTimeout = setTimeout(() => setLoading(true), 200);
     envConfig.getAppService().then(async (appService) => {
       console.log('Loading library books...');
       setLibrary(await appService.loadLibraryBooks());
+      if (loadingTimeout) clearTimeout(loadingTimeout);
       setLoading(false);
     });
   }, []);
@@ -73,7 +75,7 @@ const LibraryPage = () => {
   };
 
   if (!appService) {
-    return <Spinner loading />;
+    return null;
   }
 
   return (
@@ -90,29 +92,29 @@ const LibraryPage = () => {
           <Spinner loading />
         </div>
       )}
-      <div className='mt-12 flex-grow overflow-auto px-2'>
-        {libraryBooks.length > 0 ? (
+      {libraryBooks.length > 0 ? (
+        <div className='mt-12 flex-grow overflow-auto px-2'>
           <Bookshelf
             libraryBooks={libraryBooks}
             isSelectMode={isSelectMode}
             onImportBooks={handleImportBooks}
           />
-        ) : (
-          <div className='hero h-full items-center justify-center'>
-            <div className='hero-content text-neutral-content text-center'>
-              <div className='max-w-md'>
-                <h1 className='mb-5 text-5xl font-bold'>Your Library</h1>
-                <p className='mb-5'>
-                  Welcome to your library. You can upload your books here and read them anytime.
-                </p>
-                <button className='btn btn-primary' onClick={handleImportBooks}>
-                  Upload Books
-                </button>
-              </div>
+        </div>
+      ) : (
+        <div className='hero h-full items-center justify-center'>
+          <div className='hero-content text-neutral-content text-center'>
+            <div className='max-w-md'>
+              <h1 className='mb-5 text-5xl font-bold'>Your Library</h1>
+              <p className='mb-5'>
+                Welcome to your library. You can import your books here and read them anytime.
+              </p>
+              <button className='btn btn-primary rounded-xl' onClick={handleImportBooks}>
+                Import Books
+              </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

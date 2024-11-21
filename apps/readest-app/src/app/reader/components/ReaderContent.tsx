@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { useEnv } from '@/context/EnvContext';
@@ -24,10 +25,15 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
     useReaderStore();
   const { setBookKeys, getBookData, initViewState, getViewState, clearViewState } =
     useReaderStore();
+  const isInitiating = useRef(false);
+  const [loading, setLoading] = useState(false);
 
   useBookShortcuts({ sideBarBookKey, bookKeys });
 
   React.useEffect(() => {
+    if (isInitiating.current) return;
+    isInitiating.current = true;
+
     const initialIds = (searchParams.get('ids') || '').split(',').filter(Boolean);
     const initialBookKeys = initialIds.map((id) => `${id}-${uniqueId()}`);
     setBookKeys(initialBookKeys);
@@ -45,6 +51,7 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
   }, []);
 
   const saveConfigAndCloseBook = (bookKey: string) => {
+    console.log('Closing book', bookKey);
     getView(bookKey)?.close();
     getView(bookKey)?.remove();
     const config = getConfig(bookKey);
@@ -82,10 +89,13 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
   if (!bookKeys || bookKeys.length === 0) return null;
   const bookData = getBookData(bookKeys[0]!);
   if (!bookData || !bookData.book || !bookData.bookDoc) {
+    setTimeout(() => setLoading(true), 200);
     return (
-      <div className={'hero hero-content min-h-screen'}>
-        <Spinner loading={true} />
-      </div>
+      loading && (
+        <div className={'hero hero-content min-h-screen'}>
+          <Spinner loading={true} />
+        </div>
+      )
     );
   }
 

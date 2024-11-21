@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState } from 'react';
 import { PiPlus } from 'react-icons/pi';
 import { MdDelete, MdOpenInNew } from 'react-icons/md';
 import { MdCheckCircle, MdCheckCircleOutline } from 'react-icons/md';
@@ -11,6 +12,7 @@ import Alert from '@/components/Alert';
 import { useReaderStore } from '@/store/readerStore';
 import { useEnv } from '@/context/EnvContext';
 import clsx from 'clsx';
+import Spinner from '@/components/Spinner';
 
 type BookshelfItem = Book | BooksGroup;
 
@@ -48,9 +50,10 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
   const router = useRouter();
   const { envConfig } = useEnv();
   const { deleteBook } = useReaderStore();
-  const [selectedBooks, setSelectedBooks] = React.useState<string[]>([]);
-  const [showDeleteAlert, setShowDeleteAlert] = React.useState(false);
-  const [clickedImage, setClickedImage] = React.useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [clickedImage, setClickedImage] = useState<string | null>(null);
 
   React.useEffect(() => {
     setSelectedBooks([]);
@@ -64,6 +67,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
     } else {
       setClickedImage(id);
       setTimeout(() => setClickedImage(null), 300);
+      setTimeout(() => setLoading(true), 200);
       router.push(`/reader?ids=${id}`);
     }
   };
@@ -75,6 +79,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
   };
 
   const openSelectedBooks = () => {
+    setTimeout(() => setLoading(true), 200);
     router.push(`/reader?ids=${selectedBooks.join(',')}`);
   };
 
@@ -123,8 +128,8 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
                       />
                       <div
                         className={clsx(
-                          'invisible absolute inset-0 flex items-center justify-center',
-                          'rounded-none text-center font-sans text-lg font-medium text-gray-600',
+                          'invisible absolute inset-0 flex items-center justify-center p-1',
+                          'text-neutral-content rounded-none text-center font-serif text-base font-medium',
                         )}
                       >
                         {item.title}
@@ -194,6 +199,11 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
             <MdDelete className='fill-red-500' />
             <span className='text-red-500'>Delete</span>
           </button>
+        </div>
+      )}
+      {loading && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center'>
+          <Spinner loading />
         </div>
       )}
       {showDeleteAlert && (

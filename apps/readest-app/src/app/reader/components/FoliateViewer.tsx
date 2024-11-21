@@ -116,6 +116,8 @@ const FoliateViewer: React.FC<{
 
   useEffect(() => {
     if (isViewCreated.current) return;
+    isViewCreated.current = true;
+
     const openBook = async () => {
       console.log('Opening book', bookKey);
       await import('foliate-js/view.js');
@@ -161,13 +163,6 @@ const FoliateViewer: React.FC<{
     };
 
     openBook();
-    isViewCreated.current = true;
-
-    return () => {
-      console.log('Closing book', bookKey);
-      viewRef.current?.close();
-      viewRef.current?.remove();
-    };
   }, []);
 
   const initAnnotations = () => {
