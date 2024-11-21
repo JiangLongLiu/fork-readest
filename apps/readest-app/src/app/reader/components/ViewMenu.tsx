@@ -48,17 +48,20 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
 
   useEffect(() => {
     getView(bookKey)?.renderer.setStyles?.(getStyles(viewSettings!, themeCode));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [themeCode]);
 
   useEffect(() => {
     getView(bookKey)?.renderer.setAttribute('flow', isScrolledMode ? 'scrolled' : 'paginated');
     viewSettings!.scrolled = isScrolledMode;
     setViewSettings(bookKey, viewSettings!);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isScrolledMode]);
 
   useEffect(() => {
     document.body.classList.toggle('invert', isInvertedColors);
     getView(bookKey)?.renderer.setStyles?.(getStyles(viewSettings!, themeCode));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInvertedColors]);
 
   useEffect(() => {
@@ -70,6 +73,7 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
     }
     viewSettings!.zoomLevel = zoomLevel;
     setViewSettings(bookKey, viewSettings!);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zoomLevel]);
 
   return (

@@ -69,6 +69,7 @@ const MiscPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     } else {
       getView(bookKey)?.renderer.removeAttribute('animated');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animated]);
 
   return (

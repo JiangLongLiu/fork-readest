@@ -50,6 +50,7 @@ const SideBar: React.FC<{
     return () => {
       eventDispatcher.off('search', onSearchEvent);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDragMove = (e: MouseEvent) => {

@@ -31,5 +31,6 @@ export const useFoliateEvents = (
       if (onDrawAnnotation) view.removeEventListener('draw-annotation', onDrawAnnotation);
       if (onShowAnnotation) view.removeEventListener('show-annotation', onShowAnnotation);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, ...dependencies]);
 };

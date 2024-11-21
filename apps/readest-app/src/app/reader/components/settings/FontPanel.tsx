@@ -59,6 +59,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSettings(settings);
     }
     view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultFont]);
 
   useEffect(() => {
@@ -69,6 +70,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSettings(settings);
     }
     view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultFontSize]);
 
   useEffect(() => {
@@ -79,6 +81,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSettings(settings);
     }
     view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [minFontSize]);
 
   useEffect(() => {
@@ -89,6 +92,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSettings(settings);
     }
     view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serifFont]);
 
   useEffect(() => {
@@ -99,6 +103,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSettings(settings);
     }
     view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sansSerifFont]);
 
   useEffect(() => {
@@ -109,6 +114,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSettings(settings);
     }
     view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monospaceFont]);
 
   useEffect(() => {
@@ -119,6 +125,7 @@ const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSettings(settings);
     }
     view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overrideFont]);
 
   const handleFontFamilyFont = (option: string) => {

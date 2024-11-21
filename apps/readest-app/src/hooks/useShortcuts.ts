@@ -106,6 +106,7 @@ const useShortcuts = (actions: KeyActionHandlers, dependencies: React.Dependency
       window.removeEventListener('keydown', unifiedHandleKeyDown);
       window.removeEventListener('message', unifiedHandleKeyDown);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shortcuts, ...dependencies]);
 };
 

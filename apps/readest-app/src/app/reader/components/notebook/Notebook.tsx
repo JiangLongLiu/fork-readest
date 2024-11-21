@@ -27,6 +27,7 @@ const Notebook: React.FC = ({}) => {
     setNotebookWidth(settings.globalReadSettings.notebookWidth);
     setNotebookPin(settings.globalReadSettings.isNotebookPinned);
     setNotebookVisible(settings.globalReadSettings.isNotebookPinned);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleNotebookResize = (newWidth: string) => {

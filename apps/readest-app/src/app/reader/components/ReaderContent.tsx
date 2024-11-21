@@ -48,6 +48,7 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
         if (index === 0) setSideBarBookKey(key);
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const saveConfigAndCloseBook = (bookKey: string) => {

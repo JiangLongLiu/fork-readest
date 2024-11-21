@@ -9,9 +9,9 @@ const useBooksManager = () => {
   const searchParams = useSearchParams();
   const { envConfig } = useEnv();
   const { bookKeys, sideBarBookKey } = useReaderStore();
+  const [shouldUpdateSearchParams, setShouldUpdateSearchParams] = useState(false);
   const { setBookKeys, initViewState, setSideBarBookKey } = useReaderStore();
 
-  const [shouldUpdateSearchParams, setShouldUpdateSearchParams] = useState(false);
   useEffect(() => {
     if (shouldUpdateSearchParams) {
       const ids = bookKeys.map((key) => key.split('-')[0]).join(',');
@@ -22,6 +22,7 @@ const useBooksManager = () => {
       }
       setShouldUpdateSearchParams(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookKeys, shouldUpdateSearchParams]);
 
   // Append a new book and sync with bookKeys and URL

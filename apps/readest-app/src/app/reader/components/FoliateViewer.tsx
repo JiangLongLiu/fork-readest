@@ -112,6 +112,7 @@ const FoliateViewer: React.FC<{
       const viewSettings = getViewSettings(bookKey)!;
       viewRef.current.renderer.setStyles?.(getStyles(viewSettings, themeCode));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [themeCode]);
 
   useEffect(() => {
@@ -163,6 +164,7 @@ const FoliateViewer: React.FC<{
     };
 
     openBook();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initAnnotations = () => {
@@ -179,6 +181,7 @@ const FoliateViewer: React.FC<{
     if (viewInited) {
       initAnnotations();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewInited]);
 
   return <div className='foliate-viewer h-[100%] w-[100%]' ref={containerRef} />;

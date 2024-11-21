@@ -17,6 +17,7 @@ const ColorPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
 
   useEffect(() => {
     view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [themeCode]);
 
   return (

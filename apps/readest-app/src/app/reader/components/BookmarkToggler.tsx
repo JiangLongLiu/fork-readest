@@ -72,6 +72,7 @@ const BookmarkToggler: React.FC<BookmarkTogglerProps> = ({ bookKey }) => {
       .some((item) => CFI.compare(start, item.cfi) * CFI.compare(end, item.cfi) <= 0);
     setIsBookmarked(locationBookmarked);
     setBookmarkRibbonVisibility(bookKey, locationBookmarked);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config, progress]);
 
   return (

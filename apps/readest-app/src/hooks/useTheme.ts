@@ -81,6 +81,7 @@ export const useTheme = () => {
       fg: palette['base-content'],
       primary: palette.primary,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [themeMode, themeColor, isDarkMode]);
 
   const updateThemeMode = (mode: ThemeMode) => setThemeMode(mode);

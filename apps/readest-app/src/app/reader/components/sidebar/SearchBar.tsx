@@ -35,11 +35,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   useEffect(() => {
     handleSearchTermChange(searchTerm);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookKey]);
 
   useEffect(() => {
     setSearchTerm(term);
     handleSearchTermChange(term);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [term]);
 
   useEffect(() => {

@@ -135,6 +135,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     return () => {
       eventDispatcher.offSync('iframe-single-click', handleSingleClick);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

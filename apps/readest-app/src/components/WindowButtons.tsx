@@ -52,6 +52,7 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
     return () => {
       headerElement?.removeEventListener('mousedown', handleMouseDown);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleMinimize = async () => {

@@ -28,6 +28,7 @@ const LibraryPage = () => {
       if (loadingTimeout) clearTimeout(loadingTimeout);
       setLoading(false);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const importBooks = async (files: [string | File]) => {

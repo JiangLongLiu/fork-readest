@@ -29,6 +29,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSettings(settings);
     }
     view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lineHeight]);
 
   useEffect(() => {
@@ -39,6 +40,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSettings(settings);
     }
     view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fullJustification]);
 
   useEffect(() => {
@@ -49,6 +51,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSettings(settings);
     }
     view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hyphenation]);
 
   useEffect(() => {
@@ -59,6 +62,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSettings(settings);
     }
     view?.renderer.setAttribute('margin', `${marginPx}px`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [marginPx]);
 
   useEffect(() => {
@@ -69,6 +73,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSettings(settings);
     }
     view?.renderer.setAttribute('gap', `${gapPercent}%`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gapPercent]);
 
   useEffect(() => {
@@ -83,6 +88,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       'max-inline-size',
       `${maxColumnCount === 1 ? ONE_COLUMN_MAX_INLINE_SIZE : maxInlineSize}px`,
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maxColumnCount]);
 
   useEffect(() => {
@@ -96,6 +102,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       'max-inline-size',
       `${maxColumnCount === 1 ? ONE_COLUMN_MAX_INLINE_SIZE : maxInlineSize}px`,
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maxInlineSize]);
 
   return (
