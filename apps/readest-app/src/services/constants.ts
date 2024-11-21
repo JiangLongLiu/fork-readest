@@ -11,6 +11,7 @@ export const DEFAULT_READSETTINGS: ReadSettings = {
   notebookWidth: '25%',
   isNotebookPinned: false,
   autohideCursor: true,
+  translateTargetLang: 'EN',
 
   highlightStyle: 'highlight',
   highlightStyles: {

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Popup from '@/components/Popup';
 import { Position } from '@/utils/sel';
 import { fetch } from '@tauri-apps/plugin-http';
+import { useReaderStore } from '@/store/readerStore';
 
 const LANGUAGES = {
   AUTO: 'Auto Detect',
@@ -36,8 +37,9 @@ const DeepLPopup: React.FC<DeepLPopupProps> = ({
   popupWidth,
   popupHeight,
 }) => {
+  const { settings, setSettings } = useReaderStore();
   const [sourceLang, setSourceLang] = useState('AUTO');
-  const [targetLang, setTargetLang] = useState('EN');
+  const [targetLang, setTargetLang] = useState(settings.globalReadSettings.translateTargetLang);
   const [translation, setTranslation] = useState<string | null>(null);
   const [detectedSourceLang, setDetectedSourceLang] = useState<keyof typeof LANGUAGES | null>(null);
   const [loading, setLoading] = useState(false);
@@ -48,6 +50,8 @@ const DeepLPopup: React.FC<DeepLPopupProps> = ({
   };
 
   const handleTargetLangChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    settings.globalReadSettings.translateTargetLang = event.target.value;
+    setSettings(settings);
     setTargetLang(event.target.value);
   };
 
@@ -115,7 +119,7 @@ const DeepLPopup: React.FC<DeepLPopupProps> = ({
             <select
               value={sourceLang}
               onChange={handleSourceLangChange}
-              className='select h-8 min-h-8 rounded-md border-none bg-gray-400 text-sm focus:outline-none focus:ring-0'
+              className='select text-neutral-content h-8 min-h-8 rounded-md border-none bg-neutral-200/50 text-sm focus:outline-none focus:ring-0'
             >
               {Object.entries(LANGUAGES).map(([code, name]) => {
                 return (
@@ -137,7 +141,7 @@ const DeepLPopup: React.FC<DeepLPopupProps> = ({
             <select
               value={targetLang}
               onChange={handleTargetLangChange}
-              className='select h-8 min-h-8 rounded-md border-none bg-gray-400 text-sm focus:outline-none focus:ring-0'
+              className='select text-neutral-content h-8 min-h-8 rounded-md border-none bg-neutral-200/50 text-sm focus:outline-none focus:ring-0'
             >
               {Object.entries(LANGUAGES)
                 .filter(([code]) => code !== 'AUTO')
