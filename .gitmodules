@@ -4,6 +4,3 @@
 [submodule "packages/tauri"]
 	path = packages/tauri
 	url = git@github.com:chrox/tauri.git
-[submodule "packages/wry"]
-	path = packages/wry
-	url = git@github.com:chrox/wry.git
