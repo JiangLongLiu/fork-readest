@@ -3,13 +3,14 @@ const longHoldThreshold = 500;
 let lastClickTime = 0;
 let longHoldTimeout: ReturnType<typeof setTimeout> | null = null;
 
-export const handleKeydown = (event: KeyboardEvent) => {
+export const handleKeydown = (bookKey: string, event: KeyboardEvent) => {
   if (['Backspace', 'ArrowDown', 'ArrowUp'].includes(event.key)) {
     event.preventDefault();
   }
   window.postMessage(
     {
       type: 'iframe-keydown',
+      bookKey,
       key: event.key,
       code: event.code,
       ctrlKey: event.ctrlKey,
@@ -21,13 +22,14 @@ export const handleKeydown = (event: KeyboardEvent) => {
   );
 };
 
-export const handleMousedown = (event: MouseEvent) => {
+export const handleMousedown = (bookKey: string, event: MouseEvent) => {
   longHoldTimeout = setTimeout(() => {
     longHoldTimeout = null;
   }, longHoldThreshold);
   window.postMessage(
     {
       type: 'iframe-mousedown',
+      bookKey,
       screenX: event.screenX,
       screenY: event.screenY,
       clientX: event.clientX,
@@ -39,10 +41,11 @@ export const handleMousedown = (event: MouseEvent) => {
   );
 };
 
-export const handleMouseup = (event: MouseEvent) => {
+export const handleMouseup = (bookKey: string, event: MouseEvent) => {
   window.postMessage(
     {
       type: 'iframe-mouseup',
+      bookKey,
       screenX: event.screenX,
       screenY: event.screenY,
       clientX: event.clientX,
@@ -54,7 +57,7 @@ export const handleMouseup = (event: MouseEvent) => {
   );
 };
 
-export const handleClick = (event: MouseEvent) => {
+export const handleClick = (bookKey: string, event: MouseEvent) => {
   const now = Date.now();
 
   if (now - lastClickTime < doubleClickThreshold) {
@@ -62,6 +65,7 @@ export const handleClick = (event: MouseEvent) => {
     window.postMessage(
       {
         type: 'iframe-double-click',
+        bookKey,
         screenX: event.screenX,
         screenY: event.screenY,
         clientX: event.clientX,
@@ -93,6 +97,7 @@ export const handleClick = (event: MouseEvent) => {
       window.postMessage(
         {
           type: 'iframe-single-click',
+          bookKey,
           screenX: event.screenX,
           screenY: event.screenY,
           clientX: event.clientX,

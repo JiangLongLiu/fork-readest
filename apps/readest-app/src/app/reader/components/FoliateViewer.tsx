@@ -82,16 +82,16 @@ const FoliateViewer: React.FC<{
     if (detail.doc) {
       if (!detail.doc.isEventListenersAdded) {
         detail.doc.isEventListenersAdded = true;
-        detail.doc.addEventListener('keydown', handleKeydown);
-        detail.doc.addEventListener('mousedown', handleMousedown);
-        detail.doc.addEventListener('mouseup', handleMouseup);
-        detail.doc.addEventListener('click', handleClick);
+        detail.doc.addEventListener('keydown', handleKeydown.bind(null, bookKey));
+        detail.doc.addEventListener('mousedown', handleMousedown.bind(null, bookKey));
+        detail.doc.addEventListener('mouseup', handleMouseup.bind(null, bookKey));
+        detail.doc.addEventListener('click', handleClick.bind(null, bookKey));
       }
     }
   };
 
   const handleClickTurnPage = (msg: MessageEvent) => {
-    if (msg.data && msg.data.type === 'iframe-single-click') {
+    if (msg.data && msg.data.type === 'iframe-single-click' && msg.data.bookKey === bookKey) {
       const viewElement = containerRef.current;
       if (viewElement) {
         const rect = viewElement.getBoundingClientRect();
