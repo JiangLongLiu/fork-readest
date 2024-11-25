@@ -4,6 +4,7 @@ import { RiArrowLeftWideLine, RiArrowRightWideLine } from 'react-icons/ri';
 import { RiArrowGoBackLine, RiArrowGoForwardLine } from 'react-icons/ri';
 
 import { useReaderStore } from '@/store/readerStore';
+import { useSidebarStore } from '@/store/sidebarStore';
 import Button from '@/components/Button';
 
 interface FooterBarProps {
@@ -13,7 +14,8 @@ interface FooterBarProps {
 }
 
 const FooterBar: React.FC<FooterBarProps> = ({ bookKey, pageinfo, isHoveredAnim }) => {
-  const { isSideBarVisible, hoveredBookKey, setHoveredBookKey, getView } = useReaderStore();
+  const { hoveredBookKey, setHoveredBookKey, getView } = useReaderStore();
+  const { isSideBarVisible } = useSidebarStore();
   const view = getView(bookKey);
 
   const handleProgressChange = (event: React.ChangeEvent) => {

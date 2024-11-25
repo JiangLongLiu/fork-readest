@@ -1,7 +1,7 @@
 import React from 'react';
 
 import * as CFI from 'foliate-js/epubcfi.js';
-import { useReaderStore } from '@/store/readerStore';
+import { useBookDataStore } from '@/store/bookDataStore';
 import { findParentPath } from '@/utils/toc';
 import { TOCItem } from '@/libs/document';
 import { BookNote, BookNoteType } from '@/types/book';
@@ -19,7 +19,7 @@ const BooknoteView: React.FC<{
   bookKey: string;
   toc: TOCItem[];
 }> = ({ type, bookKey, toc }) => {
-  const { getConfig } = useReaderStore();
+  const { getConfig } = useBookDataStore();
   const config = getConfig(bookKey)!;
   const { booknotes: allNotes = [] } = config;
   const booknotes = allNotes.filter((note) => note.type === type);

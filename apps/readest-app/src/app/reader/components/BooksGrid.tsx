@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useSettingsStore } from '@/store/settingsStore';
 import { useReaderStore } from '@/store/readerStore';
 import FoliateViewer from './FoliateViewer';
 import getGridTemplate from '@/utils/grid';
@@ -10,6 +11,7 @@ import PageInfoView from './PageInfo';
 import Ribbon from './Ribbon';
 import SettingsDialog from './settings/SettingsDialog';
 import Annotator from './annotator/Annotator';
+import { useBookDataStore } from '@/store/bookDataStore';
 
 interface BooksGridProps {
   bookKeys: string[];
@@ -17,8 +19,9 @@ interface BooksGridProps {
 }
 
 const BooksGrid: React.FC<BooksGridProps> = ({ bookKeys, onCloseBook }) => {
-  const { getConfig, getProgress, getBookData, getViewState, getViewSettings } = useReaderStore();
-  const { isFontLayoutSettingsDialogOpen, setFontLayoutSettingsDialogOpen } = useReaderStore();
+  const { getConfig, getBookData } = useBookDataStore();
+  const { getProgress, getViewState, getViewSettings } = useReaderStore();
+  const { isFontLayoutSettingsDialogOpen, setFontLayoutSettingsDialogOpen } = useSettingsStore();
   const gridTemplate = getGridTemplate(bookKeys.length, window.innerWidth / window.innerHeight);
 
   return (

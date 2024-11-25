@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
-import { useReaderStore } from '@/store/readerStore';
+import { useNotebookStore } from '@/store/notebookStore';
 import { TextSelection } from '@/utils/sel';
 import { BookNote } from '@/types/book';
 
@@ -10,7 +10,7 @@ interface NoteEditorProps {
 }
 
 const NoteEditor: React.FC<NoteEditorProps> = ({ onSave, onEdit }) => {
-  const { notebookNewAnnotation, notebookEditAnnotation } = useReaderStore();
+  const { notebookNewAnnotation, notebookEditAnnotation } = useNotebookStore();
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const [note, setNote] = React.useState('');
 

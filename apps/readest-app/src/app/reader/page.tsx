@@ -4,13 +4,15 @@ import * as React from 'react';
 import { useEffect, Suspense, useRef } from 'react';
 
 import { useEnv } from '@/context/EnvContext';
-import { useReaderStore } from '@/store/readerStore';
+import { useLibraryStore } from '@/store/libraryStore';
 
 import ReaderContent from './components/ReaderContent';
+import { useSettingsStore } from '@/store/settingsStore';
 
 const ReaderPage = () => {
   const { envConfig } = useEnv();
-  const { library, settings, setLibrary, setSettings } = useReaderStore();
+  const { settings, setSettings } = useSettingsStore();
+  const { library, setLibrary } = useLibraryStore();
   const isInitiating = useRef(false);
 
   useEffect(() => {

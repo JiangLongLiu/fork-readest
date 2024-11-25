@@ -5,6 +5,7 @@ import NumberInput from './NumberInput';
 import FontDropdown from './FontDropDown';
 import { MONOSPACE_FONTS, SANS_SERIF_FONTS, SERIF_FONTS } from '@/services/constants';
 import { useReaderStore } from '@/store/readerStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { getStyles } from '@/utils/style';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -37,8 +38,8 @@ const FontFace = ({ className, family, label, options, selected, onSelect }: Fon
 );
 
 const FontPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
-  const { settings, isFontLayoutSettingsGlobal } = useReaderStore();
-  const { setSettings, getView, getViewSettings, setViewSettings } = useReaderStore();
+  const { settings, isFontLayoutSettingsGlobal, setSettings } = useSettingsStore();
+  const { getView, getViewSettings, setViewSettings } = useReaderStore();
   const view = getView(bookKey);
   const viewSettings = getViewSettings(bookKey)!;
   const { themeCode } = useTheme();

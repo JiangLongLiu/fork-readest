@@ -1,7 +1,7 @@
 import React from 'react';
 import { TbLayoutSidebar, TbLayoutSidebarFilled } from 'react-icons/tb';
 
-import { useReaderStore } from '@/store/readerStore';
+import { useSidebarStore } from '@/store/sidebarStore';
 import Button from '@/components/Button';
 
 interface SidebarTogglerProps {
@@ -9,7 +9,7 @@ interface SidebarTogglerProps {
 }
 
 const SidebarToggler: React.FC<SidebarTogglerProps> = ({ bookKey }) => {
-  const { sideBarBookKey, isSideBarVisible, setSideBarBookKey, toggleSideBar } = useReaderStore();
+  const { sideBarBookKey, isSideBarVisible, setSideBarBookKey, toggleSideBar } = useSidebarStore();
   const handleToggleSidebar = () => {
     if (sideBarBookKey === bookKey) {
       toggleSideBar();

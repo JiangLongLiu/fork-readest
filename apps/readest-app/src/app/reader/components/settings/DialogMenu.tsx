@@ -1,13 +1,13 @@
 import React from 'react';
-import { useReaderStore } from '@/store/readerStore';
 import { MdCheck } from 'react-icons/md';
+import { useSettingsStore } from '@/store/settingsStore';
 
 interface DialogMenuProps {
   toggleDropdown?: () => void;
 }
 
 const DialogMenu: React.FC<DialogMenuProps> = ({ toggleDropdown }) => {
-  const { isFontLayoutSettingsGlobal, setFontLayoutSettingsGlobal } = useReaderStore();
+  const { isFontLayoutSettingsGlobal, setFontLayoutSettingsGlobal } = useSettingsStore();
 
   const handleToggleGlobal = () => {
     setFontLayoutSettingsGlobal(!isFontLayoutSettingsGlobal);

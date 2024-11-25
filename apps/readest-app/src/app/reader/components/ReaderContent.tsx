@@ -5,7 +5,10 @@ import { useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { useEnv } from '@/context/EnvContext';
+import { useSettingsStore } from '@/store/settingsStore';
+import { useBookDataStore } from '@/store/bookDataStore';
 import { useReaderStore } from '@/store/readerStore';
+import { useSidebarStore } from '@/store/sidebarStore';
 import { SystemSettings } from '@/types/settings';
 import { uniqueId } from '@/utils/misc';
 
@@ -21,10 +24,11 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
   const searchParams = useSearchParams();
   const { envConfig } = useEnv();
   const { bookKeys, dismissBook, getNextBookKey } = useBooksManager();
-  const { sideBarBookKey, getView, getConfig, saveConfig, saveSettings, setSideBarBookKey } =
-    useReaderStore();
-  const { setBookKeys, getBookData, initViewState, getViewState, clearViewState } =
-    useReaderStore();
+  const { sideBarBookKey, setSideBarBookKey } = useSidebarStore();
+  const { saveSettings } = useSettingsStore();
+  const { getConfig, getBookData, saveConfig } = useBookDataStore();
+  const { getView, setBookKeys } = useReaderStore();
+  const { initViewState, getViewState, clearViewState } = useReaderStore();
   const isInitiating = useRef(false);
   const [loading, setLoading] = useState(false);
 

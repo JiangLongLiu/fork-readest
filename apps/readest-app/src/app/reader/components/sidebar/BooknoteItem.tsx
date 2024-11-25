@@ -3,8 +3,11 @@ import React from 'react';
 
 import { useEnv } from '@/context/EnvContext';
 import { BookNote } from '@/types/book';
+import { useSettingsStore } from '@/store/settingsStore';
 import { useReaderStore } from '@/store/readerStore';
+import { useNotebookStore } from '@/store/notebookStore';
 import useScrollToItem from '../../hooks/useScrollToItem';
+import { useBookDataStore } from '@/store/bookDataStore';
 
 interface BooknoteItemProps {
   bookKey: string;
@@ -14,8 +17,10 @@ interface BooknoteItemProps {
 
 const BooknoteItem: React.FC<BooknoteItemProps> = ({ bookKey, item, editable = false }) => {
   const { envConfig } = useEnv();
-  const { settings, getConfig, saveConfig, getProgress, getView } = useReaderStore();
-  const { updateBooknotes, setNotebookEditAnnotation, setNotebookVisible } = useReaderStore();
+  const { settings } = useSettingsStore();
+  const { getConfig, saveConfig, updateBooknotes } = useBookDataStore();
+  const { getProgress, getView } = useReaderStore();
+  const { setNotebookEditAnnotation, setNotebookVisible } = useNotebookStore();
 
   const { text, cfi, note } = item;
   const progress = getProgress(bookKey);

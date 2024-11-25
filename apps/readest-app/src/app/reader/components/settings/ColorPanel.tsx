@@ -11,12 +11,13 @@ import { getStyles } from '@/utils/style';
 const ColorPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { themeMode, themeColor, themeCode, isDarkMode, updateThemeMode, updateThemeColor } =
     useTheme();
-  const { getView, getViewSettings } = useReaderStore();
-  const view = getView(bookKey);
+  const { getViews, getViewSettings } = useReaderStore();
   const viewSettings = getViewSettings(bookKey)!;
 
   useEffect(() => {
-    view?.renderer.setStyles?.(getStyles(viewSettings, themeCode));
+    getViews().forEach((view) => {
+      view.renderer.setStyles?.(getStyles(viewSettings!, themeCode));
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [themeCode]);
 

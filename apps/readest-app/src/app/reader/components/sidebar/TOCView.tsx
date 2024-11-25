@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { TOCItem } from '@/libs/document';
 import { useReaderStore } from '@/store/readerStore';
+import { useSidebarStore } from '@/store/sidebarStore';
 import { findParentPath } from '@/utils/toc';
 import { getContentMd5 } from '@/utils/misc';
 import clsx from 'clsx';
@@ -104,7 +105,8 @@ const TOCView: React.FC<{
   bookKey: string;
   toc: TOCItem[];
 }> = ({ bookKey, toc }) => {
-  const { sideBarBookKey, getProgress } = useReaderStore();
+  const { getProgress } = useReaderStore();
+  const { sideBarBookKey } = useSidebarStore();
   const progress = getProgress(bookKey);
 
   const [expandedItems, setExpandedItems] = useState<string[]>([]);

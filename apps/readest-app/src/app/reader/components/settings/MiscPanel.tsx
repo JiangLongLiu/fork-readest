@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useReaderStore } from '@/store/readerStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import cssbeautify from 'cssbeautify';
 import { getStyles } from '@/utils/style';
 import { useTheme } from '@/hooks/useTheme';
@@ -8,8 +9,8 @@ const cssRegex =
   /((?:\s*)([\w#.@*,:\-.:>+~\[\]\"=(),*\s]+)\s*{(?:[\s]*)((?:[A-Za-z\- \s]+[:]\s*['"0-9\w .,\/\()\-!#%]+;?)*)*\s*}(?:\s*))/gim;
 
 const MiscPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
-  const { settings, isFontLayoutSettingsGlobal } = useReaderStore();
-  const { setSettings, getView, getViewSettings, setViewSettings } = useReaderStore();
+  const { settings, isFontLayoutSettingsGlobal, setSettings } = useSettingsStore();
+  const { getView, getViewSettings, setViewSettings } = useReaderStore();
   const viewSettings = getViewSettings(bookKey)!;
   const { themeCode } = useTheme();
 

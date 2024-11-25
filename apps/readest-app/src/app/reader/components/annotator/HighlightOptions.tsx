@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import React from 'react';
 
-import { useReaderStore } from '@/store/readerStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { HighlightColor, HighlightStyle } from '@/types/book';
 import { FaCheckCircle } from 'react-icons/fa';
 
@@ -21,7 +21,7 @@ const HighlightOptions: React.FC<HighlightOptionsProps> = ({
   selectedColor,
   onHandleHighlight,
 }) => {
-  const { settings, setSettings } = useReaderStore();
+  const { settings, setSettings } = useSettingsStore();
   const globalReadSettings = settings.globalReadSettings;
 
   const handleSelectStyle = (style: HighlightStyle) => {

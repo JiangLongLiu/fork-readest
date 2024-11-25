@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import React from 'react';
 
-import { useReaderStore } from '@/store/readerStore';
+import { useSidebarStore } from '@/store/sidebarStore';
 import useTrafficLight from '@/hooks/useTrafficLight';
 
 interface SectionInfoProps {
@@ -10,7 +10,7 @@ interface SectionInfoProps {
 }
 
 const SectionInfo: React.FC<SectionInfoProps> = ({ section, gapLeft }) => {
-  const { isSideBarVisible } = useReaderStore();
+  const { isSideBarVisible } = useSidebarStore();
   const { isTrafficLightVisible } = useTrafficLight();
   return (
     <div

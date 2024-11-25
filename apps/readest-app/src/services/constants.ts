@@ -22,7 +22,7 @@ export const DEFAULT_READSETTINGS: ReadSettings = {
 };
 
 export const DEFAULT_BOOK_FONT: BookFont = {
-  serifFont: 'Literata',
+  serifFont: 'Bitter',
   sansSerifFont: 'Roboto',
   monospaceFont: 'Consolas',
   defaultFont: 'Serif',
@@ -38,7 +38,7 @@ export const DEFAULT_BOOK_LAYOUT: BookLayout = {
   maxColumnCount: 2,
   maxInlineSize: 720,
   maxBlockSize: 1440,
-  animated: true,
+  animated: false,
 };
 
 export const DEFAULT_BOOK_STYLE: BookStyle = {

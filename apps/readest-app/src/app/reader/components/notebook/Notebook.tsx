@@ -1,7 +1,11 @@
 import clsx from 'clsx';
 import React, { useEffect } from 'react';
 
+import { useSettingsStore } from '@/store/settingsStore';
+import { useBookDataStore } from '@/store/bookDataStore';
 import { useReaderStore } from '@/store/readerStore';
+import { useSidebarStore } from '@/store/sidebarStore';
+import { useNotebookStore } from '@/store/notebookStore';
 import { useEnv } from '@/context/EnvContext';
 import useDragBar from '../../hooks/useDragBar';
 import NotebookHeader from './Header';
@@ -16,12 +20,14 @@ const MAX_NOTEBOOK_WIDTH = 0.45;
 
 const Notebook: React.FC = ({}) => {
   const { envConfig } = useEnv();
-  const { settings, sideBarBookKey, notebookWidth } = useReaderStore();
-  const { isNotebookVisible, isNotebookPinned } = useReaderStore();
-  const { notebookNewAnnotation, notebookEditAnnotation } = useReaderStore();
-  const { setNotebookWidth, setNotebookPin, toggleNotebookPin } = useReaderStore();
-  const { getConfig, saveConfig, getView, setNotebookVisible, updateBooknotes } = useReaderStore();
-  const { setNotebookNewAnnotation, setNotebookEditAnnotation } = useReaderStore();
+  const { settings } = useSettingsStore();
+  const { sideBarBookKey } = useSidebarStore();
+  const { notebookWidth, isNotebookVisible, isNotebookPinned } = useNotebookStore();
+  const { notebookNewAnnotation, notebookEditAnnotation, setNotebookPin } = useNotebookStore();
+  const { getConfig, saveConfig, updateBooknotes } = useBookDataStore();
+  const { getView } = useReaderStore();
+  const { setNotebookWidth, setNotebookVisible, toggleNotebookPin } = useNotebookStore();
+  const { setNotebookNewAnnotation, setNotebookEditAnnotation } = useNotebookStore();
 
   useEffect(() => {
     setNotebookWidth(settings.globalReadSettings.notebookWidth);

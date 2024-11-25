@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSettingsStore } from '@/store/settingsStore';
 import { useReaderStore } from '@/store/readerStore';
 import { getStyles } from '@/utils/style';
 import { ONE_COLUMN_MAX_INLINE_SIZE } from '@/services/constants';
@@ -6,8 +7,8 @@ import NumberInput from './NumberInput';
 import { useTheme } from '@/hooks/useTheme';
 
 const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
-  const { settings, isFontLayoutSettingsGlobal } = useReaderStore();
-  const { setSettings, getView, getViewSettings, setViewSettings } = useReaderStore();
+  const { settings, isFontLayoutSettingsGlobal, setSettings } = useSettingsStore();
+  const { getView, getViewSettings, setViewSettings } = useReaderStore();
   const view = getView(bookKey);
   const viewSettings = getViewSettings(bookKey)!;
   const { themeCode } = useTheme();

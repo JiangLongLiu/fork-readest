@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import * as React from 'react';
 import { useState } from 'react';
 import { PiPlus } from 'react-icons/pi';
@@ -8,10 +9,9 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 import { Book, BooksGroup } from '@/types/book';
-import Alert from '@/components/Alert';
-import { useReaderStore } from '@/store/readerStore';
 import { useEnv } from '@/context/EnvContext';
-import clsx from 'clsx';
+import { useLibraryStore } from '@/store/libraryStore';
+import Alert from '@/components/Alert';
 import Spinner from '@/components/Spinner';
 
 type BookshelfItem = Book | BooksGroup;
@@ -49,7 +49,7 @@ interface BookshelfProps {
 const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImportBooks }) => {
   const router = useRouter();
   const { envConfig } = useEnv();
-  const { deleteBook } = useReaderStore();
+  const { deleteBook } = useLibraryStore();
   const [loading, setLoading] = useState(false);
   const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);

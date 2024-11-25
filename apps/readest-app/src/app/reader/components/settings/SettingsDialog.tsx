@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BookConfig } from '@/types/book';
-import { useReaderStore } from '@/store/readerStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { RiFontSize } from 'react-icons/ri';
 import { RiDashboardLine } from 'react-icons/ri';
 import { VscSymbolColor } from 'react-icons/vsc';
@@ -17,7 +17,7 @@ import MiscPanel from './MiscPanel';
 
 const SettingsDialog: React.FC<{ bookKey: string; config: BookConfig }> = ({ bookKey }) => {
   const [activePanel, setActivePanel] = useState('Font');
-  const { setFontLayoutSettingsDialogOpen } = useReaderStore();
+  const { setFontLayoutSettingsDialogOpen } = useSettingsStore();
 
   return (
     <dialog className='modal modal-open min-w-90 w-full'>

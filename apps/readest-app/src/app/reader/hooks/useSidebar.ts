@@ -1,8 +1,9 @@
-import { useReaderStore } from '@/store/readerStore';
+import { useSettingsStore } from '@/store/settingsStore';
+import { useSidebarStore } from '@/store/sidebarStore';
 import { useEffect } from 'react';
 
 const useSidebar = (initialWidth: string, isPinned: boolean) => {
-  const { settings } = useReaderStore();
+  const { settings } = useSettingsStore();
   const {
     sideBarWidth,
     isSideBarVisible,
@@ -12,7 +13,7 @@ const useSidebar = (initialWidth: string, isPinned: boolean) => {
     setSideBarPin,
     toggleSideBar,
     toggleSideBarPin,
-  } = useReaderStore();
+  } = useSidebarStore();
 
   useEffect(() => {
     setSideBarWidth(initialWidth);

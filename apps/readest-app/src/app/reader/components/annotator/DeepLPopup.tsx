@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Popup from '@/components/Popup';
 import { Position } from '@/utils/sel';
 import { fetch } from '@tauri-apps/plugin-http';
-import { useReaderStore } from '@/store/readerStore';
+import { useSettingsStore } from '@/store/settingsStore';
 
 const LANGUAGES = {
   AUTO: 'Auto Detect',
@@ -37,7 +37,7 @@ const DeepLPopup: React.FC<DeepLPopupProps> = ({
   popupWidth,
   popupHeight,
 }) => {
-  const { settings, setSettings } = useReaderStore();
+  const { settings, setSettings } = useSettingsStore();
   const [sourceLang, setSourceLang] = useState('AUTO');
   const [targetLang, setTargetLang] = useState(settings.globalReadSettings.translateTargetLang);
   const [translation, setTranslation] = useState<string | null>(null);

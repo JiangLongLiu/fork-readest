@@ -2,15 +2,17 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEnv } from '@/context/EnvContext';
 import { useReaderStore } from '@/store/readerStore';
+import { useSidebarStore } from '@/store/sidebarStore';
 import { uniqueId } from '@/utils/misc';
 
 const useBooksManager = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { envConfig } = useEnv();
-  const { bookKeys, sideBarBookKey } = useReaderStore();
+  const { bookKeys } = useReaderStore();
+  const { setBookKeys, initViewState } = useReaderStore();
+  const { sideBarBookKey, setSideBarBookKey } = useSidebarStore();
   const [shouldUpdateSearchParams, setShouldUpdateSearchParams] = useState(false);
-  const { setBookKeys, initViewState, setSideBarBookKey } = useReaderStore();
 
   useEffect(() => {
     if (shouldUpdateSearchParams) {

@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useState, useRef } from 'react';
 
 import { useEnv } from '@/context/EnvContext';
-import { useReaderStore } from '@/store/readerStore';
+import { useLibraryStore } from '@/store/libraryStore';
 
 import Spinner from '@/components/Spinner';
 import LibraryHeader from '@/app/library/components/LibraryHeader';
@@ -12,7 +12,7 @@ import Bookshelf from '@/app/library/components/Bookshelf';
 
 const LibraryPage = () => {
   const { envConfig, appService } = useEnv();
-  const { library: libraryBooks, setLibrary } = useReaderStore();
+  const { library: libraryBooks, setLibrary } = useLibraryStore();
   const [loading, setLoading] = useState(false);
   const isInitiating = useRef(false);
   const [isSelectMode, setIsSelectMode] = useState(false);

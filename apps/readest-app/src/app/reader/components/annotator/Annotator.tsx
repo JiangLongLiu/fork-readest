@@ -12,7 +12,9 @@ import { Overlayer } from 'foliate-js/overlayer.js';
 import { useEnv } from '@/context/EnvContext';
 import { BookNote, HighlightColor, HighlightStyle } from '@/types/book';
 import { uniqueId } from '@/utils/misc';
+import { useSettingsStore } from '@/store/settingsStore';
 import { useReaderStore } from '@/store/readerStore';
+import { useNotebookStore } from '@/store/notebookStore';
 import { useFoliateEvents } from '../../hooks/useFoliateEvents';
 import { getPopupPosition, getPosition, Position, TextSelection } from '@/utils/sel';
 import { eventDispatcher } from '@/utils/event';
@@ -21,12 +23,15 @@ import AnnotationPopup from './AnnotationPopup';
 import WiktionaryPopup from './WiktionaryPopup';
 import WikipediaPopup from './WikipediaPopup';
 import DeepLPopup from './DeepLPopup';
+import { useBookDataStore } from '@/store/bookDataStore';
 
 const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { envConfig } = useEnv();
-  const { settings, saveConfig, getProgress, updateBooknotes } = useReaderStore();
-  const { getConfig, getBookData, getView, getViewsById } = useReaderStore();
-  const { notebookNewAnnotation, setNotebookVisible, setNotebookNewAnnotation } = useReaderStore();
+  const { settings } = useSettingsStore();
+  const { getConfig, saveConfig, getBookData, updateBooknotes } = useBookDataStore();
+  const { getProgress, getView, getViewsById } = useReaderStore();
+  const { notebookNewAnnotation } = useNotebookStore();
+  const { setNotebookVisible, setNotebookNewAnnotation } = useNotebookStore();
   const globalReadSettings = settings.globalReadSettings;
   const config = getConfig(bookKey)!;
   const progress = getProgress(bookKey)!;

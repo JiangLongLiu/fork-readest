@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { FaSearch, FaChevronDown } from 'react-icons/fa';
 
 import { useEnv } from '@/context/EnvContext';
+import { useSettingsStore } from '@/store/settingsStore';
+import { useBookDataStore } from '@/store/bookDataStore';
 import { useReaderStore } from '@/store/readerStore';
 import { BookSearchConfig, BookSearchResult } from '@/types/book';
 import Dropdown from '@/components/Dropdown';
@@ -21,7 +23,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onSearchResultChange,
 }) => {
   const { envConfig } = useEnv();
-  const { settings, getView, getProgress, getConfig, saveConfig } = useReaderStore();
+  const { settings } = useSettingsStore();
+  const { getConfig, saveConfig } = useBookDataStore();
+  const { getView, getProgress } = useReaderStore();
   const [searchTerm, setSearchTerm] = useState(term);
 
   const view = getView(bookKey)!;

@@ -3,6 +3,7 @@ import React, { useRef, useState } from 'react';
 import { PiDotsThreeVerticalBold } from 'react-icons/pi';
 
 import { useReaderStore } from '@/store/readerStore';
+import { useSidebarStore } from '@/store/sidebarStore';
 import useTrafficLight from '@/hooks/useTrafficLight';
 import WindowButtons from '@/components/WindowButtons';
 import Dropdown from '@/components/Dropdown';
@@ -31,7 +32,8 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   const headerRef = useRef<HTMLDivElement>(null);
   const { isTrafficLightVisible } = useTrafficLight();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { hoveredBookKey, isSideBarVisible, setHoveredBookKey } = useReaderStore();
+  const { hoveredBookKey, setHoveredBookKey } = useReaderStore();
+  const { isSideBarVisible } = useSidebarStore();
 
   const handleToggleDropdown = (isOpen: boolean) => {
     setIsDropdownOpen(isOpen);

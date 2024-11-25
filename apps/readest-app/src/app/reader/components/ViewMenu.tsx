@@ -21,7 +21,7 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
   setIsDropdownOpen,
   onSetSettingsDialogOpen,
 }) => {
-  const { getView, getViewSettings, setViewSettings } = useReaderStore();
+  const { getView, getViews, getViewSettings, setViewSettings } = useReaderStore();
   const viewSettings = getViewSettings(bookKey);
 
   const { themeMode, isDarkMode, themeCode, updateThemeMode } = useTheme();
@@ -47,7 +47,9 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
   };
 
   useEffect(() => {
-    getView(bookKey)?.renderer.setStyles?.(getStyles(viewSettings!, themeCode));
+    getViews().forEach((view) => {
+      view.renderer.setStyles?.(getStyles(viewSettings!, themeCode));
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [themeCode]);
 

@@ -2,7 +2,10 @@ import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 
 import { useEnv } from '@/context/EnvContext';
+import { useSettingsStore } from '@/store/settingsStore';
+import { useBookDataStore } from '@/store/bookDataStore';
 import { useReaderStore } from '@/store/readerStore';
+import { useSidebarStore } from '@/store/sidebarStore';
 import { BookSearchResult } from '@/types/book';
 import { eventDispatcher } from '@/utils/event';
 import SidebarHeader from './Header';
@@ -20,8 +23,10 @@ const SideBar: React.FC<{
   onGoToLibrary: () => void;
 }> = ({ onGoToLibrary }) => {
   const { envConfig } = useEnv();
-  const { sideBarBookKey, settings } = useReaderStore();
-  const { saveSettings, getBookData, getView } = useReaderStore();
+  const { settings, saveSettings } = useSettingsStore();
+  const { sideBarBookKey } = useSidebarStore();
+  const { getBookData } = useBookDataStore();
+  const { getView } = useReaderStore();
   const [isSearchBarVisible, setIsSearchBarVisible] = useState(false);
   const [searchResults, setSearchResults] = useState<BookSearchResult[] | null>(null);
   const [searchTerm, setSearchTerm] = useState('');

@@ -1,7 +1,8 @@
 import React from 'react';
 import { TbLayoutSidebarRight, TbLayoutSidebarRightFilled } from 'react-icons/tb';
 
-import { useReaderStore } from '@/store/readerStore';
+import { useSidebarStore } from '@/store/sidebarStore';
+import { useNotebookStore } from '@/store/notebookStore';
 import Button from '@/components/Button';
 
 interface NotebookTogglerProps {
@@ -9,7 +10,8 @@ interface NotebookTogglerProps {
 }
 
 const NotebookToggler: React.FC<NotebookTogglerProps> = ({ bookKey }) => {
-  const { sideBarBookKey, isNotebookVisible, setSideBarBookKey, toggleNotebook } = useReaderStore();
+  const { sideBarBookKey, setSideBarBookKey } = useSidebarStore();
+  const { isNotebookVisible, toggleNotebook } = useNotebookStore();
   const handleToggleSidebar = () => {
     if (sideBarBookKey === bookKey) {
       toggleNotebook();
