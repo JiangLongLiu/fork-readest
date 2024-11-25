@@ -28,6 +28,15 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# certs and keys
+/private_keys
+
+# plists
+*.plist
+
+# local confs
+tauri.*.conf.json
+
 # vercel
 .vercel
 
@@ -35,10 +44,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-<<<<<<< HEAD:apps/readest-app/.gitignore
 #generated
 src-tauri/gen
-=======
+
 # vendor
 /public/vendor
->>>>>>> 8a4b5fb (Fix PDF rendering):apps/digest-app/.gitignore

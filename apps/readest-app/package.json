@@ -18,7 +18,9 @@
     "build-win-arm64": "tauri build --target aarch64-pc-windows-msvc --bundles nsis",
     "build-linux-x64": "tauri build --target x86_64-unknown-linux-gnu --bundles appimage",
     "build-macos-universial": "dotenv -e .env.apple-nonstore.local -- tauri build -t universal-apple-darwin --bundles dmg",
-    "build-macos-universial-appstore": "dotenv -e .env.apple-appstore.local -- tauri build -t universal-apple-darwin --bundles dmg"
+    "build-macos-universial-appstore": "dotenv -e .env.apple-appstore.local -- tauri build -t universal-apple-darwin --bundles app --config src-tauri/tauri.appstore.conf.json",
+    "build-macos-universial-appstore-dev": "dotenv -e .env.apple-appstore-dev.local -- tauri build -t universal-apple-darwin --bundles app --config src-tauri/tauri.appstore-dev.conf.json",
+    "release-macos-universial-appstore": "dotenv -e .env.apple-appstore.local -- bash scripts/release-mac-appstore.sh"
   },
   "dependencies": {
     "@tauri-apps/api": "2.1.1",
