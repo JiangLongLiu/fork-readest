@@ -1,8 +1,8 @@
 [package]
-name = "readest"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+name = "Readest"
+version = "0.2.0"
+description = "Your online library"
+authors = ["Bilingify LLC"]
 license = ""
 repository = ""
 edition = "2021"
@@ -15,21 +15,22 @@ name = "readestlib"
 crate-type = ["staticlib", "cdylib", "lib"]
 
 [build-dependencies]
-tauri-build = { version = "2.0.1", features = [] }
+tauri-build = { version = "2.0.3", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
 # FIXME: remove the devtools feature in production
-tauri = { version = "2.0.2", features = [ "protocol-asset", "devtools"] }
-tauri-plugin-log = "2.0.1"
-tauri-plugin-fs = "2.0.1"
-tauri-plugin-dialog = "2.0.1"
+tauri = { version = "2.1.1", features = [ "protocol-asset", "devtools"] }
+tauri-build = "2.0.3"
+tauri-plugin-log = "2.0.2"
+tauri-plugin-fs = "2.0.3"
+tauri-plugin-dialog = "2.0.3"
 tauri-plugin-os = "2.0.1"
-tauri-plugin-http = "2.0.1"
-tauri-build = "2.0.1"
+tauri-plugin-http = "2.0.3"
 tauri-plugin-devtools = "2.0.0"
+tauri-plugin-shell = "2"
 [patch.crates-io]
 tauri = { path = "../../../packages/tauri/crates/tauri" }
 
