@@ -1,6 +1,7 @@
 import React from 'react';
 
 import MenuItem from '@/components/MenuItem';
+import { setAboutDialogVisible } from '@/components/AboutWindow';
 import useBooksManager from '../../hooks/useBooksManager';
 
 interface BookMenuProps {
@@ -18,6 +19,7 @@ const BookMenu: React.FC<BookMenuProps> = ({ setIsDropdownOpen }) => {
     setIsDropdownOpen?.(false);
   };
   const showAboutReadest = () => {
+    setAboutDialogVisible(true);
     setIsDropdownOpen?.(false);
   };
 

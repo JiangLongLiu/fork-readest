@@ -7,6 +7,7 @@ import { useEnv } from '@/context/EnvContext';
 import { useLibraryStore } from '@/store/libraryStore';
 
 import ReaderContent from './components/ReaderContent';
+import { AboutWindow } from '@/components/AboutWindow';
 import { useSettingsStore } from '@/store/settingsStore';
 
 const ReaderPage = () => {
@@ -36,6 +37,7 @@ const ReaderPage = () => {
       <div className='reader-page bg-base-100 text-base-content min-h-screen select-none'>
         <Suspense>
           <ReaderContent settings={settings} />
+          <AboutWindow />
         </Suspense>
       </div>
     )
