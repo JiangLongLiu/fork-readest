@@ -48,9 +48,9 @@ export const useBookDataStore = create<BookDataState>((set, get) => ({
     const { library, setLibrary } = useLibraryStore.getState();
     const bookIndex = library.findIndex((b) => b.hash === bookKey.split('-')[0]);
     if (bookIndex == -1) return;
-    const book = library[bookIndex]!;
+    const book = library.splice(bookIndex, 1)[0]!;
     book.lastUpdated = Date.now();
-    library[bookIndex] = book;
+    library.unshift(book);
     setLibrary(library);
     config.lastUpdated = Date.now();
     appService.saveBookConfig(book, config, settings);

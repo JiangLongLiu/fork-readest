@@ -13,7 +13,7 @@ const useBookShortcuts = ({ sideBarBookKey, bookKeys }: UseBookShortcutsProps) =
   const { getView, getViewSettings } = useReaderStore();
   const { toggleSideBar, setSideBarBookKey } = useSidebarStore();
   const { toggleNotebook } = useNotebookStore();
-  const { getNextBookKey, openParallelView } = useBooksManager();
+  const { getNextBookKey } = useBooksManager();
   const viewSettings = getViewSettings(sideBarBookKey ?? '');
   const fontSize = viewSettings?.defaultFontSize ?? 16;
   const lineHeight = viewSettings?.lineHeight ?? 1.6;
@@ -45,7 +45,6 @@ const useBookShortcuts = ({ sideBarBookKey, bookKeys }: UseBookShortcutsProps) =
 
   useShortcuts(
     {
-      onOpenParallelView: openParallelView,
       onSwitchSideBar: switchSideBar,
       onToggleSideBar: toggleSideBar,
       onToggleNotebook: toggleNotebook,

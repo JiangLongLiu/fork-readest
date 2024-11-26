@@ -3,6 +3,7 @@ import { useFoliateEvents } from '../hooks/useFoliateEvents';
 import { BookDoc } from '@/libs/document';
 import { BookConfig, BookNote, BookSearchConfig, BookSearchResult } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
+import { useParallelViewStore } from '@/store/parallelViewStore';
 import { getStyles } from '@/utils/style';
 import { useTheme } from '@/hooks/useTheme';
 import { ONE_COLUMN_MAX_INLINE_SIZE } from '@/services/constants';
@@ -38,11 +39,16 @@ export interface FoliateView extends HTMLElement {
     clear: () => void;
   };
   renderer: {
-    setStyles?: (css: string) => void;
+    scrolled?: boolean;
+    viewSize: number;
     setAttribute: (name: string, value: string | number) => void;
     removeAttribute: (name: string) => void;
     next: () => Promise<void>;
     prev: () => Promise<void>;
+    scrollTo?: (offset: number, reason: string, smooth: boolean) => void;
+    setStyles?: (css: string) => void;
+    addEventListener: (type: string, listener: EventListener) => void;
+    removeEventListener: (type: string, listener: EventListener) => void;
   };
 }
 
@@ -68,7 +74,9 @@ const FoliateViewer: React.FC<{
   const viewRef = useRef<FoliateView | null>(null);
   const [viewInited, setViewInited] = useState(false);
   const isViewCreated = useRef(false);
-  const { setView: setFoliateView, setProgress, getViewSettings } = useReaderStore();
+  const isScrolling = useRef(false);
+  const { getView, setView: setFoliateView, setProgress, getViewSettings } = useReaderStore();
+  const { getParallels } = useParallelViewStore();
   const { themeCode } = useTheme();
 
   const progressRelocateHandler = (event: Event) => {
@@ -87,6 +95,29 @@ const FoliateViewer: React.FC<{
         detail.doc.addEventListener('mouseup', handleMouseup.bind(null, bookKey));
         detail.doc.addEventListener('click', handleClick.bind(null, bookKey));
       }
+    }
+  };
+
+  const docScrollHandler = (event: Event) => {
+    setTimeout(() => {
+      isScrolling.current = false;
+    }, 300);
+    if (isScrolling.current) return;
+    isScrolling.current = true;
+
+    const detail = (event as CustomEvent).detail;
+    if (detail.reason === 'follow-scroll') return;
+    if (!viewRef.current!.renderer.scrolled) return;
+    const parallelViews = getParallels(bookKey);
+    if (parallelViews && parallelViews.size > 0) {
+      parallelViews.forEach((key) => {
+        if (key !== bookKey) {
+          const target = getView(key)?.renderer;
+          if (target && target.scrolled && target.viewSize) {
+            target.scrollTo?.(detail.fraction * target.viewSize, 'follow-scroll', true);
+          }
+        }
+      });
     }
   };
 
@@ -112,6 +143,7 @@ const FoliateViewer: React.FC<{
   useFoliateEvents(viewRef.current, {
     onLoad: docLoadHandler,
     onRelocate: progressRelocateHandler,
+    onRendererRelocate: docScrollHandler,
   });
 
   useEffect(() => {
@@ -132,10 +164,11 @@ const FoliateViewer: React.FC<{
       const view = wrappedFoliateView(document.createElement('foliate-view') as FoliateView);
       document.body.append(view);
       containerRef.current?.appendChild(view);
-      viewRef.current = view;
       setFoliateView(bookKey, view);
 
       await view.open(bookDoc);
+      // make sure we can listen renderer events after opening book
+      viewRef.current = view;
       const viewSettings = getViewSettings(bookKey)!;
       view.renderer.setStyles?.(getStyles(viewSettings, themeCode));
 

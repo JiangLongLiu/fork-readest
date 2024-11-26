@@ -4,28 +4,52 @@ import React from 'react';
 interface MenuItemProps {
   label: string;
   shortcut?: string;
-  icon?: React.ReactNode;
-  onClick?: () => void;
   disabled?: boolean;
+  noIcon?: boolean;
+  icon?: React.ReactNode;
+  children?: React.ReactNode;
+  onClick?: () => void;
 }
 
-const MenuItem: React.FC<MenuItemProps> = ({ label, shortcut, icon, onClick, disabled }) => {
-  return (
+const MenuItem: React.FC<MenuItemProps> = ({
+  label,
+  shortcut,
+  disabled,
+  noIcon = false,
+  icon,
+  children,
+  onClick,
+}) => {
+  const menuButton = (
     <button
       className={clsx(
-        'hover:bg-neutral text-base-content flex w-full items-center justify-between rounded-md p-2',
+        'hover:bg-neutral text-base-content flex h-10 w-full items-center justify-between rounded-md p-2',
         disabled && 'btn-disabled text-gray-400',
       )}
       onClick={onClick}
       disabled={disabled}
     >
       <div className='flex items-center'>
-        {<span style={{ minWidth: '20px' }}>{icon}</span>}
-        <span className='ml-2'>{label}</span>
+        {!noIcon && <span style={{ minWidth: '20px' }}>{icon}</span>}
+        <span className='ml-2 max-w-32 truncate'>{label}</span>
       </div>
       {shortcut && <span className='text-neutral-content text-sm'>{shortcut}</span>}
     </button>
   );
+
+  if (children) {
+    return (
+      <ul className='menu rounded-box m-0 p-0'>
+        <li>
+          <details>
+            <summary className='hover:bg-neutral p-0 pr-3'>{menuButton}</summary>
+            {children}
+          </details>
+        </li>
+      </ul>
+    );
+  }
+  return menuButton;
 };
 
 export default MenuItem;

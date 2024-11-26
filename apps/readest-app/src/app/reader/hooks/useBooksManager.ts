@@ -4,6 +4,7 @@ import { useEnv } from '@/context/EnvContext';
 import { useReaderStore } from '@/store/readerStore';
 import { useSidebarStore } from '@/store/sidebarStore';
 import { uniqueId } from '@/utils/misc';
+import { useParallelViewStore } from '@/store/parallelViewStore';
 
 const useBooksManager = () => {
   const router = useRouter();
@@ -13,6 +14,7 @@ const useBooksManager = () => {
   const { setBookKeys, initViewState } = useReaderStore();
   const { sideBarBookKey, setSideBarBookKey } = useSidebarStore();
   const [shouldUpdateSearchParams, setShouldUpdateSearchParams] = useState(false);
+  const { setParallel } = useParallelViewStore();
 
   useEffect(() => {
     if (shouldUpdateSearchParams) {
@@ -28,13 +30,14 @@ const useBooksManager = () => {
   }, [bookKeys, shouldUpdateSearchParams]);
 
   // Append a new book and sync with bookKeys and URL
-  const appendBook = (id: string, isPrimary: boolean) => {
+  const appendBook = (id: string, isPrimary: boolean, isParallel: boolean) => {
     const newKey = `${id}-${uniqueId()}`;
     initViewState(envConfig, id, newKey, isPrimary);
     if (!bookKeys.includes(newKey)) {
       const updatedKeys = [...bookKeys, newKey];
       setBookKeys(updatedKeys);
     }
+    if (isParallel) setParallel(sideBarBookKey!, newKey);
     setSideBarBookKey(newKey);
     setShouldUpdateSearchParams(true);
   };
@@ -52,9 +55,9 @@ const useBooksManager = () => {
     return bookKeys[nextIndex]!;
   };
 
-  const openParallelView = () => {
+  const openParallelView = (id: string) => {
     const sideBarBookId = sideBarBookKey?.split('-')[0];
-    if (sideBarBookId) appendBook(sideBarBookId, false);
+    appendBook(id, sideBarBookId != id, true);
   };
 
   return {

@@ -2,7 +2,6 @@ export interface ShortcutConfig {
   onSwitchSideBar: string[];
   onToggleSideBar: string[];
   onToggleNotebook: string[];
-  onOpenParallelView: string[];
   onReloadPage: string[];
   onGoLeft: string[];
   onGoRight: string[];
@@ -14,7 +13,6 @@ const DEFAULT_SHORTCUTS: ShortcutConfig = {
   onSwitchSideBar: ['ctrl+Tab', 'opt+Tab', 'alt+Tab'],
   onToggleSideBar: ['s'],
   onToggleNotebook: ['n'],
-  onOpenParallelView: ['shift+p'],
   onReloadPage: ['shift+r'],
   onGoLeft: ['ArrowLeft', 'PageUp', 'h'],
   onGoRight: ['ArrowRight', 'PageDown', 'l'],
