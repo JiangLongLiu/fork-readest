@@ -45,6 +45,7 @@ const AnnotationPopup: React.FC<AnnotationPopupProps> = ({
           {buttons.map((button, index) => (
             <PopupButton
               key={index}
+              showTooltip={!highlightOptionsVisible}
               tooltipText={button.tooltipText}
               Icon={button.Icon}
               onClick={button.onClick}
