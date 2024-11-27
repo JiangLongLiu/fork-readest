@@ -30,7 +30,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { settings } = useSettingsStore();
   const { getConfig, saveConfig, getBookData, updateBooknotes } = useBookDataStore();
   const { getProgress, getView, getViewsById } = useReaderStore();
-  const { notebookNewAnnotation } = useNotebookStore();
+  const { isNotebookPinned, isNotebookVisible } = useNotebookStore();
   const { setNotebookVisible, setNotebookNewAnnotation } = useNotebookStore();
   const globalReadSettings = settings.globalReadSettings;
   const config = getConfig(bookKey)!;
@@ -103,7 +103,6 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     setSelectedStyle(annotation.style!);
     setSelectedColor(annotation.color!);
     setSelection(selection);
-    console.log('show annotation', selection);
   };
 
   useFoliateEvents(view, { onLoad, onDrawAnnotation, onShowAnnotation }, [config]);
@@ -311,7 +310,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   return (
     <div>
       {(showAnnotPopup || showWiktionaryPopup || showWikipediaPopup || showDeepLPopup) &&
-        !notebookNewAnnotation && (
+        (!isNotebookVisible || isNotebookPinned) && (
           <div
             className='fixed inset-0'
             onClick={handleDismissPopupAndSelection}
