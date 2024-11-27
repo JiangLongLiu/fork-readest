@@ -12,12 +12,14 @@ import SearchOptions from './SearchOptions';
 const MINIMUM_SEARCH_TERM_LENGTH = 2;
 
 interface SearchBarProps {
+  isVisible: boolean;
   bookKey: string;
   searchTerm: string;
   onSearchResultChange: (results: BookSearchResult[]) => void;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
+  isVisible,
   bookKey,
   searchTerm: term,
   onSearchResultChange,
@@ -27,6 +29,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const { getConfig, saveConfig } = useBookDataStore();
   const { getView, getProgress } = useReaderStore();
   const [searchTerm, setSearchTerm] = useState(term);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const view = getView(bookKey)!;
   const config = getConfig(bookKey)!;
@@ -47,6 +50,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
     handleSearchTermChange(term);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [term]);
+
+  useEffect(() => {
+    if (isVisible && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isVisible]);
 
   useEffect(() => {
     return () => {
@@ -128,6 +137,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         </div>
 
         <input
+          ref={inputRef}
           type='text'
           value={searchTerm}
           spellCheck={false}

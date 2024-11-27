@@ -124,6 +124,7 @@ const SideBar: React.FC<{
             })}
           >
             <SearchBar
+              isVisible={isSearchBarVisible}
               bookKey={sideBarBookKey!}
               searchTerm={searchTerm}
               onSearchResultChange={setSearchResults}
