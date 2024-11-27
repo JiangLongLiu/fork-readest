@@ -106,7 +106,7 @@ const FoliateViewer: React.FC<{
     isScrolling.current = true;
 
     const detail = (event as CustomEvent).detail;
-    if (detail.reason === 'follow-scroll') return;
+    if (detail.reason !== 'scroll') return;
     if (!viewRef.current!.renderer.scrolled) return;
     const parallelViews = getParallels(bookKey);
     if (parallelViews && parallelViews.size > 0) {
@@ -121,21 +121,35 @@ const FoliateViewer: React.FC<{
     }
   };
 
-  const handleClickTurnPage = (msg: MessageEvent) => {
-    if (msg.data && msg.data.type === 'iframe-single-click' && msg.data.bookKey === bookKey) {
-      const viewElement = containerRef.current;
-      if (viewElement) {
-        const rect = viewElement.getBoundingClientRect();
-        const { screenX } = msg.data;
+  const handleClickTurnPage = (
+    msg: MessageEvent | React.MouseEvent<HTMLDivElement, MouseEvent>,
+  ) => {
+    if (msg instanceof MessageEvent) {
+      if (msg.data && msg.data.type === 'iframe-single-click' && msg.data.bookKey === bookKey) {
+        const viewElement = containerRef.current;
+        if (viewElement) {
+          const rect = viewElement.getBoundingClientRect();
+          const { screenX } = msg.data;
 
-        const eventConsumed = eventDispatcher.dispatchSync('iframe-single-click', { screenX });
-        if (!eventConsumed) {
-          if (screenX >= rect.left + rect.width / 2) {
-            viewRef.current?.goRight();
-          } else if (screenX < rect.left + rect.width / 2) {
-            viewRef.current?.goLeft();
+          const eventConsumed = eventDispatcher.dispatchSync('iframe-single-click', { screenX });
+          if (!eventConsumed) {
+            if (screenX >= rect.left + rect.width / 2) {
+              viewRef.current?.goRight();
+            } else if (screenX < rect.left + rect.width / 2) {
+              viewRef.current?.goLeft();
+            }
           }
         }
+      }
+    } else {
+      const { clientX } = msg;
+      const width = window.innerWidth;
+      const leftThreshold = width * 0.5;
+      const rightThreshold = width * 0.5;
+      if (clientX < leftThreshold) {
+        viewRef.current?.goLeft();
+      } else if (clientX > rightThreshold) {
+        viewRef.current?.goRight();
       }
     }
   };
@@ -178,7 +192,9 @@ const FoliateViewer: React.FC<{
       const animated = viewSettings.animated!;
       const maxColumnCount = viewSettings.maxColumnCount!;
       const maxInlineSize =
-        maxColumnCount === 1 ? ONE_COLUMN_MAX_INLINE_SIZE : viewSettings.maxInlineSize!;
+        maxColumnCount === 1 || isScrolled
+          ? ONE_COLUMN_MAX_INLINE_SIZE
+          : viewSettings.maxInlineSize!;
       const maxBlockSize = viewSettings.maxBlockSize!;
       if (animated) {
         view.renderer.setAttribute('animated', '');
@@ -224,7 +240,13 @@ const FoliateViewer: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewInited]);
 
-  return <div className='foliate-viewer h-[100%] w-[100%]' ref={containerRef} />;
+  return (
+    <div
+      className='foliate-viewer h-[100%] w-[100%]'
+      onClick={(event) => handleClickTurnPage(event)}
+      ref={containerRef}
+    />
+  );
 };
 
 export default FoliateViewer;

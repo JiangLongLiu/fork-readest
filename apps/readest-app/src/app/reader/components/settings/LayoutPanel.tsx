@@ -74,6 +74,9 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       setSettings(settings);
     }
     view?.renderer.setAttribute('gap', `${gapPercent}%`);
+    if (viewSettings.scrolled) {
+      view?.renderer.setAttribute('flow', 'scrolled');
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gapPercent]);
 
@@ -87,7 +90,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     view?.renderer.setAttribute('max-column-count', maxColumnCount);
     view?.renderer.setAttribute(
       'max-inline-size',
-      `${maxColumnCount === 1 ? ONE_COLUMN_MAX_INLINE_SIZE : maxInlineSize}px`,
+      `${maxColumnCount === 1 || viewSettings.scrolled ? ONE_COLUMN_MAX_INLINE_SIZE : maxInlineSize}px`,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maxColumnCount]);
@@ -101,7 +104,7 @@ const LayoutPanel: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     }
     view?.renderer.setAttribute(
       'max-inline-size',
-      `${maxColumnCount === 1 ? ONE_COLUMN_MAX_INLINE_SIZE : maxInlineSize}px`,
+      `${maxColumnCount === 1 || viewSettings.scrolled ? ONE_COLUMN_MAX_INLINE_SIZE : maxInlineSize}px`,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maxInlineSize]);
