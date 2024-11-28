@@ -103,15 +103,17 @@ const BooknoteItem: React.FC<BooknoteItemProps> = ({ bookKey, item, editable = f
           onClick={(e) => e.stopPropagation()}
         >
           <div className='flex justify-end space-x-3'>
-            <button
-              className={clsx(
-                'btn btn-ghost settings-content hover:bg-transparent',
-                'flex h-4 min-h-4 items-end p-0',
-              )}
-              onClick={editNote.bind(null, item)}
-            >
-              <div className='align-bottom text-xs text-blue-400'>Edit</div>
-            </button>
+            {item.note && (
+              <button
+                className={clsx(
+                  'btn btn-ghost settings-content hover:bg-transparent',
+                  'flex h-4 min-h-4 items-end p-0',
+                )}
+                onClick={editNote.bind(null, item)}
+              >
+                <div className='align-bottom text-blue-400'>Edit</div>
+              </button>
+            )}
             <button
               className={clsx(
                 'btn btn-ghost settings-content hover:bg-transparent',
@@ -119,7 +121,7 @@ const BooknoteItem: React.FC<BooknoteItemProps> = ({ bookKey, item, editable = f
               )}
               onClick={deleteNote.bind(null, item)}
             >
-              <div className='align-bottom text-xs text-red-400'>Delete</div>
+              <div className='align-bottom text-red-400'>Delete</div>
             </button>
           </div>
         </div>

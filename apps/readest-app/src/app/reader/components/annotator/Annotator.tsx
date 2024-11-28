@@ -8,6 +8,7 @@ import { RiDeleteBinLine } from 'react-icons/ri';
 import { BsTranslate } from 'react-icons/bs';
 import { SiDeepl } from 'react-icons/si';
 
+import * as CFI from 'foliate-js/epubcfi.js';
 import { Overlayer } from 'foliate-js/overlayer.js';
 import { useEnv } from '@/context/EnvContext';
 import { BookNote, HighlightColor, HighlightStyle } from '@/types/book';
@@ -32,7 +33,6 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { getProgress, getView, getViewsById } = useReaderStore();
   const { isNotebookPinned, isNotebookVisible } = useNotebookStore();
   const { setNotebookVisible, setNotebookNewAnnotation } = useNotebookStore();
-  const globalReadSettings = settings.globalReadSettings;
   const config = getConfig(bookKey)!;
   const progress = getProgress(bookKey)!;
   const bookData = getBookData(bookKey)!;
@@ -52,10 +52,10 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const [highlightOptionsVisible, setHighlightOptionsVisible] = useState(false);
 
   const [selectedStyle, setSelectedStyle] = useState<HighlightStyle>(
-    globalReadSettings.highlightStyle,
+    settings.globalReadSettings.highlightStyle,
   );
   const [selectedColor, setSelectedColor] = useState<HighlightColor>(
-    globalReadSettings.highlightStyles[selectedStyle],
+    settings.globalReadSettings.highlightStyles[selectedStyle],
   );
 
   const dictPopupWidth = 400;
@@ -177,9 +177,29 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     return () => clearTimeout(timer);
   }, [toastMessage]);
 
+  useEffect(() => {
+    if (!progress) return;
+    const { location } = progress;
+    const start = CFI.collapse(location);
+    const end = CFI.collapse(location, true);
+    const { booknotes = [] } = config;
+    const annotations = booknotes.filter(
+      (item) =>
+        item.type === 'annotation' &&
+        item.style &&
+        CFI.compare(item.cfi, start) >= 0 &&
+        CFI.compare(item.cfi, end) <= 0,
+    );
+    try {
+      Promise.all(annotations.map((annotation) => view?.addAnnotation(annotation)));
+    } catch (e) {
+      console.error(e);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progress]);
+
   const handleCopy = () => {
     if (!selection || !selection.text) return;
-    setShowAnnotPopup(false);
     setToastMessage('Copied to notebook');
 
     const { booknotes: annotations = [] } = config;
@@ -209,7 +229,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     if (updatedConfig) {
       saveConfig(envConfig, bookKey, updatedConfig, settings);
     }
-    setHighlightOptionsVisible(false);
+    handleDismissPopupAndSelection();
     setNotebookVisible(true);
   };
 
@@ -220,8 +240,8 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     const { sectionHref: href } = progress;
     const cfi = view?.getCFI(selection.index, selection.range);
     if (!cfi) return;
-    const style = globalReadSettings.highlightStyle;
-    const color = globalReadSettings.highlightStyles[style];
+    const style = settings.globalReadSettings.highlightStyle;
+    const color = settings.globalReadSettings.highlightStyles[style];
     const annotation: BookNote = {
       id: uniqueId(),
       type: 'annotation',

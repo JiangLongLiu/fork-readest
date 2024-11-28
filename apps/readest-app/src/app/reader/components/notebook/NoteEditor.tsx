@@ -73,7 +73,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ onSave, onEdit }) => {
           )}
           onClick={handleSaveNote}
         >
-          <div className='align-bottom text-blue-400'>Save</div>
+          <div className='pr-1 align-bottom text-xs text-blue-400'>Save</div>
         </button>
       </div>
       <div className='flex items-start pt-2'>

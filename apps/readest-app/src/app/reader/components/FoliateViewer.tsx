@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useFoliateEvents } from '../hooks/useFoliateEvents';
 import { BookDoc } from '@/libs/document';
 import { BookConfig, BookNote, BookSearchConfig, BookSearchResult } from '@/types/book';
@@ -72,7 +72,6 @@ const FoliateViewer: React.FC<{
 }> = ({ bookKey, bookDoc, config }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<FoliateView | null>(null);
-  const [viewInited, setViewInited] = useState(false);
   const isViewCreated = useRef(false);
   const isScrolling = useRef(false);
   const { getView, setView: setFoliateView, setProgress, getViewSettings } = useReaderStore();
@@ -214,7 +213,6 @@ const FoliateViewer: React.FC<{
       } else {
         await view.goToFraction(0);
       }
-      setViewInited(true);
 
       window.addEventListener('message', handleClickTurnPage);
     };
@@ -222,23 +220,6 @@ const FoliateViewer: React.FC<{
     openBook();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const initAnnotations = () => {
-    const { booknotes = [] } = config;
-    const annotations = booknotes.filter((item) => item.type === 'annotation' && item.style);
-    try {
-      Promise.all(annotations.map((annotation) => viewRef.current?.addAnnotation(annotation)));
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  useEffect(() => {
-    if (viewInited) {
-      initAnnotations();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewInited]);
 
   return (
     <div

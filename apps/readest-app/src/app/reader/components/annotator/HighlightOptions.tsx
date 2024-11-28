@@ -17,22 +17,27 @@ interface HighlightOptionsProps {
 
 const HighlightOptions: React.FC<HighlightOptionsProps> = ({
   style,
-  selectedStyle,
-  selectedColor,
+  selectedStyle: _selectedStyle,
+  selectedColor: _selectedColor,
   onHandleHighlight,
 }) => {
   const { settings, setSettings } = useSettingsStore();
   const globalReadSettings = settings.globalReadSettings;
+  const [selectedStyle, setSelectedStyle] = React.useState<HighlightStyle>(_selectedStyle);
+  const [selectedColor, setSelectedColor] = React.useState<HighlightColor>(_selectedColor);
 
   const handleSelectStyle = (style: HighlightStyle) => {
     globalReadSettings.highlightStyle = style;
     setSettings(settings);
+    setSelectedStyle(style);
+    setSelectedColor(globalReadSettings.highlightStyles[style]);
     onHandleHighlight(true);
   };
   const handleSelectColor = (color: HighlightColor) => {
     const style = globalReadSettings.highlightStyle;
     globalReadSettings.highlightStyles[style] = color;
     setSettings(settings);
+    setSelectedColor(color);
     onHandleHighlight(true);
   };
   return (
