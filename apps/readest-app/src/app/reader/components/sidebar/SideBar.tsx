@@ -15,6 +15,7 @@ import useSidebar from '../../hooks/useSidebar';
 import useDragBar from '../../hooks/useDragBar';
 import SearchBar from './SearchBar';
 import SearchResults from './SearchResults';
+import useShortcuts from '@/hooks/useShortcuts';
 
 const MIN_SIDEBAR_WIDTH = 0.05;
 const MAX_SIDEBAR_WIDTH = 0.45;
@@ -83,6 +84,8 @@ const SideBar: React.FC<{
       getView(sideBarBookKey)?.clearSearch();
     }
   };
+
+  useShortcuts({ onToggleSearchBar: handleToggleSearchBar }, [sideBarBookKey]);
 
   const handleSearchResultClick = (cfi: string) => {
     getView(sideBarBookKey)?.goTo(cfi);

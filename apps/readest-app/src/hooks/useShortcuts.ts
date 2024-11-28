@@ -22,9 +22,9 @@ const useShortcuts = (actions: KeyActionHandlers, dependencies: React.Dependency
     return {
       ctrlKey: keys.includes('ctrl'),
       altKey: keys.includes('alt') || keys.includes('opt'),
-      metaKey: keys.includes('meta'),
+      metaKey: keys.includes('meta') || keys.includes('cmd'),
       shiftKey: keys.includes('shift'),
-      key: keys.find((k) => !['ctrl', 'alt', 'opt', 'meta', 'shift'].includes(k)),
+      key: keys.find((k) => !['ctrl', 'alt', 'opt', 'meta', 'cmd', 'shift'].includes(k)),
     };
   };
 

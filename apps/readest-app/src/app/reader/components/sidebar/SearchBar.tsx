@@ -58,7 +58,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
   }, [isVisible]);
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && inputRef.current) {
+        inputRef.current.blur();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
+      window.removeEventListener('keydown', handleKeyDown);
       if (searchTimeout.current) {
         clearTimeout(searchTimeout.current);
       }
