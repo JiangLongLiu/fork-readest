@@ -3,6 +3,8 @@ export interface ShortcutConfig {
   onToggleSideBar: string[];
   onToggleNotebook: string[];
   onToggleSearchBar: string[];
+  onToggleScrollMode: string[];
+  onOpenFontLayoutSettings: string[];
   onReloadPage: string[];
   onGoLeft: string[];
   onGoRight: string[];
@@ -15,6 +17,8 @@ const DEFAULT_SHORTCUTS: ShortcutConfig = {
   onToggleSideBar: ['s'],
   onToggleNotebook: ['n'],
   onToggleSearchBar: ['ctrl+f', 'cmd+f'],
+  onToggleScrollMode: ['shift+j'],
+  onOpenFontLayoutSettings: ['shift+f'],
   onReloadPage: ['shift+r'],
   onGoLeft: ['ArrowLeft', 'PageUp', 'h'],
   onGoRight: ['ArrowRight', 'PageDown', 'l'],

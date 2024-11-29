@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BookConfig } from '@/types/book';
 import { useSettingsStore } from '@/store/settingsStore';
 import { RiFontSize } from 'react-icons/ri';
@@ -18,6 +18,20 @@ import MiscPanel from './MiscPanel';
 const SettingsDialog: React.FC<{ bookKey: string; config: BookConfig }> = ({ bookKey }) => {
   const [activePanel, setActivePanel] = useState('Font');
   const { setFontLayoutSettingsDialogOpen } = useSettingsStore();
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      setFontLayoutSettingsDialogOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <dialog className='modal modal-open min-w-90 w-full'>

@@ -1,6 +1,6 @@
 {
   "name": "@readest/readest-app",
-  "version": "0.7.6",
+  "version": "0.7.9",
   "private": true,
   "scripts": {
     "dev": "next dev",
