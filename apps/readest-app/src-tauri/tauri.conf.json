@@ -48,11 +48,16 @@
     },
     "macOS": {
       "minimumSystemVersion": "12.0"
-    }
+    },
+    "createUpdaterArtifacts": true
   },
   "plugins": {
     "fs": {
       "requireLiteralLeadingDot": false
+    },
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNDMDdERDIyMTQ1QzE5NUQKUldSZEdWd1VJdDBIUE50UXVDeHZtUXVyb1lnNUtVUFVKS0Fva2FDRVc0K0NubWpmajlxY2I1bCsK",
+      "endpoints": ["https://github.com/chrox/readest/releases/latest/download/latest.json"]
     }
   }
 }
