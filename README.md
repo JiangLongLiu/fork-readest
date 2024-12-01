@@ -1,16 +1,31 @@
-# Readest
+# Readest 📚
 
-Readest is an open-source ebook reading software designed for immersive and deep reading experiences. It supports EPUB and PDF document formats, and with Tauri v2, Readest is cross-platform, running seamlessly on macOS, Windows, and Linux.
+<div align="center">
+<div align="center">
+  <img src="./data/screenshots/landing_page_preview.png" alt="Readest Banner" width="100%" />
+</div>
+<br/>
+Readest is an open-source ebook reader designed for immersive and deep reading experiences. Built as a modern rewrite of [Foliate](https://github.com/johnfactotum/foliate), it leverages [Next.js](https://github.com/vercel/next.js) and [Tauri v2](https://github.com/tauri-apps/tauri) to offer a seamless cross-platform experience on macOS, Windows, Linux, with support for mobile platforms coming soon.
+</div>
 
 ## Features
 
-- **EPUB and PDF Support**: Enjoy both EPUB and PDF formats, making Readest versatile for all your reading needs.
-- **Cross-Platform Compatibility**: Runs on macOS, Windows, and Linux with Tauri v2.
-- **Immersive Reading Experience**: Supports advanced reading features like note-taking, highlighting, and progress syncing.
-- **Optimized Performance**: Readest is lightweight, ensuring smooth performance even with large files.
+- **EPUB and PDF Support**: Enjoy both EPUB and PDF formats (experimental), making Readest versatile for all your reading needs.
+- **Cross-Platform Compatibility**: Runs on macOS, Windows, Linux and iOS, Android (coming soon) with Tauri v2.
+- **Immersive Reading Experience**: Supports advanced reading features like note-taking, highlighting, full-text search and [Parallel Read](https://readest.com/#parallel-read).
 - **Customizable Interface**: Built with daisyUI for a modern and user-friendly UI.
 
 ## Screenshots
+
+![Annotations](./data/screenshots/annotations.jpeg)
+
+![Wikipedia](./data/screenshots/wikipedia.jpeg)
+
+![DeepL](./data/screenshots/deepl.jpeg)
+
+![Dark Mode](./data/screenshots/dark_mode.jpeg)
+
+---
 
 ## Requirements
 
@@ -76,7 +91,7 @@ Readest is open-source, and contributions are welcome! Feel free to open issues,
 
 ## License
 
-This project is licensed under the AGPL V3 License. See the LICENSE file for details.
+Readest is distributed under the AGPL-3.0 License. See the [LICENSE](<(LICENSE)>) file for details.
 
 ---
 
