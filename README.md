@@ -1,12 +1,21 @@
 # Readest 📚
 
 <div align="center">
-<div align="center">
-  <img src="./data/screenshots/landing_page_preview.png" alt="Readest Banner" width="100%" />
+  <a href="https://readest.com" target="_blank">
+    <img src="./data/screenshots/landing_page_preview.png" alt="Readest Banner" width="100%" />
+    <img src="https://img.shields.io/badge/Visit-Readest.com-orange?style=for-the-badge" alt="Visit Readest" />
+  </a>
 </div>
-<br/>
+
+---
+
 Readest is an open-source ebook reader designed for immersive and deep reading experiences. Built as a modern rewrite of [Foliate](https://github.com/johnfactotum/foliate), it leverages [Next.js](https://github.com/vercel/next.js) and [Tauri v2](https://github.com/tauri-apps/tauri) to offer a seamless cross-platform experience on macOS, Windows, Linux, with support for mobile platforms coming soon.
-</div>
+
+[![Website][badge-website]][link-website]
+[![AGPL Licence][badge-license]](LICENSE)
+[![Latest release][badge-release]][link-gh-releases]
+[![Last commit][badge-last-commit]][link-gh-commits]
+[![Commits][badge-commit-activity]][link-gh-pulse]
 
 ## Features
 
@@ -95,4 +104,14 @@ Readest is distributed under the AGPL-3.0 License. See the [LICENSE](<(LICENSE)>
 
 ---
 
-Happy reading with Readest!
+<div align="center" style="color: gray;">Happy reading with Readest!</div>
+
+[badge-website]: https://img.shields.io/badge/website-readest.com-orange
+[badge-license]: https://img.shields.io/github/license/chrox/readest?color=teal
+[badge-release]: https://img.shields.io/github/release/chrox/readest?color=green
+[badge-last-commit]: https://img.shields.io/github/last-commit/chrox/readest?color=green
+[badge-commit-activity]: https://img.shields.io/github/commit-activity/m/chrox/readest
+[link-website]: https://readest.com
+[link-gh-releases]: https://github.com/chrox/readest/releases
+[link-gh-commits]: https://github.com/chrox/readest/commits/main
+[link-gh-pulse]: https://github.com/chrox/readest/pulse
