@@ -58,8 +58,8 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     settings.globalReadSettings.highlightStyles[selectedStyle],
   );
 
-  const dictPopupWidth = 400;
-  const dictPopupHeight = 300;
+  const dictPopupWidth = 480;
+  const dictPopupHeight = 360;
   const annotPopupWidth = 280;
   const annotPopupHeight = 44;
   const popupPadding = 10;

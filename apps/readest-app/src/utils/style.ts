@@ -75,6 +75,7 @@ const getLayoutStyles = (
       tab-size: 2;
   }
   body {
+    color: ${fg};
     zoom: ${zoomLevel}%; 
     background-color: ${bg} !important;
   }
