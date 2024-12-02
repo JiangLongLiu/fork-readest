@@ -57,6 +57,26 @@ export const handleMouseup = (bookKey: string, event: MouseEvent) => {
   );
 };
 
+export const handleWheel = (bookKey: string, event: WheelEvent) => {
+  window.postMessage(
+    {
+      type: 'iframe-wheel',
+      bookKey,
+      deltaMode: event.deltaMode,
+      deltaX: event.deltaX,
+      deltaY: event.deltaY,
+      deltaZ: event.deltaZ,
+      screenX: event.screenX,
+      screenY: event.screenY,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      offsetX: event.offsetX,
+      offsetY: event.offsetY,
+    },
+    '*',
+  );
+};
+
 export const handleClick = (bookKey: string, event: MouseEvent) => {
   const now = Date.now();
 

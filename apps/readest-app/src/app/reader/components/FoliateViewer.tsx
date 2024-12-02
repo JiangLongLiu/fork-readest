@@ -10,8 +10,9 @@ import { ONE_COLUMN_MAX_INLINE_SIZE } from '@/services/constants';
 import {
   handleKeydown,
   handleMousedown,
-  handleClick,
   handleMouseup,
+  handleClick,
+  handleWheel,
 } from '../utils/iframeEventHandlers';
 import { eventDispatcher } from '@/utils/event';
 
@@ -93,6 +94,7 @@ const FoliateViewer: React.FC<{
         detail.doc.addEventListener('mousedown', handleMousedown.bind(null, bookKey));
         detail.doc.addEventListener('mouseup', handleMouseup.bind(null, bookKey));
         detail.doc.addEventListener('click', handleClick.bind(null, bookKey));
+        detail.doc.addEventListener('wheel', handleWheel.bind(null, bookKey));
       }
     }
   };
@@ -120,23 +122,31 @@ const FoliateViewer: React.FC<{
     }
   };
 
-  const handleClickTurnPage = (
-    msg: MessageEvent | React.MouseEvent<HTMLDivElement, MouseEvent>,
-  ) => {
+  const handleTurnPage = (msg: MessageEvent | React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (msg instanceof MessageEvent) {
-      if (msg.data && msg.data.type === 'iframe-single-click' && msg.data.bookKey === bookKey) {
-        const viewElement = containerRef.current;
-        if (viewElement) {
-          const rect = viewElement.getBoundingClientRect();
-          const { screenX } = msg.data;
+      if (msg.data && msg.data.bookKey === bookKey) {
+        const viewSettings = getViewSettings(bookKey)!;
+        if (msg.data.type === 'iframe-single-click') {
+          const viewElement = containerRef.current;
+          if (viewElement) {
+            const rect = viewElement.getBoundingClientRect();
+            const { screenX } = msg.data;
 
-          const eventConsumed = eventDispatcher.dispatchSync('iframe-single-click', { screenX });
-          if (!eventConsumed) {
-            if (screenX >= rect.left + rect.width / 2) {
-              viewRef.current?.goRight();
-            } else if (screenX < rect.left + rect.width / 2) {
-              viewRef.current?.goLeft();
+            const eventConsumed = eventDispatcher.dispatchSync('iframe-single-click', { screenX });
+            if (!eventConsumed) {
+              if (screenX >= rect.left + rect.width / 2) {
+                viewRef.current?.goRight();
+              } else if (screenX < rect.left + rect.width / 2) {
+                viewRef.current?.goLeft();
+              }
             }
+          }
+        } else if (msg.data.type === 'iframe-wheel' && !viewSettings.scrolled) {
+          const { deltaY } = msg.data;
+          if (deltaY > 0) {
+            viewRef.current?.next(1);
+          } else if (deltaY < 0) {
+            viewRef.current?.prev(1);
           }
         }
       }
@@ -214,7 +224,7 @@ const FoliateViewer: React.FC<{
         await view.goToFraction(0);
       }
 
-      window.addEventListener('message', handleClickTurnPage);
+      window.addEventListener('message', handleTurnPage);
     };
 
     openBook();
@@ -224,7 +234,7 @@ const FoliateViewer: React.FC<{
   return (
     <div
       className='foliate-viewer h-[100%] w-[100%]'
-      onClick={(event) => handleClickTurnPage(event)}
+      onClick={(event) => handleTurnPage(event)}
       ref={containerRef}
     />
   );
