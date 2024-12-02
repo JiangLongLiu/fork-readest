@@ -12,6 +12,24 @@ interface WindowButtonsProps {
   onClose?: () => void;
 }
 
+interface WindowButtonProps {
+  id: string;
+  onClick: () => void;
+  ariaLabel: string;
+  children: React.ReactNode;
+}
+
+const WindowButton: React.FC<WindowButtonProps> = ({ onClick, ariaLabel, id, children }) => (
+  <button
+    id={id}
+    onClick={onClick}
+    className='window-button text-base-content/85 hover:text-base-content'
+    aria-label={ariaLabel}
+  >
+    {children}
+  </button>
+);
+
 const WindowButtons: React.FC<WindowButtonsProps> = ({
   className,
   headerRef,
@@ -27,11 +45,7 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
   const handleMouseDown = async (e: MouseEvent) => {
     const target = e.target as HTMLElement;
 
-    if (target !== e.currentTarget) {
-      return;
-    }
-
-    if (target.closest('#exclude-title-bar-mousedown')) {
+    if (target.closest('.window-button') || target.closest('#exclude-title-bar-mousedown')) {
       return;
     }
 
@@ -83,45 +97,30 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
       )}
     >
       {showMinimize && (
-        <button
-          onClick={handleMinimize}
-          className='window-button text-base-content'
-          aria-label='Minimize'
-          id='titlebar-minimize'
-        >
+        <WindowButton onClick={handleMinimize} ariaLabel='Minimize' id='titlebar-minimize'>
           <svg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 24 24'>
             <path fill='currentColor' d='M20 14H4v-2h16' />
           </svg>
-        </button>
+        </WindowButton>
       )}
 
       {showMaximize && (
-        <button
-          onClick={handleMaximize}
-          className='window-button text-base-content'
-          aria-label='Maximize/Restore'
-          id='titlebar-maximize'
-        >
+        <WindowButton onClick={handleMaximize} ariaLabel='Maximize/Restore' id='titlebar-maximize'>
           <svg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 24 24'>
             <path fill='currentColor' d='M4 4h16v16H4zm2 4v10h12V8z' />
           </svg>
-        </button>
+        </WindowButton>
       )}
 
       {showClose && (
-        <button
-          onClick={handleClose}
-          className='window-button text-base-content'
-          aria-label='Close'
-          id='titlebar-close'
-        >
+        <WindowButton onClick={handleClose} ariaLabel='Close' id='titlebar-close'>
           <svg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 24 24'>
             <path
               fill='currentColor'
               d='M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z'
             />
           </svg>
-        </button>
+        </WindowButton>
       )}
     </div>
   );
