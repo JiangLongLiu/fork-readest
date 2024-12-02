@@ -5,6 +5,7 @@ import { BiMoon, BiSun } from 'react-icons/bi';
 import { TbSunMoon } from 'react-icons/tb';
 import { MdZoomOut, MdZoomIn, MdCheck } from 'react-icons/md';
 
+import { ONE_COLUMN_MAX_INLINE_SIZE } from '@/services/constants';
 import MenuItem from '@/components/MenuItem';
 import { useReaderStore } from '@/store/readerStore';
 import { useTheme, ThemeMode } from '@/hooks/useTheme';
@@ -22,7 +23,7 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
   onSetSettingsDialogOpen,
 }) => {
   const { getView, getViews, getViewSettings, setViewSettings } = useReaderStore();
-  const viewSettings = getViewSettings(bookKey);
+  const viewSettings = getViewSettings(bookKey)!;
 
   const { themeMode, isDarkMode, themeCode, updateThemeMode } = useTheme();
   const [isScrolledMode, setScrolledMode] = useState(viewSettings!.scrolled);
@@ -55,6 +56,11 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
 
   useEffect(() => {
     getView(bookKey)?.renderer.setAttribute('flow', isScrolledMode ? 'scrolled' : 'paginated');
+    getView(bookKey)?.renderer.setAttribute(
+      'max-inline-size',
+      `${viewSettings.maxColumnCount === 1 || isScrolledMode ? ONE_COLUMN_MAX_INLINE_SIZE : viewSettings.maxInlineSize}px`,
+    );
+    getView(bookKey)?.renderer.setStyles?.(getStyles(viewSettings!, themeCode));
     viewSettings!.scrolled = isScrolledMode;
     setViewSettings(bookKey, viewSettings!);
     // eslint-disable-next-line react-hooks/exhaustive-deps
