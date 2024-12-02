@@ -23,7 +23,6 @@ const ReaderPage = () => {
       const appService = await envConfig.getAppService();
       const settings = await appService.loadSettings();
       setSettings(settings);
-      console.log('initializing library in reader');
       setLibrary(await appService.loadLibraryBooks());
     };
 

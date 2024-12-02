@@ -5,6 +5,7 @@ import { useState, useRef } from 'react';
 
 import { useEnv } from '@/context/EnvContext';
 import { useLibraryStore } from '@/store/libraryStore';
+import { useSettingsStore } from '@/store/settingsStore';
 
 import Spinner from '@/components/Spinner';
 import LibraryHeader from '@/app/library/components/LibraryHeader';
@@ -13,6 +14,7 @@ import Bookshelf from '@/app/library/components/Bookshelf';
 const LibraryPage = () => {
   const { envConfig, appService } = useEnv();
   const { library: libraryBooks, setLibrary } = useLibraryStore();
+  const { setSettings } = useSettingsStore();
   const [loading, setLoading] = useState(false);
   const isInitiating = useRef(false);
   const [isSelectMode, setIsSelectMode] = useState(false);
@@ -22,12 +24,17 @@ const LibraryPage = () => {
     isInitiating.current = true;
 
     const loadingTimeout = setTimeout(() => setLoading(true), 200);
-    envConfig.getAppService().then(async (appService) => {
-      console.log('Loading library books...');
+    const initLibrary = async () => {
+      const appService = await envConfig.getAppService();
+      const settings = await appService.loadSettings();
+      setSettings(settings);
       setLibrary(await appService.loadLibraryBooks());
+
       if (loadingTimeout) clearTimeout(loadingTimeout);
       setLoading(false);
-    });
+    };
+
+    initLibrary();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

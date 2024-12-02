@@ -55,6 +55,8 @@ pub fn run() {
             let win_builder = win_builder.decorations(false).transparent(true);
 
             win_builder.build().unwrap();
+            // let win = win_builder.build().unwrap();
+            // win.open_devtools();
 
             #[cfg(target_os = "macos")]
             menu::setup_macos_menu(&app.handle())?;

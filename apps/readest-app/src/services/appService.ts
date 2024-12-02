@@ -210,6 +210,7 @@ export abstract class BaseAppService implements AppService {
   }
 
   async loadLibraryBooks(): Promise<Book[]> {
+    console.log('Loading library books...');
     let books: Book[] = [];
     const libraryFilename = getLibraryFilename();
 
