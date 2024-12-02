@@ -46,7 +46,7 @@ export interface FoliateView extends HTMLElement {
     removeAttribute: (name: string) => void;
     next: () => Promise<void>;
     prev: () => Promise<void>;
-    scrollTo?: (offset: number, reason: string, smooth: boolean) => void;
+    goTo?: (params: { index: number; anchor: number }) => void;
     setStyles?: (css: string) => void;
     addEventListener: (type: string, listener: EventListener) => void;
     removeEventListener: (type: string, listener: EventListener) => void;
@@ -74,7 +74,6 @@ const FoliateViewer: React.FC<{
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<FoliateView | null>(null);
   const isViewCreated = useRef(false);
-  const isScrolling = useRef(false);
   const { getView, setView: setFoliateView, setProgress, getViewSettings } = useReaderStore();
   const { getParallels } = useParallelViewStore();
   const { themeCode } = useTheme();
@@ -85,9 +84,41 @@ const FoliateViewer: React.FC<{
     setProgress(bookKey, detail.cfi, detail.tocItem, detail.section, detail.location, detail.range);
   };
 
+  const handleScrollbarAutoHide = (doc: Document) => {
+    if (doc && doc.defaultView && doc.defaultView.frameElement) {
+      const iframe = doc.defaultView.frameElement as HTMLIFrameElement;
+      const container = iframe.parentElement?.parentElement;
+      if (!container) return;
+
+      let hideScrollbarTimeout: ReturnType<typeof setTimeout>;
+      const showScrollbar = () => {
+        container.style.overflow = 'auto';
+        container.style.scrollbarWidth = 'thin';
+      };
+
+      const hideScrollbar = () => {
+        container.style.overflow = 'hidden';
+        container.style.scrollbarWidth = 'none';
+        requestAnimationFrame(() => {
+          container.style.overflow = 'auto';
+        });
+      };
+      container.addEventListener('scroll', () => {
+        showScrollbar();
+        clearTimeout(hideScrollbarTimeout);
+        hideScrollbarTimeout = setTimeout(hideScrollbar, 1000);
+      });
+      hideScrollbar();
+    }
+  };
+
   const docLoadHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;
     if (detail.doc) {
+      const viewSettings = getViewSettings(bookKey)!;
+      if (viewSettings.scrolled) {
+        handleScrollbarAutoHide(detail.doc);
+      }
       if (!detail.doc.isEventListenersAdded) {
         detail.doc.isEventListenersAdded = true;
         detail.doc.addEventListener('keydown', handleKeydown.bind(null, bookKey));
@@ -99,23 +130,16 @@ const FoliateViewer: React.FC<{
     }
   };
 
-  const docScrollHandler = (event: Event) => {
-    setTimeout(() => {
-      isScrolling.current = false;
-    }, 300);
-    if (isScrolling.current) return;
-    isScrolling.current = true;
-
+  const docRelocateHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;
-    if (detail.reason !== 'scroll') return;
-    if (!viewRef.current!.renderer.scrolled) return;
+    if (detail.reason !== 'scroll' && detail.reason !== 'page') return;
     const parallelViews = getParallels(bookKey);
     if (parallelViews && parallelViews.size > 0) {
       parallelViews.forEach((key) => {
         if (key !== bookKey) {
           const target = getView(key)?.renderer;
-          if (target && target.scrolled && target.viewSize) {
-            target.scrollTo?.(detail.fraction * target.viewSize, 'follow-scroll', true);
+          if (target) {
+            target.goTo?.({ index: detail.index, anchor: detail.fraction });
           }
         }
       });
@@ -166,7 +190,7 @@ const FoliateViewer: React.FC<{
   useFoliateEvents(viewRef.current, {
     onLoad: docLoadHandler,
     onRelocate: progressRelocateHandler,
-    onRendererRelocate: docScrollHandler,
+    onRendererRelocate: docRelocateHandler,
   });
 
   useEffect(() => {
