@@ -69,21 +69,42 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const tauriHandleMinimize = async () => {
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
+    getCurrentWindow().minimize();
+  };
+
+  const tauriHandleToggleMaximize = async () => {
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
+    getCurrentWindow().toggleMaximize();
+  };
+
+  const tauriHandleClose = async () => {
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
+    getCurrentWindow().close();
+  };
+
   const handleMinimize = async () => {
     if (onMinimize) {
       onMinimize();
+    } else {
+      tauriHandleMinimize();
     }
   };
 
   const handleMaximize = async () => {
     if (onToggleMaximize) {
       onToggleMaximize();
+    } else {
+      tauriHandleToggleMaximize();
     }
   };
 
   const handleClose = async () => {
     if (onClose) {
       onClose();
+    } else {
+      tauriHandleClose();
     }
   };
 

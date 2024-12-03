@@ -33,21 +33,6 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
     };
   }, [onToggleSelectMode]);
 
-  const handleMinimize = async () => {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    getCurrentWindow().minimize();
-  };
-
-  const handleToggleMaximize = async () => {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    getCurrentWindow().toggleMaximize();
-  };
-
-  const handleClose = async () => {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    getCurrentWindow().close();
-  };
-
   return (
     <div
       ref={headerRef}
@@ -103,9 +88,6 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
           showMinimize={!isTrafficLightVisible}
           showMaximize={!isTrafficLightVisible}
           showClose={!isTrafficLightVisible}
-          onMinimize={handleMinimize}
-          onToggleMaximize={handleToggleMaximize}
-          onClose={handleClose}
         />
       </div>
     </div>
