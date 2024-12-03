@@ -97,34 +97,35 @@ const LibraryPage = () => {
           onToggleSelectMode={handleToggleSelectMode}
         />
       </div>
-      {(loading || !libraryLoaded.current) && (
+      {loading && (
         <div className='fixed inset-0 z-50 flex items-center justify-center'>
           <Spinner loading />
         </div>
       )}
-      {libraryBooks.length > 0 ? (
-        <div className='mt-12 flex-grow overflow-auto px-2'>
-          <Bookshelf
-            libraryBooks={libraryBooks}
-            isSelectMode={isSelectMode}
-            onImportBooks={handleImportBooks}
-          />
-        </div>
-      ) : (
-        <div className='hero h-screen items-center justify-center'>
-          <div className='hero-content text-neutral-content text-center'>
-            <div className='max-w-md'>
-              <h1 className='mb-5 text-5xl font-bold'>Your Library</h1>
-              <p className='mb-5'>
-                Welcome to your library. You can import your books here and read them anytime.
-              </p>
-              <button className='btn btn-primary rounded-xl' onClick={handleImportBooks}>
-                Import Books
-              </button>
+      {libraryLoaded.current &&
+        (libraryBooks.length > 0 ? (
+          <div className='mt-12 flex-grow overflow-auto px-2'>
+            <Bookshelf
+              libraryBooks={libraryBooks}
+              isSelectMode={isSelectMode}
+              onImportBooks={handleImportBooks}
+            />
+          </div>
+        ) : (
+          <div className='hero h-screen items-center justify-center'>
+            <div className='hero-content text-neutral-content text-center'>
+              <div className='max-w-md'>
+                <h1 className='mb-5 text-5xl font-bold'>Your Library</h1>
+                <p className='mb-5'>
+                  Welcome to your library. You can import your books here and read them anytime.
+                </p>
+                <button className='btn btn-primary rounded-xl' onClick={handleImportBooks}>
+                  Import Books
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        ))}
     </div>
   );
 };
