@@ -17,6 +17,7 @@ const LibraryPage = () => {
   const { setSettings } = useSettingsStore();
   const [loading, setLoading] = useState(false);
   const isInitiating = useRef(false);
+  const libraryLoaded = useRef(false);
   const [isSelectMode, setIsSelectMode] = useState(false);
 
   React.useEffect(() => {
@@ -29,6 +30,7 @@ const LibraryPage = () => {
       const settings = await appService.loadSettings();
       setSettings(settings);
       setLibrary(await appService.loadLibraryBooks());
+      libraryLoaded.current = true;
 
       if (loadingTimeout) clearTimeout(loadingTimeout);
       setLoading(false);
@@ -95,7 +97,7 @@ const LibraryPage = () => {
           onToggleSelectMode={handleToggleSelectMode}
         />
       </div>
-      {loading && (
+      {(loading || !libraryLoaded.current) && (
         <div className='fixed inset-0 z-50 flex items-center justify-center'>
           <Spinner loading />
         </div>
