@@ -6,7 +6,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { EnvProvider } from '@/context/EnvContext';
 import { CSPostHogProvider } from '@/context/PHContext';
 import { useTheme } from '@/hooks/useTheme';
-import { checkForAppUpdates } from '../helpers/updater';
+import { checkForAppUpdates } from '@/helpers/updater';
 
 import '../styles/globals.css';
 import '../styles/fonts.css';

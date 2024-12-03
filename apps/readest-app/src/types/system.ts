@@ -27,7 +27,7 @@ export interface AppService {
 
   loadSettings(): Promise<SystemSettings>;
   saveSettings(settings: SystemSettings): Promise<void>;
-  importBook(file: string | File, books: Book[], overwrite?: boolean): Promise<Book[]>;
+  importBook(file: string | File, books: Book[], overwrite?: boolean): Promise<Book | null>;
   deleteBook(book: Book): Promise<void>;
   loadBookConfig(book: Book, settings: SystemSettings): Promise<BookConfig>;
   saveBookConfig(book: Book, config: BookConfig, settings?: SystemSettings): Promise<void>;

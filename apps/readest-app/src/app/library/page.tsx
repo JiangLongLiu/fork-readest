@@ -2,23 +2,54 @@
 
 import * as React from 'react';
 import { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { useEnv } from '@/context/EnvContext';
 import { useLibraryStore } from '@/store/libraryStore';
 import { useSettingsStore } from '@/store/settingsStore';
 
+import { Book } from '@/types/book';
+import { parseOpenWithFiles } from '@/helpers/cli';
 import Spinner from '@/components/Spinner';
 import LibraryHeader from '@/app/library/components/LibraryHeader';
 import Bookshelf from '@/app/library/components/Bookshelf';
+import { AppService } from '@/types/system';
 
 const LibraryPage = () => {
+  const router = useRouter();
   const { envConfig, appService } = useEnv();
-  const { library: libraryBooks, setLibrary } = useLibraryStore();
+  const {
+    library: libraryBooks,
+    setLibrary,
+    checkOpenWithBooks,
+    clearOpenWithBooks,
+  } = useLibraryStore();
   const { setSettings } = useSettingsStore();
   const [loading, setLoading] = useState(false);
   const isInitiating = useRef(false);
   const libraryLoaded = useRef(false);
   const [isSelectMode, setIsSelectMode] = useState(false);
+
+  const processOpenWithFiles = React.useCallback(
+    async (appService: AppService, openWithFiles: string[], libraryBooks: Book[]) => {
+      const bookIds: string[] = [];
+      for (const file of openWithFiles) {
+        const book = await appService.importBook(file, libraryBooks);
+        if (book) {
+          bookIds.push(book.hash);
+        }
+      }
+      setLibrary(libraryBooks);
+      appService.saveLibraryBooks(libraryBooks);
+
+      console.log('Opening books:', bookIds);
+      if (bookIds.length > 0) {
+        router.push(`/reader?ids=${bookIds.join(',')}`);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   React.useEffect(() => {
     if (isInitiating.current) return;
@@ -29,11 +60,30 @@ const LibraryPage = () => {
       const appService = await envConfig.getAppService();
       const settings = await appService.loadSettings();
       setSettings(settings);
-      setLibrary(await appService.loadLibraryBooks());
+
+      const libraryBooks = await appService.loadLibraryBooks();
+      if (checkOpenWithBooks) {
+        await handleOpenWithBooks(appService, libraryBooks);
+      } else {
+        setLibrary(libraryBooks);
+      }
+
       libraryLoaded.current = true;
 
       if (loadingTimeout) clearTimeout(loadingTimeout);
       setLoading(false);
+    };
+
+    const handleOpenWithBooks = async (appService: AppService, libraryBooks: Book[]) => {
+      const openWithFiles = (await parseOpenWithFiles()) || [];
+
+      if (openWithFiles.length > 0) {
+        await processOpenWithFiles(appService, openWithFiles, libraryBooks);
+      } else {
+        setLibrary(libraryBooks);
+      }
+
+      clearOpenWithBooks();
     };
 
     initLibrary();

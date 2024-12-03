@@ -49,11 +49,80 @@
     "macOS": {
       "minimumSystemVersion": "12.0"
     },
+    "fileAssociations": [
+      {
+        "name": "epub",
+        "ext": ["epub"],
+        "description": "EPUB file",
+        "mimeType": "application/epub+zip",
+        "role": "Viewer"
+      },
+      {
+        "name": "mobi",
+        "ext": ["mobi"],
+        "description": "MOBI file",
+        "mimeType": "application/x-mobipocket-ebook",
+        "role": "Viewer"
+      },
+      {
+        "name": "azw",
+        "ext": ["azw", "azw3"],
+        "description": "AZW file",
+        "mimeType": "application/vnd.amazon.ebook",
+        "role": "Viewer"
+      },
+      {
+        "name": "fb2",
+        "ext": ["fb2"],
+        "description": "FB2 file",
+        "mimeType": "application/x-fictionbook+xml",
+        "role": "Viewer"
+      },
+      {
+        "name": "cbz",
+        "ext": ["cbz"],
+        "description": "CBZ file",
+        "mimeType": "application/vnd.comicbook+zip",
+        "role": "Viewer"
+      },
+      {
+        "name": "pdf",
+        "ext": ["pdf"],
+        "description": "PDF file",
+        "mimeType": "application/pdf",
+        "role": "Viewer"
+      }
+    ],
     "createUpdaterArtifacts": true
   },
   "plugins": {
     "fs": {
       "requireLiteralLeadingDot": false
+    },
+    "cli": {
+      "description": "Readest CLI",
+      "args": [
+        {
+          "name": "file1",
+          "index": 1,
+          "takesValue": true
+        },
+        {
+          "name": "file2",
+          "index": 2,
+          "takesValue": true
+        },
+        {
+          "name": "file3",
+          "index": 3,
+          "takesValue": true
+        },
+        {
+          "name": "file4",
+          "index": 4,
+          "takesValue": true
+        }
+      ]
     },
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU0OTAxMURGQkUzQjFENTQKUldSVUhUdSszeEdRNUExdmFkWnlvYWNYNG5wamkxMmUxRk5SejlMOTJVd28yNXlVTDh6Wld4OC8K",

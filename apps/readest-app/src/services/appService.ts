@@ -93,7 +93,7 @@ export abstract class BaseAppService implements AppService {
     file: string | File,
     books: Book[],
     overwrite: boolean = false,
-  ): Promise<Book[]> {
+  ): Promise<Book | null> {
     try {
       let loadedBook: BookDoc;
       let format: BookFormat;
@@ -156,11 +156,11 @@ export abstract class BaseAppService implements AppService {
         await this.saveBookConfig(book, INIT_BOOK_CONFIG);
         books.splice(0, 0, book);
       }
+      return book;
     } catch (error) {
       throw error;
     }
-
-    return books;
+    return null;
   }
 
   async deleteBook(book: Book): Promise<void> {
