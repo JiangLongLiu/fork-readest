@@ -32,7 +32,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   const headerRef = useRef<HTMLDivElement>(null);
   const { isTrafficLightVisible } = useTrafficLight();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { hoveredBookKey, setHoveredBookKey } = useReaderStore();
+  const { hoveredBookKey, setHoveredBookKey, bookKeys } = useReaderStore();
   const { isSideBarVisible } = useSidebarStore();
 
   const handleToggleDropdown = (isOpen: boolean) => {
@@ -78,8 +78,8 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
         <WindowButtons
           className='window-buttons flex h-full items-center'
           headerRef={headerRef}
-          showMinimize={false}
-          showMaximize={false}
+          showMinimize={bookKeys.length == 1}
+          showMaximize={bookKeys.length == 1}
           onClose={() => onCloseBook(bookKey)}
         />
       </div>
