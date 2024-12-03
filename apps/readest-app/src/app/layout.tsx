@@ -6,6 +6,8 @@ import { AuthProvider } from '@/context/AuthContext';
 import { EnvProvider } from '@/context/EnvContext';
 import { CSPostHogProvider } from '@/context/PHContext';
 import { useTheme } from '@/hooks/useTheme';
+import { checkForAppUpdates } from '../helpers/updater';
+
 import '../styles/globals.css';
 import '../styles/fonts.css';
 
@@ -15,6 +17,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-page', pathname.replace('/', '') || 'default');
   }, [pathname]);
+
+  React.useEffect(() => {
+    const doAppUpdates = async () => {
+      await checkForAppUpdates();
+    };
+    doAppUpdates();
+  }, []);
 
   React.useEffect(() => {
     // TODO: disabled for now

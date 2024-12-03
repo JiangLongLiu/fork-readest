@@ -15,10 +15,12 @@ mod tauri_traffic_light_positioner_plugin;
 use tauri::TitleBarStyle;
 
 use tauri::{WebviewUrl, WebviewWindowBuilder};
+use tauri_plugin_dialog;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_os::init())
