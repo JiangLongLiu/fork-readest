@@ -1,6 +1,8 @@
 import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
 
+import { tauriHandleMinimize, tauriHandleToggleMaximize, tauriHandleClose } from '@/utils/window';
+
 interface WindowButtonsProps {
   className?: string;
   headerRef?: React.RefObject<HTMLDivElement>;
@@ -72,21 +74,6 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const tauriHandleMinimize = async () => {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    getCurrentWindow().minimize();
-  };
-
-  const tauriHandleToggleMaximize = async () => {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    getCurrentWindow().toggleMaximize();
-  };
-
-  const tauriHandleClose = async () => {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    getCurrentWindow().close();
-  };
 
   const handleMinimize = async () => {
     if (onMinimize) {

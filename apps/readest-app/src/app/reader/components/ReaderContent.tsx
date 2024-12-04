@@ -10,6 +10,8 @@ import { useBookDataStore } from '@/store/bookDataStore';
 import { useReaderStore } from '@/store/readerStore';
 import { useSidebarStore } from '@/store/sidebarStore';
 import { SystemSettings } from '@/types/settings';
+import { parseOpenWithFiles } from '@/helpers/cli';
+import { tauriHandleClose } from '@/utils/window';
 import { uniqueId } from '@/utils/misc';
 
 import useBooksManager from '../hooks/useBooksManager';
@@ -80,14 +82,19 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
     saveSettingsAndGoToLibrary();
   };
 
-  const handleCloseBook = (bookKey: string) => {
+  const handleCloseBook = async (bookKey: string) => {
     saveConfigAndCloseBook(bookKey);
     if (sideBarBookKey === bookKey) {
       setSideBarBookKey(getNextBookKey(sideBarBookKey));
     }
     dismissBook(bookKey);
     if (bookKeys.filter((key) => key !== bookKey).length == 0) {
-      saveSettingsAndGoToLibrary();
+      const openWithFiles = (await parseOpenWithFiles()) || [];
+      if (openWithFiles.length > 0) {
+        tauriHandleClose();
+      } else {
+        saveSettingsAndGoToLibrary();
+      }
     }
   };
 
