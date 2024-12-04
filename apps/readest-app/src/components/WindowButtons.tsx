@@ -45,7 +45,11 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
   const handleMouseDown = async (e: MouseEvent) => {
     const target = e.target as HTMLElement;
 
-    if (target.closest('.window-button') || target.closest('#exclude-title-bar-mousedown')) {
+    if (
+      target.closest('.btn') ||
+      target.closest('.window-button') ||
+      target.closest('#exclude-title-bar-mousedown')
+    ) {
       return;
     }
 
