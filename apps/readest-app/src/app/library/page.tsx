@@ -79,13 +79,15 @@ const LibraryPage = () => {
       if (openWithFiles.length > 0) {
         await processOpenWithFiles(appService, openWithFiles, libraryBooks);
       } else {
+        clearOpenWithBooks();
         setLibrary(libraryBooks);
       }
-
-      clearOpenWithBooks();
     };
 
     initLibrary();
+    return () => {
+      clearOpenWithBooks();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -135,6 +137,16 @@ const LibraryPage = () => {
 
   if (!appService) {
     return null;
+  }
+
+  if (checkOpenWithBooks) {
+    return (
+      loading && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center'>
+          <Spinner loading />
+        </div>
+      )
+    );
   }
 
   return (

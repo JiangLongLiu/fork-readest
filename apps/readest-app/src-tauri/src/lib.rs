@@ -15,19 +15,34 @@ mod tauri_traffic_light_positioner_plugin;
 use tauri::TitleBarStyle;
 
 use std::path::PathBuf;
-use tauri::{AppHandle, Emitter, Listener, Manager, Url};
+use tauri::{AppHandle, Emitter, Manager, Url};
 use tauri::{WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_dialog;
 use tauri_plugin_fs::FsExt;
 
-fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
-    let asset_protocol_scope = app.asset_protocol_scope();
-    let fs_scope = app.fs_scope();
-    for file in &files {
-        let _ = fs_scope.allow_file(file);
-        let _ = asset_protocol_scope.allow_file(file);
-    }
+#[cfg(desktop)]
+use tauri::Listener;
 
+#[cfg(desktop)]
+fn allow_file_in_scopes(app: &AppHandle, files: Vec<PathBuf>) {
+    let fs_scope = app.fs_scope();
+    let asset_protocol_scope = app.asset_protocol_scope();
+    for file in &files {
+        if let Err(e) = fs_scope.allow_file(&file) {
+            eprintln!("Failed to allow file in fs_scope: {}", e);
+        } else {
+            println!("Allowed file in fs_scope: {:?}", file);
+        }
+        if let Err(e) = asset_protocol_scope.allow_file(&file) {
+            eprintln!("Failed to allow file in asset_protocol_scope: {}", e);
+        } else {
+            println!("Allowed file in asset_protocol_scope: {:?}", file);
+        }
+    }
+}
+
+#[cfg(desktop)]
+fn set_window_open_with_files(app: &AppHandle, files: Vec<PathBuf>) {
     let files = files
         .into_iter()
         .map(|f| {
@@ -37,7 +52,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
         .collect::<Vec<_>>()
         .join(",");
     let window = app.get_webview_window("main").unwrap();
-    let script = format!("window.TAURI_CLI_ARGS = [{}];", files);
+    let script = format!("window.OPEN_WITH_FILES = [{}];", files);
     if let Err(e) = window.eval(&script) {
         eprintln!("Failed to set open files variable: {}", e);
     }
@@ -73,16 +88,20 @@ pub fn run() {
                     if let Ok(url) = Url::parse(&maybe_file) {
                         if let Ok(path) = url.to_file_path() {
                             files.push(path);
+                        } else {
+                            files.push(PathBuf::from(maybe_file))
                         }
                     } else {
                         files.push(PathBuf::from(maybe_file))
                     }
                 }
-                let asset_protocol_scope = app.asset_protocol_scope();
-                let fs_scope = app.fs_scope();
-                for file in &files {
-                    let _ = fs_scope.allow_file(file);
-                    let _ = asset_protocol_scope.allow_file(file);
+                if !files.is_empty() {
+                    let app_handle = app.handle().clone();
+                    allow_file_in_scopes(&app_handle, files.clone());
+                    app.listen("window-ready", move |_| {
+                        println!("Window is ready, proceeding to handle files.");
+                        set_window_open_with_files(&app_handle, files.clone());
+                    });
                 }
             }
             #[cfg(desktop)]
@@ -122,19 +141,23 @@ pub fn run() {
         })
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
-        .run(|app, event| {
-            #[cfg(any(target_os = "macos", target_os = "ios"))]
-            if let tauri::RunEvent::Opened { urls } = event {
-                let files = urls
-                    .into_iter()
-                    .filter_map(|url| url.to_file_path().ok())
-                    .collect::<Vec<_>>();
+        .run(
+            #[allow(unused_variables)]
+            |app_handle, event| {
+                #[cfg(any(target_os = "macos", target_os = "ios"))]
+                if let tauri::RunEvent::Opened { urls } = event {
+                    let files = urls
+                        .into_iter()
+                        .filter_map(|url| url.to_file_path().ok())
+                        .collect::<Vec<_>>();
 
-                let app_handle = app.clone();
-                app.listen("window-ready", move |_| {
-                    println!("Window is ready, proceeding to handle files.");
-                    handle_file_associations(app_handle.clone(), files.clone());
-                });
-            }
-        });
+                    let app_handler_clone = app_handle.clone();
+                    allow_file_in_scopes(&app_handle, files.clone());
+                    app_handle.listen("window-ready", move |_| {
+                        println!("Window is ready, proceeding to handle files.");
+                        set_window_open_with_files(&app_handler_clone, files.clone());
+                    });
+                }
+            },
+        );
 }

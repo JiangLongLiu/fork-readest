@@ -2,7 +2,7 @@ import { getMatches } from '@tauri-apps/plugin-cli';
 
 declare global {
   interface Window {
-    TAURI_CLI_ARGS?: string[];
+    OPEN_WITH_FILES?: string[];
   }
 }
 
@@ -11,11 +11,11 @@ interface CliArgument {
   occurrences: number;
 }
 
-const parseGlobalArgs = () => {
-  return window.TAURI_CLI_ARGS;
+const parseWindowOpenWithFiles = () => {
+  return window.OPEN_WITH_FILES;
 };
 
-const parseCLIArgs = async () => {
+const parseCLIOpenWithFiles = async () => {
   const matches = await getMatches();
   const args = matches?.args;
   const files: string[] = [];
@@ -32,9 +32,9 @@ const parseCLIArgs = async () => {
 };
 
 export const parseOpenWithFiles = async () => {
-  let files = parseGlobalArgs();
+  let files = parseWindowOpenWithFiles();
   if (!files) {
-    files = await parseCLIArgs();
+    files = await parseCLIOpenWithFiles();
   }
   return files;
 };
