@@ -86,7 +86,6 @@ const ViewMenu: React.FC<ViewMenuProps> = ({
 
   return (
     <div
-      id='exclude-title-bar-mousedown'
       tabIndex={0}
       className='view-menu dropdown-content dropdown-right no-triangle border-base-100 z-20 mt-1 w-72 border shadow-2xl'
     >

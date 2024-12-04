@@ -27,7 +27,7 @@ const LibraryPage = () => {
   const { setSettings } = useSettingsStore();
   const [loading, setLoading] = useState(false);
   const isInitiating = useRef(false);
-  const libraryLoaded = useRef(false);
+  const [libraryLoaded, setLibraryLoaded] = useState(false);
   const [isSelectMode, setIsSelectMode] = useState(false);
 
   const processOpenWithFiles = React.useCallback(
@@ -68,8 +68,7 @@ const LibraryPage = () => {
         setLibrary(libraryBooks);
       }
 
-      libraryLoaded.current = true;
-
+      setLibraryLoaded(true);
       if (loadingTimeout) clearTimeout(loadingTimeout);
       setLoading(false);
     };
@@ -152,7 +151,7 @@ const LibraryPage = () => {
           <Spinner loading />
         </div>
       )}
-      {libraryLoaded.current &&
+      {libraryLoaded &&
         (libraryBooks.length > 0 ? (
           <div className='mt-12 flex-grow overflow-auto px-2'>
             <Bookshelf
