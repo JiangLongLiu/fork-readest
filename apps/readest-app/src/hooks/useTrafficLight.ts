@@ -30,7 +30,10 @@ const useTrafficLight = () => {
   };
 
   useEffect(() => {
+    if (!appService?.hasTrafficLight) return;
+
     handleSwitchFullScreen();
+
     return () => {
       unlistenEnterFullScreen?.();
       unlistenExitFullScreen?.();

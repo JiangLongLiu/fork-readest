@@ -1,11 +1,13 @@
 import { SystemSettings } from './settings';
 import { Book, BookConfig, BookContent } from './book';
 
+export type AppPlatform = 'web' | 'tauri';
 export type BaseDir = 'Books' | 'Settings' | 'Data' | 'Log' | 'Cache' | 'None';
 export type ToastType = 'info' | 'warning' | 'error';
 
 export interface FileSystem {
   getURL(path: string): string;
+  getBlobURL(path: string, base: BaseDir): Promise<string>;
   copyFile(srcPath: string, dstPath: string, base: BaseDir): Promise<void>;
   readFile(path: string, base: BaseDir, mode: 'text' | 'binary'): Promise<string | ArrayBuffer>;
   writeFile(path: string, base: BaseDir, content: string | ArrayBuffer): Promise<void>;
@@ -18,10 +20,10 @@ export interface FileSystem {
 
 export interface AppService {
   fs: FileSystem;
+  appPlatform: AppPlatform;
   hasTrafficLight: boolean;
   isAppDataSandbox: boolean;
 
-  selectDirectory(title: string): Promise<string>;
   selectFiles(name: string, extensions: string[]): Promise<string[]>;
   showMessage(msg: string, kind?: ToastType, title?: string, okLabel?: string): Promise<void>;
 
@@ -35,4 +37,5 @@ export interface AppService {
   loadLibraryBooks(): Promise<Book[]>;
   saveLibraryBooks(books: Book[]): Promise<void>;
   getCoverImageUrl(book: Book): string;
+  getCoverImageBlobUrl(book: Book): Promise<string>;
 }

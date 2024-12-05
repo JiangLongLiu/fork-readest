@@ -1,4 +1,4 @@
-import { AppService, ToastType } from '@/types/system';
+import { AppPlatform, AppService, ToastType } from '@/types/system';
 
 import { SystemSettings } from '@/types/settings';
 import { FileSystem, BaseDir } from '@/types/system';
@@ -26,14 +26,15 @@ import {
 
 export abstract class BaseAppService implements AppService {
   localBooksDir: string = '';
+  abstract fs: FileSystem;
+  abstract appPlatform: AppPlatform;
   abstract isAppDataSandbox: boolean;
   abstract hasTrafficLight: boolean;
-  abstract fs: FileSystem;
 
   abstract resolvePath(fp: string, base: BaseDir): { baseDir: number; base: BaseDir; fp: string };
   abstract getCoverImageUrl(book: Book): string;
+  abstract getCoverImageBlobUrl(book: Book): Promise<string>;
   abstract getInitBooksDir(): Promise<string>;
-  abstract selectDirectory(title: string): Promise<string>;
   abstract selectFiles(name: string, extensions: string[]): Promise<string[]>;
   abstract showMessage(
     msg: string,
@@ -133,8 +134,6 @@ export abstract class BaseAppService implements AppService {
         author: loadedBook.metadata.author,
         lastUpdated: Date.now(),
       };
-      book.coverImageUrl = this.getCoverImageUrl(book);
-
       if (!(await this.fs.exists(getDir(book), 'Books'))) {
         await this.fs.createDir(getDir(book), 'Books');
       }
@@ -156,6 +155,13 @@ export abstract class BaseAppService implements AppService {
         await this.saveBookConfig(book, INIT_BOOK_CONFIG);
         books.splice(0, 0, book);
       }
+
+      if (this.appPlatform === 'web') {
+        book.coverImageUrl = await this.getCoverImageBlobUrl(book);
+      } else {
+        book.coverImageUrl = this.getCoverImageUrl(book);
+      }
+
       return book;
     } catch (error) {
       throw error;
@@ -173,7 +179,13 @@ export abstract class BaseAppService implements AppService {
 
   async loadBookContent(book: Book, settings: SystemSettings): Promise<BookContent> {
     const fp = getFilename(book);
-    const file = await new RemoteFile(this.fs.getURL(`${this.localBooksDir}/${fp}`), fp).open();
+    let file: File;
+    if (this.appPlatform === 'web') {
+      const content = await this.fs.readFile(fp, 'Books', 'binary');
+      file = new File([content], fp);
+    } else {
+      file = await new RemoteFile(this.fs.getURL(`${this.localBooksDir}/${fp}`), fp).open();
+    }
     return { book, file, config: await this.loadBookConfig(book, settings) };
   }
 
@@ -222,9 +234,16 @@ export abstract class BaseAppService implements AppService {
       await this.fs.writeFile(libraryFilename, 'Books', '[]');
     }
 
-    books.forEach((book) => {
-      book.coverImageUrl = this.getCoverImageUrl(book);
-    });
+    await Promise.all(
+      books.map(async (book) => {
+        if (this.appPlatform === 'web') {
+          book.coverImageUrl = await this.getCoverImageBlobUrl(book);
+        } else {
+          book.coverImageUrl = this.getCoverImageUrl(book);
+        }
+        return book;
+      }),
+    );
 
     return books;
   }

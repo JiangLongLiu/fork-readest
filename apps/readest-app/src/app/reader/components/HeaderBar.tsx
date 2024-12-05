@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import React, { useRef, useState } from 'react';
 import { PiDotsThreeVerticalBold } from 'react-icons/pi';
 
+import { useEnv } from '@/context/EnvContext';
 import { useReaderStore } from '@/store/readerStore';
 import { useSidebarStore } from '@/store/sidebarStore';
 import useTrafficLight from '@/hooks/useTrafficLight';
@@ -29,6 +30,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   onCloseBook,
   onSetSettingsDialogOpen,
 }) => {
+  const { appService } = useEnv();
   const headerRef = useRef<HTMLDivElement>(null);
   const { isTrafficLightVisible } = useTrafficLight();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -78,8 +80,8 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
         <WindowButtons
           className='window-buttons flex h-full items-center'
           headerRef={headerRef}
-          showMinimize={bookKeys.length == 1}
-          showMaximize={bookKeys.length == 1}
+          showMinimize={bookKeys.length == 1 && appService?.appPlatform !== 'web'}
+          showMaximize={bookKeys.length == 1 && appService?.appPlatform !== 'web'}
           onClose={() => onCloseBook(bookKey)}
         />
       </div>

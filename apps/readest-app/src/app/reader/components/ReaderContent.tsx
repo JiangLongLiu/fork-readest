@@ -101,7 +101,7 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
   if (!bookKeys || bookKeys.length === 0) return null;
   const bookData = getBookData(bookKeys[0]!);
   if (!bookData || !bookData.book || !bookData.bookDoc) {
-    setTimeout(() => setLoading(true), 200);
+    setTimeout(() => setLoading(true), 300);
     return (
       loading && (
         <div className={'hero hero-content min-h-screen'}>

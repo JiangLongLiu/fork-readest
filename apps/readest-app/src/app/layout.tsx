@@ -6,6 +6,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { EnvProvider } from '@/context/EnvContext';
 import { CSPostHogProvider } from '@/context/PHContext';
 import { useTheme } from '@/hooks/useTheme';
+import { isTauriAppPlatform } from '@/services/environment';
 import { checkForAppUpdates } from '@/helpers/updater';
 
 import '../styles/globals.css';
@@ -20,7 +21,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   React.useEffect(() => {
     const doAppUpdates = async () => {
-      await checkForAppUpdates();
+      if (isTauriAppPlatform()) {
+        await checkForAppUpdates();
+      }
     };
     doAppUpdates();
   }, []);

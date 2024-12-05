@@ -4,6 +4,7 @@ import { FaSearch } from 'react-icons/fa';
 import { PiPlus } from 'react-icons/pi';
 import { PiSelectionAllDuotone } from 'react-icons/pi';
 
+import { useEnv } from '@/context/EnvContext';
 import useTrafficLight from '@/hooks/useTrafficLight';
 import WindowButtons from '@/components/WindowButtons';
 
@@ -18,6 +19,7 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
   onImportBooks,
   onToggleSelectMode,
 }) => {
+  const { appService } = useEnv();
   const { isTrafficLightVisible } = useTrafficLight();
   const headerRef = useRef<HTMLDivElement>(null);
 
@@ -85,9 +87,9 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
         </div>
         <WindowButtons
           headerRef={headerRef}
-          showMinimize={!isTrafficLightVisible}
-          showMaximize={!isTrafficLightVisible}
-          showClose={!isTrafficLightVisible}
+          showMinimize={!isTrafficLightVisible && appService?.appPlatform !== 'web'}
+          showMaximize={!isTrafficLightVisible && appService?.appPlatform !== 'web'}
+          showClose={!isTrafficLightVisible && appService?.appPlatform !== 'web'}
         />
       </div>
     </div>

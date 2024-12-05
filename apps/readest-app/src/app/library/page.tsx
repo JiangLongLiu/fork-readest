@@ -4,16 +4,19 @@ import * as React from 'react';
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { Book } from '@/types/book';
+import { AppService } from '@/types/system';
+import { parseOpenWithFiles } from '@/helpers/cli';
+import { isTauriAppPlatform } from '@/services/environment';
+import { FILE_ACCEPT_FORMATS, SUPPORTED_FILE_EXTS } from '@/services/constants';
+
 import { useEnv } from '@/context/EnvContext';
 import { useLibraryStore } from '@/store/libraryStore';
 import { useSettingsStore } from '@/store/settingsStore';
 
-import { Book } from '@/types/book';
-import { parseOpenWithFiles } from '@/helpers/cli';
 import Spinner from '@/components/Spinner';
 import LibraryHeader from '@/app/library/components/LibraryHeader';
 import Bookshelf from '@/app/library/components/Bookshelf';
-import { AppService } from '@/types/system';
 
 const LibraryPage = () => {
   const router = useRouter();
@@ -55,16 +58,17 @@ const LibraryPage = () => {
     if (isInitiating.current) return;
     isInitiating.current = true;
 
-    const loadingTimeout = setTimeout(() => setLoading(true), 200);
+    const loadingTimeout = setTimeout(() => setLoading(true), 300);
     const initLibrary = async () => {
       const appService = await envConfig.getAppService();
       const settings = await appService.loadSettings();
       setSettings(settings);
 
       const libraryBooks = await appService.loadLibraryBooks();
-      if (checkOpenWithBooks) {
+      if (checkOpenWithBooks && isTauriAppPlatform()) {
         await handleOpenWithBooks(appService, libraryBooks);
       } else {
+        clearOpenWithBooks();
         setLibrary(libraryBooks);
       }
 
@@ -102,14 +106,14 @@ const LibraryPage = () => {
   };
 
   const selectFilesTauri = async () => {
-    return appService?.selectFiles('Select Books', ['epub', 'pdf']);
+    return appService?.selectFiles('Select Books', SUPPORTED_FILE_EXTS);
   };
 
   const selectFilesWeb = () => {
     return new Promise((resolve) => {
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
-      fileInput.accept = '.epub, .pdf';
+      fileInput.accept = FILE_ACCEPT_FORMATS;
       fileInput.multiple = true;
       fileInput.click();
 
@@ -121,12 +125,17 @@ const LibraryPage = () => {
 
   const handleImportBooks = async () => {
     console.log('Importing books...');
-    const { type } = await import('@tauri-apps/plugin-os');
     let files;
-    if (['android', 'ios'].includes(type())) {
-      files = (await selectFilesWeb()) as [File];
+
+    if (isTauriAppPlatform()) {
+      const { type } = await import('@tauri-apps/plugin-os');
+      if (['android', 'ios'].includes(type())) {
+        files = (await selectFilesWeb()) as [File];
+      } else {
+        files = (await selectFilesTauri()) as [string];
+      }
     } else {
-      files = (await selectFilesTauri()) as [string];
+      files = (await selectFilesWeb()) as [File];
     }
     importBooks(files);
   };

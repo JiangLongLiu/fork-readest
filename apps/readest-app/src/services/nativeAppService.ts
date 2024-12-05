@@ -16,7 +16,7 @@ import { join, appDataDir } from '@tauri-apps/api/path';
 import { type as osType } from '@tauri-apps/plugin-os';
 
 import { Book } from '@/types/book';
-import { ToastType, FileSystem, BaseDir } from '@/types/system';
+import { ToastType, FileSystem, BaseDir, AppPlatform } from '@/types/system';
 import { getCoverFilename } from '@/utils/book';
 
 import { BaseAppService } from './appService';
@@ -24,10 +24,7 @@ import { LOCAL_BOOKS_SUBDIR } from './constants';
 
 export const isMobile = ['android', 'ios'].includes(osType());
 
-export const resolvePath = (
-  fp: string,
-  base: BaseDir,
-): { baseDir: number; base: BaseDir; fp: string } => {
+const resolvePath = (fp: string, base: BaseDir): { baseDir: number; base: BaseDir; fp: string } => {
   switch (base) {
     case 'Settings':
       return { baseDir: BaseDirectory.AppConfig, fp, base };
@@ -55,6 +52,10 @@ export const resolvePath = (
 export const nativeFileSystem: FileSystem = {
   getURL(path: string) {
     return convertFileSrc(path);
+  },
+  async getBlobURL(path: string, base: BaseDir) {
+    const content = await this.readFile(path, base, 'binary');
+    return URL.createObjectURL(new Blob([content]));
   },
   async copyFile(srcPath: string, dstPath: string, base: BaseDir) {
     const { fp, baseDir } = resolvePath(dstPath, base);
@@ -114,6 +115,7 @@ export const nativeFileSystem: FileSystem = {
 
 export class NativeAppService extends BaseAppService {
   fs = nativeFileSystem;
+  appPlatform = 'tauri' as AppPlatform;
   isAppDataSandbox = isMobile;
   hasTrafficLight = osType() === 'macos';
 
@@ -123,14 +125,6 @@ export class NativeAppService extends BaseAppService {
 
   async getInitBooksDir(): Promise<string> {
     return join(await appDataDir(), LOCAL_BOOKS_SUBDIR);
-  }
-
-  async selectDirectory(title: string): Promise<string> {
-    const selected = await open({
-      title,
-      directory: true,
-    });
-    return selected as string;
   }
 
   async selectFiles(name: string, extensions: string[]): Promise<string[]> {
@@ -152,5 +146,9 @@ export class NativeAppService extends BaseAppService {
 
   getCoverImageUrl = (book: Book): string => {
     return this.fs.getURL(`${this.localBooksDir}/${getCoverFilename(book)}`);
+  };
+
+  getCoverImageBlobUrl = async (book: Book): Promise<string> => {
+    return this.fs.getBlobURL(`${this.localBooksDir}/${getCoverFilename(book)}`, 'None');
   };
 }

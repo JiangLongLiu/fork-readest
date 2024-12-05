@@ -61,6 +61,10 @@ const DeepLPopup: React.FC<DeepLPopupProps> = ({
       setError(null);
       setTranslation(null);
 
+      if (!process.env['NEXT_PUBLIC_DEEPL_API_KEY']) {
+        console.error('DeepL API key not found. Set NEXT_PUBLIC_DEEPL_API_KEY in .env.local');
+      }
+
       try {
         const response = await fetch('https://api-free.deepl.com/v2/translate', {
           method: 'POST',
