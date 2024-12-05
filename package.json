@@ -1,6 +1,7 @@
 {
   "name": "@readest/monorepo",
   "private": true,
+  "repository": "chrox/readest",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "tauri": "pnpm --filter @readest/readest-app tauri"

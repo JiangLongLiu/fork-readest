@@ -1,28 +1,68 @@
-# Readest 📚
-
 <div align="center">
   <a href="https://readest.com" target="_blank">
-    <img src="./data/screenshots/landing_page_preview.png" alt="Readest Banner" width="100%" />
-    <img src="https://img.shields.io/badge/Visit-Readest.com-orange?style=for-the-badge" alt="Visit Readest" />
+    <img src="https://github.com/chrox/readest/blob/main/apps/readest-app/src-tauri/icons/icon.png?raw=true" alt="Readest Logo" width="20%" />
   </a>
-</div>
+  <h1>Readest</h1>
+  <br>
 
----
-
-Readest is an open-source ebook reader designed for immersive and deep reading experiences. Built as a modern rewrite of [Foliate](https://github.com/johnfactotum/foliate), it leverages [Next.js](https://github.com/vercel/next.js) and [Tauri v2](https://github.com/tauri-apps/tauri) to offer a seamless cross-platform experience on macOS, Windows, Linux, with support for mobile platforms coming soon.
+Readest is an open-source ebook reader designed for immersive and deep reading experiences. Built as a modern rewrite of [Foliate](https://github.com/johnfactotum/foliate), it leverages [Next.js](https://github.com/vercel/next.js) and [Tauri v2](https://github.com/tauri-apps/tauri) to offer a seamless cross-platform experience on macOS, Windows, Linux, with support for Web and mobile platforms coming soon.
 
 [![Website][badge-website]][link-website]
 [![AGPL Licence][badge-license]](LICENSE)
+[![OS][badge-platforms]][link-website]
+[![][badge-discord]][link-discord]
+<br>
 [![Latest release][badge-release]][link-gh-releases]
 [![Last commit][badge-last-commit]][link-gh-commits]
 [![Commits][badge-commit-activity]][link-gh-pulse]
 
+</div>
+
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#planned-features">Planned Features</a> •
+  <a href="#screenshots">Screenshots</a> •
+  <a href="#getting-started">Getting Started</a> •
+  <a href="#contributing">Contributing</a> •
+  <a href="#contributors">Contributors</a> •
+  <a href="#license">License</a>
+</p>
+
+<div align="center">
+  <a href="https://readest.com" target="_blank">
+    <img src="./data/screenshots/landing_page_preview.png" alt="Readest Banner" width="100%" />
+  </a>
+</div>
+
 ## Features
 
-- **EPUB and PDF Support**: Enjoy both EPUB and PDF formats (experimental), making Readest versatile for all your reading needs.
-- **Cross-Platform Compatibility**: Runs on macOS, Windows, Linux and iOS, Android (coming soon) with Tauri v2.
-- **Immersive Reading Experience**: Supports advanced reading features like note-taking, highlighting, full-text search and [Parallel Read](https://readest.com/#parallel-read).
-- **Customizable Interface**: Built with daisyUI for a modern and user-friendly UI.
+| **Feature**                             | **Description**                                                                          | **Status**     |
+| --------------------------------------- | ---------------------------------------------------------------------------------------- | -------------- |
+| **Multi-Format Support**                | Supports EPUB, MOBI, KF8 (AZW3), FB2, CBZ, PDF (experimental)                            | ✅ Implemented |
+| **Scroll/Page View Modes**              | Switch between scrolling or paginated reading modes.                                     | ✅ Implemented |
+| **Full-Text Search**                    | Search across the entire book to find relevant sections instantly.                       | ✅ Implemented |
+| **Annotations and Highlighting**        | Add highlights, bookmarks, and notes to enhance your reading experience.                 | ✅ Implemented |
+| **Excerpt Text for Note-Taking**        | Easily excerpt text from books for detailed notes and analysis.                          | ✅ Implemented |
+| **Dictionary/Wikipedia Lookup**         | Instantly look up words and terms when reading.                                          | ✅ Implemented |
+| **Translate with DeepL**                | Translate selected text instantly using DeepL for accurate translations.                 | ✅ Implemented |
+| **[Parallel Read][link-parallel-read]** | Read two books or documents simultaneously in a split-screen view.                       | ✅ Implemented |
+| **Customize Font and Layout**           | Adjust font, layout, theme mode, and theme colors for a personalized reading experience. | ✅ Implemented |
+| **File Association and Open With**      | Quickly open files in Readest in your file browser with one-click.                       | ✅ Implemented |
+
+## Planned Features
+
+| **Feature**                        | **Description**                                                                    | **Priority** |
+| ---------------------------------- | ---------------------------------------------------------------------------------- | ------------ |
+| **Support Web, iOS, and Android**  | Expand the app to work on web browsers, iOS, and Android devices.                  | 🔄 Planned   |
+| **Sync Progress Across Platforms** | Synchronize reading progress, notes, and bookmarks across all supported platforms. | 🔄 Planned   |
+| **OPDS Support**                   | Integrate OPDS to access online libraries and catalogs.                            | 🔄 Planned   |
+| **Text-to-Speech (TTS) Support**   | Enable text-to-speech functionality for a more accessible reading experience.      | 🔄 Planned   |
+| **Audiobook Support**              | Extend functionality to play and manage audiobooks.                                | 🔄 Planned   |
+| **Annotation with Pen on Pad**     | Add support for handwriting annotations using a pen on compatible devices.         | 🔄 Planned   |
+| **Advanced Reading Stats**         | Track reading time, pages read, and more for detailed insights.                    | 🔄 Planned   |
+| **AI-Powered Summarization**       | Generate smart summaries of books or chapters using AI for quick insights.         | 🔄 Planned   |
+
+Stay tuned for continuous improvements and updates! Contributions and suggestions are always welcome—let's build the ultimate reading experience together. 😊
 
 ## Screenshots
 
@@ -98,6 +138,18 @@ pnpm tauri build
 
 Readest is open-source, and contributions are welcome! Feel free to open issues, suggest features, or submit pull requests. Please review our contributing guidelines before you start.
 
+## Contributors
+
+<!---
+npx contributor-faces --exclude "*bot*" --limit 100"
+--->
+
+[//]: contributor-faces
+
+<a href="https://github.com/chrox"><img src="https://avatars.githubusercontent.com/u/751535?v=4" title="chrox" width="50" height="50"></a>
+
+[//]: contributor-faces
+
 ## License
 
 Readest is distributed under the AGPL-3.0 License. See the [LICENSE](<(LICENSE)>) file for details.
@@ -109,9 +161,13 @@ Readest is distributed under the AGPL-3.0 License. See the [LICENSE](<(LICENSE)>
 [badge-website]: https://img.shields.io/badge/website-readest.com-orange
 [badge-license]: https://img.shields.io/github/license/chrox/readest?color=teal
 [badge-release]: https://img.shields.io/github/release/chrox/readest?color=green
+[badge-platforms]: https://img.shields.io/badge/OS-macOS%2C%20Windows%2C%20Linux-green
 [badge-last-commit]: https://img.shields.io/github/last-commit/chrox/readest?color=green
 [badge-commit-activity]: https://img.shields.io/github/commit-activity/m/chrox/readest
+[badge-discord]: https://img.shields.io/discord/1314226120886976544?color=5865F2&label=discord&labelColor=black&logo=discord&logoColor=white&style=flat-square
 [link-website]: https://readest.com
 [link-gh-releases]: https://github.com/chrox/readest/releases
 [link-gh-commits]: https://github.com/chrox/readest/commits/main
 [link-gh-pulse]: https://github.com/chrox/readest/pulse
+[link-discord]: https://discord.gg/jb2nzDts
+[link-parallel-read]: https://readest.com/#parallel-read
