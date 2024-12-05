@@ -22,3 +22,15 @@ export const makeSafeFilename = (filename: string, replacement = '_') => {
 
   return safeName.trim();
 };
+
+export const getOSPlatform = () => {
+  const userAgent = navigator.userAgent.toLowerCase();
+
+  if (userAgent.includes('macintosh') || userAgent.includes('mac os x')) return 'macos';
+  if (userAgent.includes('windows nt')) return 'windows';
+  if (userAgent.includes('linux')) return 'linux';
+  if (/iphone|ipad|ipod/.test(userAgent)) return 'ios';
+  if (userAgent.includes('android')) return 'android';
+
+  return '';
+};

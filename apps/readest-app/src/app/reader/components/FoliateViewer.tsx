@@ -4,6 +4,7 @@ import { BookDoc } from '@/libs/document';
 import { BookConfig, BookNote, BookSearchConfig, BookSearchResult } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
 import { useParallelViewStore } from '@/store/parallelViewStore';
+import { getOSPlatform } from '@/utils/misc';
 import { getStyles } from '@/utils/style';
 import { useTheme } from '@/hooks/useTheme';
 import { ONE_COLUMN_MAX_INLINE_SIZE } from '@/services/constants';
@@ -78,6 +79,8 @@ const FoliateViewer: React.FC<{
   const { getParallels } = useParallelViewStore();
   const { themeCode } = useTheme();
 
+  const shouldAutoHideScrollbar = ['macos', 'ios'].includes(getOSPlatform());
+
   const progressRelocateHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;
     // console.log('relocate:', detail);
@@ -116,7 +119,7 @@ const FoliateViewer: React.FC<{
     const detail = (event as CustomEvent).detail;
     if (detail.doc) {
       const viewSettings = getViewSettings(bookKey)!;
-      if (viewSettings.scrolled) {
+      if (viewSettings.scrolled && shouldAutoHideScrollbar) {
         handleScrollbarAutoHide(detail.doc);
       }
       if (!detail.doc.isEventListenersAdded) {
