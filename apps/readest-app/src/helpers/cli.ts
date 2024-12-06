@@ -1,4 +1,4 @@
-import { getMatches } from '@tauri-apps/plugin-cli';
+import { isWebAppPlatform } from '@/services/environment';
 
 declare global {
   interface Window {
@@ -16,6 +16,7 @@ const parseWindowOpenWithFiles = () => {
 };
 
 const parseCLIOpenWithFiles = async () => {
+  const { getMatches } = await import('@tauri-apps/plugin-cli');
   const matches = await getMatches();
   const args = matches?.args;
   const files: string[] = [];
@@ -32,6 +33,8 @@ const parseCLIOpenWithFiles = async () => {
 };
 
 export const parseOpenWithFiles = async () => {
+  if (isWebAppPlatform()) return [];
+
   let files = parseWindowOpenWithFiles();
   if (!files) {
     files = await parseCLIOpenWithFiles();

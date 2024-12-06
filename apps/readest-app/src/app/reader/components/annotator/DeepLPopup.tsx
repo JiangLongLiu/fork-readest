@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Popup from '@/components/Popup';
 import { Position } from '@/utils/sel';
-import { fetch } from '@tauri-apps/plugin-http';
 import { useSettingsStore } from '@/store/settingsStore';
+import { isWebAppPlatform } from '@/services/environment';
 
 const LANGUAGES = {
   AUTO: 'Auto Detect',
@@ -65,8 +65,15 @@ const DeepLPopup: React.FC<DeepLPopupProps> = ({
         console.error('DeepL API key not found. Set NEXT_PUBLIC_DEEPL_API_KEY in .env.local');
       }
 
+      const { fetch, url } = isWebAppPlatform()
+        ? { fetch: window.fetch, url: '/api/deepl/translate' }
+        : {
+            fetch: (await import('@tauri-apps/plugin-http')).fetch,
+            url: 'https://api-free.deepl.com/v2/translate',
+          };
+
       try {
-        const response = await fetch('https://api-free.deepl.com/v2/translate', {
+        const response = await fetch(url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -82,7 +89,6 @@ const DeepLPopup: React.FC<DeepLPopupProps> = ({
         if (!response.ok) {
           throw new Error('Failed to fetch translation');
         }
-
         const data = await response.json();
         const translatedText = data.translations[0]?.text;
         const detectedSource = data.translations[0]?.detected_source_language;
