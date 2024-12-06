@@ -56,16 +56,19 @@ jobs:
       - name: initialize git submodules
         run: git submodule update --init --recursive
 
-      - name: Setup pnpm
+      - name: setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9.14.4
 
-      - name: Setup node
+      - name: setup node
         uses: actions/setup-node@v3
         with:
           node-version: 22
           cache: pnpm
+
+      - name: install rimraf
+        run: npm install -g rimraf
 
       - name: install dependencies
         run: pnpm install
@@ -83,15 +86,18 @@ jobs:
           key: ${{ matrix.config.os }}-cargo-${{ hashFiles('apps/readest-app/src-tauri/Cargo.lock') }}
           workspaces: apps/readest-app/src-tauri -> target
 
-      - name: Create .env.local file for Next.js
+      - name: create .env.local file for Next.js
         run: |
           echo "NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}" >> .env.local
           echo "NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}" >> .env.local
           echo "NEXT_PUBLIC_DEEPL_API_KEY=${{ secrets.NEXT_PUBLIC_DEEPL_API_KEY }}" >> .env.local
           echo "NEXT_PUBLIC_APP_PLATFORM=tauri" >> .env.local
 
-      - name: Copy .env.local to apps/readest-app
+      - name: copy .env.local to apps/readest-app
         run: cp .env.local apps/readest-app/.env.local
+
+      - name: fix dynamic route for Next.js, see https://github.com/vercel/next.js/discussions/55393
+        run: rimraf "apps/readest-app/src/app/reader/[ids]"
 
       - name: install dependencies (ubuntu only)
         if: matrix.config.os == 'ubuntu-latest'
