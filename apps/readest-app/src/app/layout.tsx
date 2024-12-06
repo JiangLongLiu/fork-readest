@@ -1,46 +1,36 @@
-'use client';
-
 import * as React from 'react';
-import { usePathname } from 'next/navigation';
 import { AuthProvider } from '@/context/AuthContext';
 import { EnvProvider } from '@/context/EnvContext';
 import { CSPostHogProvider } from '@/context/PHContext';
-import { useTheme } from '@/hooks/useTheme';
-import { isTauriAppPlatform } from '@/services/environment';
-import { checkForAppUpdates } from '@/helpers/updater';
 
 import '../styles/globals.css';
 import '../styles/fonts.css';
 
+const url = 'https://web.readest.com/';
+const title = 'Readest — Where You Read, Digest and Get Insight';
+const description = 'Readest brings your entire library to your fingertips.';
+const previewImage = 'https://cdn.readest.com/images/open_graph_preview_read_now.png';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  useTheme();
-  const pathname = usePathname();
-  React.useEffect(() => {
-    document.documentElement.setAttribute('data-page', pathname.replace('/', '') || 'default');
-  }, [pathname]);
-
-  React.useEffect(() => {
-    const doAppUpdates = async () => {
-      if (isTauriAppPlatform()) {
-        await checkForAppUpdates();
-      }
-    };
-    doAppUpdates();
-  }, []);
-
-  React.useEffect(() => {
-    // TODO: disabled for now
-    // if (process.env['NODE_ENV'] === 'production') {
-    //   document.oncontextmenu = (event) => {
-    //     event.preventDefault();
-    //   };
-    // }
-  }, []);
-
   return (
     <html lang='en'>
       <head>
+        <title>{title}</title>
         <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1' />
+        <link rel='apple-touch-icon' sizes='180x180' href='/apple-touch-icon.png' />
+        <link rel='icon' href='/favicon.ico' />
+        <meta name='description' content={description} />
+        <meta property='og:url' content={url} />
+        <meta property='og:type' content='website' />
+        <meta property='og:title' content={title} />
+        <meta property='og:description' content={description} />
+        <meta property='og:image' content={previewImage} />
+        <meta name='twitter:card' content='summary_large_image' />
+        <meta property='twitter:domain' content='web.readest.com' />
+        <meta property='twitter:url' content={url} />
+        <meta name='twitter:title' content={title} />
+        <meta name='twitter:description' content={description} />
+        <meta name='twitter:image' content={previewImage} />
       </head>
       <CSPostHogProvider>
         <body>

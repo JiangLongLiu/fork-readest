@@ -9,9 +9,11 @@ import { AppService } from '@/types/system';
 import { navigateToReader } from '@/utils/nav';
 import { parseOpenWithFiles } from '@/helpers/cli';
 import { isTauriAppPlatform } from '@/services/environment';
+import { checkForAppUpdates } from '@/helpers/updater';
 import { FILE_ACCEPT_FORMATS, SUPPORTED_FILE_EXTS } from '@/services/constants';
 
 import { useEnv } from '@/context/EnvContext';
+import { useTheme } from '@/hooks/useTheme';
 import { useLibraryStore } from '@/store/libraryStore';
 import { useSettingsStore } from '@/store/settingsStore';
 
@@ -28,11 +30,21 @@ const LibraryPage = () => {
     checkOpenWithBooks,
     clearOpenWithBooks,
   } = useLibraryStore();
+  useTheme();
   const { setSettings } = useSettingsStore();
   const [loading, setLoading] = useState(false);
   const isInitiating = useRef(false);
   const [libraryLoaded, setLibraryLoaded] = useState(false);
   const [isSelectMode, setIsSelectMode] = useState(false);
+
+  React.useEffect(() => {
+    const doAppUpdates = async () => {
+      if (isTauriAppPlatform()) {
+        await checkForAppUpdates();
+      }
+    };
+    doAppUpdates();
+  }, []);
 
   const processOpenWithFiles = React.useCallback(
     async (appService: AppService, openWithFiles: string[], libraryBooks: Book[]) => {
