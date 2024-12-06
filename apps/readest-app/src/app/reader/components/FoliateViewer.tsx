@@ -76,6 +76,7 @@ const FoliateViewer: React.FC<{
   const viewRef = useRef<FoliateView | null>(null);
   const isViewCreated = useRef(false);
   const { getView, setView: setFoliateView, setProgress, getViewSettings } = useReaderStore();
+  const { hoveredBookKey, setHoveredBookKey } = useReaderStore();
   const { getParallels } = useParallelViewStore();
   const { themeCode } = useTheme();
 
@@ -157,11 +158,25 @@ const FoliateViewer: React.FC<{
           const viewElement = containerRef.current;
           if (viewElement) {
             const rect = viewElement.getBoundingClientRect();
-            const { screenX } = msg.data;
-
-            const eventConsumed = eventDispatcher.dispatchSync('iframe-single-click', { screenX });
-            if (!eventConsumed) {
-              if (screenX >= rect.left + rect.width / 2) {
+            const { screenX, screenY } = msg.data;
+            const consumed = eventDispatcher.dispatchSync('iframe-single-click', {
+              screenX,
+              screenY,
+            });
+            if (!consumed) {
+              const centerStartX = rect.left + rect.width * 0.375;
+              const centerEndX = rect.left + rect.width * 0.625;
+              const centerStartY = rect.top + rect.height * 0.375;
+              const centerEndY = rect.top + rect.height * 0.625;
+              if (
+                screenX >= centerStartX &&
+                screenX <= centerEndX &&
+                screenY >= centerStartY &&
+                screenY <= centerEndY
+              ) {
+                // toggle visibility of the header bar and the footer bar
+                setHoveredBookKey(hoveredBookKey ? '' : bookKey);
+              } else if (screenX >= rect.left + rect.width / 2) {
                 viewRef.current?.goRight();
               } else if (screenX < rect.left + rect.width / 2) {
                 viewRef.current?.goLeft();
@@ -189,6 +204,14 @@ const FoliateViewer: React.FC<{
       }
     }
   };
+
+  useEffect(() => {
+    window.addEventListener('message', handleTurnPage);
+    return () => {
+      window.removeEventListener('message', handleTurnPage);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hoveredBookKey, viewRef]);
 
   useFoliateEvents(viewRef.current, {
     onLoad: docLoadHandler,
@@ -250,8 +273,6 @@ const FoliateViewer: React.FC<{
       } else {
         await view.goToFraction(0);
       }
-
-      window.addEventListener('message', handleTurnPage);
     };
 
     openBook();
