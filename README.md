@@ -1,11 +1,11 @@
 <div align="center">
-  <a href="https://readest.com" target="_blank">
+  <a href="https://readest.com?utm_source=github&utm_medium=referral&utm_campaign=readme" target="_blank">
     <img src="https://github.com/chrox/readest/blob/main/apps/readest-app/src-tauri/icons/icon.png?raw=true" alt="Readest Logo" width="20%" />
   </a>
   <h1>Readest</h1>
   <br>
 
-Readest is an open-source ebook reader designed for immersive and deep reading experiences. Built as a modern rewrite of [Foliate](https://github.com/johnfactotum/foliate), it leverages [Next.js](https://github.com/vercel/next.js) and [Tauri v2](https://github.com/tauri-apps/tauri) to offer a seamless cross-platform experience on macOS, Windows, Linux, with support for Web and mobile platforms coming soon.
+[Readest][link-website] is an open-source ebook reader designed for immersive and deep reading experiences. Built as a modern rewrite of [Foliate](https://github.com/johnfactotum/foliate), it leverages [Next.js 15](https://github.com/vercel/next.js) and [Tauri v2](https://github.com/tauri-apps/tauri) to offer a seamless cross-platform experience on macOS, Windows, Linux and Web, with support for mobile platforms coming soon.
 
 [![Website][badge-website]][link-website]
 [![AGPL Licence][badge-license]](LICENSE)
@@ -22,9 +22,9 @@ Readest is an open-source ebook reader designed for immersive and deep reading e
   <a href="#features">Features</a> •
   <a href="#planned-features">Planned Features</a> •
   <a href="#screenshots">Screenshots</a> •
+  <a href="#downloads">Downloads</a> •
   <a href="#getting-started">Getting Started</a> •
   <a href="#contributing">Contributing</a> •
-  <a href="#contributors">Contributors</a> •
   <a href="#license">License</a>
 </p>
 
@@ -56,19 +56,19 @@ Readest is an open-source ebook reader designed for immersive and deep reading e
 <div align="left">🛠 Building</div>
 <div align="left">🔄 Planned</div>
 
-| **Feature**                       | **Description**                                                                    | **Priority** |
-| --------------------------------- | ---------------------------------------------------------------------------------- | ------------ |
-| **Support Web, iOS, and Android** | Expand the APP to work on web browsers, iOS, and Android devices.                  | 🛠           |
-| **Sync Across Platforms**         | Synchronize reading progress, notes, and bookmarks across all supported platforms. | 🛠           |
-| **Sync with Koreader**            | Synchronize reading progress, notes, and bookmarks with Koreader devices.          | 🔄           |
-| **Library Management**            | Organize, sort, and manage your entire ebook library.                              | 🔄           |
-| **OPDS/Calibre Support**          | Integrate OPDS/Calibre to access online libraries and catalogs.                    | 🔄           |
-| **Text-to-Speech (TTS) Support**  | Enable text-to-speech functionality for a more accessible reading experience.      | 🔄           |
-| **Audiobook Support**             | Extend functionality to play and manage audiobooks.                                | 🔄           |
-| **Handwriting Annotations**       | Add support for handwriting annotations using a pen on compatible devices.         | 🔄           |
-| **Advanced Reading Stats**        | Track reading time, pages read, and more for detailed insights.                    | 🔄           |
-| **In-Library Full-Text Search**   | Search across your entire ebook library to find topics and quotes.                 | 🔄           |
-| **AI-Powered Summarization**      | Generate summaries of books or chapters using AI for quick insights.               | 🔄           |
+| **Feature**                      | **Description**                                                                            | **Priority** |
+| -------------------------------- | ------------------------------------------------------------------------------------------ | ------------ |
+| **Support iOS and Android**      | Expand the APP to work on iOS and Android devices.                                         | 🛠           |
+| **Sync Across Platforms**        | Synchronize reading progress, notes, and bookmarks across all supported platforms.         | 🛠           |
+| **Sync with Koreader**           | Synchronize reading progress, notes, and bookmarks with [Koreader][link-koreader] devices. | 🔄           |
+| **Library Management**           | Organize, sort, and manage your entire ebook library.                                      | 🔄           |
+| **Support OPDS/Calibre**         | Integrate OPDS/Calibre to access online libraries and catalogs.                            | 🔄           |
+| **Text-to-Speech (TTS) Support** | Enable text-to-speech functionality for a more accessible reading experience.              | 🔄           |
+| **Audiobook Support**            | Extend functionality to play and manage audiobooks.                                        | 🔄           |
+| **Handwriting Annotations**      | Add support for handwriting annotations using a pen on compatible devices.                 | 🔄           |
+| **Advanced Reading Stats**       | Track reading time, pages read, and more for detailed insights.                            | 🔄           |
+| **In-Library Full-Text Search**  | Search across your entire ebook library to find topics and quotes.                         | 🔄           |
+| **AI-Powered Summarization**     | Generate summaries of books or chapters using AI for quick insights.                       | 🔄           |
 
 Stay tuned for continuous improvements and updates! Contributions and suggestions are always welcome—let's build the ultimate reading experience together. 😊
 
@@ -84,16 +84,26 @@ Stay tuned for continuous improvements and updates! Contributions and suggestion
 
 ---
 
+## Downloads
+
+The Readest app is available for download! 🥳 🚀
+
+- macOS : Search for "Readest" on the [macOS App Store][link-macos-appstore].
+- Windows / Linux: Visit [https://readest.com][link-website] or the [Releases on GitHub][link-gh-releases].
+- Web: Visit [https://web.readest.com][link-web-readest].
+- iOS / Android: coming soon 👀
+
 ## Requirements
 
 - **Node.js** and **pnpm** for Next.js development
 - **Rust and Cargo** for Tauri development
 
-For the best experience, use a recent version of Node.js and Rust. Refer to the [Tauri documentation](https://v2.tauri.app/start/prerequisites/) for details on setting up the development environment prerequisites on different platforms.
+For the best experience to build Readest for yourself, use a recent version of Node.js and Rust. Refer to the [Tauri documentation](https://v2.tauri.app/start/prerequisites/) for details on setting up the development environment prerequisites on different platforms.
 
 ```bash
 nvm install v22
 nvm use v22
+npm install -g pnpm
 rustup update
 ```
 
@@ -112,7 +122,7 @@ git submodule update --init --recursive
 ### 2. Install Dependencies
 
 ```bash
-npm install -g pnpm
+# might need to rerun this when code is updated
 pnpm install
 # copy pdfjs-dist to Next.js public directory
 pnpm --filter @readest/readest-app setup-pdfjs
@@ -130,7 +140,7 @@ This command will display information about the installed Tauri dependencies and
 
 For Windows targets, “Build Tools for Visual Studio 2022” (or a higher edition of Visual Studio) and the “Desktop development with C++” workflow must be installed. For Windows ARM64 targets, the “VS 2022 C++ ARM64 build tools” and "C++ Clang Compiler for Windows" components must be installed. And make sure `clang` can be found in the path by adding `C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\Llvm\x64\bin` for example in the environment variable `Path`.
 
-### 4. Build the Development
+### 4. Build for Development
 
 ```bash
 pnpm tauri dev
@@ -169,13 +179,16 @@ Readest is distributed under the AGPL-3.0 License. See the [LICENSE](<(LICENSE)>
 [badge-website]: https://img.shields.io/badge/website-readest.com-orange
 [badge-license]: https://img.shields.io/github/license/chrox/readest?color=teal
 [badge-release]: https://img.shields.io/github/release/chrox/readest?color=green
-[badge-platforms]: https://img.shields.io/badge/OS-macOS%2C%20Windows%2C%20Linux-green
+[badge-platforms]: https://img.shields.io/badge/OS-macOS%2C%20Windows%2C%20Linux%2C%20Web-green
 [badge-last-commit]: https://img.shields.io/github/last-commit/chrox/readest?color=green
 [badge-commit-activity]: https://img.shields.io/github/commit-activity/m/chrox/readest
 [badge-discord]: https://img.shields.io/discord/1314226120886976544?color=5865F2&label=discord&labelColor=black&logo=discord&logoColor=white&style=flat-square
-[link-website]: https://readest.com
+[link-macos-appstore]: https://apps.apple.com/app/apple-store/id6738622779?pt=127463130&ct=github&mt=8
+[link-website]: https://readest.com?utm_source=github&utm_medium=referral&utm_campaign=readme
+[link-web-readest]: https://web.readest.com
 [link-gh-releases]: https://github.com/chrox/readest/releases
 [link-gh-commits]: https://github.com/chrox/readest/commits/main
 [link-gh-pulse]: https://github.com/chrox/readest/pulse
 [link-discord]: https://discord.gg/jb2nzDts
 [link-parallel-read]: https://readest.com/#parallel-read
+[link-koreader]: https://github.com/koreader/koreader
