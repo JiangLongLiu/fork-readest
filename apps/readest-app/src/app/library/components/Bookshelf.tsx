@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { Book, BooksGroup } from '@/types/book';
 import { useEnv } from '@/context/EnvContext';
 import { useLibraryStore } from '@/store/libraryStore';
+import { navigateToReader } from '@/utils/nav';
 import Alert from '@/components/Alert';
 import Spinner from '@/components/Spinner';
 
@@ -68,7 +69,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
       setClickedImage(id);
       setTimeout(() => setClickedImage(null), 300);
       setTimeout(() => setLoading(true), 200);
-      router.push(`/reader?ids=${id}`);
+      navigateToReader(router, [id]);
     }
   };
 
@@ -80,7 +81,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
 
   const openSelectedBooks = () => {
     setTimeout(() => setLoading(true), 200);
-    router.push(`/reader?ids=${selectedBooks.join(',')}`);
+    navigateToReader(router, selectedBooks);
   };
 
   const confirmDelete = () => {

@@ -13,6 +13,8 @@ import { SystemSettings } from '@/types/settings';
 import { parseOpenWithFiles } from '@/helpers/cli';
 import { tauriHandleClose } from '@/utils/window';
 import { uniqueId } from '@/utils/misc';
+import { navigateToLibrary } from '@/utils/nav';
+import { BOOK_IDS_SEPARATOR } from '@/services/constants';
 
 import useBooksManager from '../hooks/useBooksManager';
 import useBookShortcuts from '../hooks/useBookShortcuts';
@@ -21,7 +23,7 @@ import SideBar from './sidebar/SideBar';
 import Notebook from './notebook/Notebook';
 import BooksGrid from './BooksGrid';
 
-const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => {
+const ReaderContent: React.FC<{ ids?: string; settings: SystemSettings }> = ({ ids, settings }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { envConfig } = useEnv();
@@ -40,7 +42,8 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
     if (isInitiating.current) return;
     isInitiating.current = true;
 
-    const initialIds = (searchParams.get('ids') || '').split(',').filter(Boolean);
+    const bookIds = ids || searchParams.get('ids') || '';
+    const initialIds = bookIds.split(BOOK_IDS_SEPARATOR).filter(Boolean);
     const initialBookKeys = initialIds.map((id) => `${id}-${uniqueId()}`);
     setBookKeys(initialBookKeys);
     const uniqueIds = new Set<string>();
@@ -72,7 +75,7 @@ const ReaderContent: React.FC<{ settings: SystemSettings }> = ({ settings }) => 
 
   const saveSettingsAndGoToLibrary = () => {
     saveSettings(envConfig, settings);
-    router.replace('/library');
+    navigateToLibrary(router);
   };
 
   const handleCloseBooks = () => {

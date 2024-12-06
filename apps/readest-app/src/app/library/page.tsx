@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import { Book } from '@/types/book';
 import { AppService } from '@/types/system';
+import { navigateToReader } from '@/utils/nav';
 import { parseOpenWithFiles } from '@/helpers/cli';
 import { isTauriAppPlatform } from '@/services/environment';
 import { FILE_ACCEPT_FORMATS, SUPPORTED_FILE_EXTS } from '@/services/constants';
@@ -47,7 +48,7 @@ const LibraryPage = () => {
 
       console.log('Opening books:', bookIds);
       if (bookIds.length > 0) {
-        router.push(`/reader?ids=${bookIds.join(',')}`);
+        navigateToReader(router, bookIds);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

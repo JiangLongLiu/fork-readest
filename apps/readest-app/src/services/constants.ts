@@ -78,3 +78,5 @@ export const SANS_SERIF_FONTS = ['Roboto', 'Noto Sans', 'Open Sans', 'Helvetica'
 export const MONOSPACE_FONTS = ['Fira Code', 'Lucida Console', 'Consolas', 'Courier New'];
 
 export const ONE_COLUMN_MAX_INLINE_SIZE = 9999;
+
+export const BOOK_IDS_SEPARATOR = '+';

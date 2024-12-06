@@ -5,6 +5,7 @@ import { useReaderStore } from '@/store/readerStore';
 import { useSidebarStore } from '@/store/sidebarStore';
 import { uniqueId } from '@/utils/misc';
 import { useParallelViewStore } from '@/store/parallelViewStore';
+import { navigateToReader } from '@/utils/nav';
 
 const useBooksManager = () => {
   const router = useRouter();
@@ -18,11 +19,9 @@ const useBooksManager = () => {
 
   useEffect(() => {
     if (shouldUpdateSearchParams) {
-      const ids = bookKeys.map((key) => key.split('-')[0]).join(',');
+      const ids = bookKeys.map((key) => key.split('-')[0]!);
       if (ids) {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set('ids', ids);
-        router.replace(`?${params.toString()}`, { scroll: false });
+        navigateToReader(router, ids, searchParams.toString(), { scroll: false });
       }
       setShouldUpdateSearchParams(false);
     }
