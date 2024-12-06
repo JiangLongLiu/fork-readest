@@ -30,7 +30,7 @@
 
 <div align="center">
   <a href="https://readest.com" target="_blank">
-    <img src="./data/screenshots/landing_page_preview.png" alt="Readest Banner" width="100%" />
+    <img src="./data/screenshots/readest_landing_preview.png" alt="Readest Banner" width="100%" />
   </a>
 </div>
 
