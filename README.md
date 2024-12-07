@@ -24,7 +24,7 @@
   <a href="#screenshots">Screenshots</a> •
   <a href="#downloads">Downloads</a> •
   <a href="#getting-started">Getting Started</a> •
-  <a href="#contributing">Contributing</a> •
+  <a href="#contributors">Contributors</a> •
   <a href="#license">License</a>
 </p>
 
@@ -61,6 +61,7 @@
 | **Support iOS and Android**      | Expand the APP to work on iOS and Android devices.                                         | 🛠           |
 | **Sync Across Platforms**        | Synchronize reading progress, notes, and bookmarks across all supported platforms.         | 🛠           |
 | **Sync with Koreader**           | Synchronize reading progress, notes, and bookmarks with [Koreader][link-koreader] devices. | 🔄           |
+| **Keyboard Navigation**          | Implement vimium-style keybindings for book navigation.                                    | 🔄           |
 | **Library Management**           | Organize, sort, and manage your entire ebook library.                                      | 🔄           |
 | **Support OPDS/Calibre**         | Integrate OPDS/Calibre to access online libraries and catalogs.                            | 🔄           |
 | **Text-to-Speech (TTS) Support** | Enable text-to-speech functionality for a more accessible reading experience.              | 🔄           |
@@ -96,7 +97,7 @@ The Readest app is available for download! 🥳 🚀
 ## Requirements
 
 - **Node.js** and **pnpm** for Next.js development
-- **Rust and Cargo** for Tauri development
+- **Rust** and **Cargo** for Tauri development
 
 For the best experience to build Readest for yourself, use a recent version of Node.js and Rust. Refer to the [Tauri documentation](https://v2.tauri.app/start/prerequisites/) for details on setting up the development environment prerequisites on different platforms.
 
@@ -152,25 +153,19 @@ pnpm tauri dev
 pnpm tauri build
 ```
 
-## Contributing
-
-Readest is open-source, and contributions are welcome! Feel free to open issues, suggest features, or submit pull requests. Please review our contributing guidelines before you start.
-
 ## Contributors
 
-<!---
-npx contributor-faces --exclude "*bot*" --limit 100"
---->
+Readest is open-source, and contributions are welcome! Feel free to open issues, suggest features, or submit pull requests. Please **review our [contributing guidelines](CONTRIBUTING.md) before you start**. We also welcome you to join our [Discord][link-discord] community for either support or contributing guidance.
 
-[//]: contributor-faces
-
-<a href="https://github.com/chrox"><img src="https://avatars.githubusercontent.com/u/751535?v=4" title="chrox" width="50" height="50"></a>
-
-[//]: contributor-faces
+<a href="https://github.com/chrox/readest/graphs/contributors">
+  <p align="left">
+    <img width="50" src="https://contrib.rocks/image?repo=chrox/readest" alt="A table of avatars from the project's contributors" />
+  </p>
+</a>
 
 ## License
 
-Readest is distributed under the AGPL-3.0 License. See the [LICENSE](<(LICENSE)>) file for details.
+Readest is distributed under the AGPL-3.0 License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
