@@ -80,3 +80,5 @@ export const MONOSPACE_FONTS = ['Fira Code', 'Lucida Console', 'Consolas', 'Cour
 export const ONE_COLUMN_MAX_INLINE_SIZE = 9999;
 
 export const BOOK_IDS_SEPARATOR = '+';
+
+export const DOWNLOAD_READEST_URL = 'https://readest.com?utm_source=readest_web';
