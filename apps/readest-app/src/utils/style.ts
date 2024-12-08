@@ -74,10 +74,14 @@ const getLayoutStyles = (
       white-space: pre-wrap !important;
       tab-size: 2;
   }
-  body {
+  html, body {
     color: ${fg};
     zoom: ${zoomLevel}%; 
-    background-color: ${bg} !important;
+  }
+  body * {
+    color: inherit;
+    border-color: currentColor !important;
+    ${bg === '#ffffff' ? '' : `background-color: ${bg} !important;`}
   }
   svg, img {
     background-color: transparent !important;
