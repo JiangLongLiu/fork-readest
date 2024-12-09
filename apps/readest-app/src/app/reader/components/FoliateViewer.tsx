@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { useFoliateEvents } from '../hooks/useFoliateEvents';
 import { BookDoc } from '@/libs/document';
 import { BookConfig, BookNote, BookSearchConfig, BookSearchResult } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
 import { useParallelViewStore } from '@/store/parallelViewStore';
+import { useFoliateEvents } from '../hooks/useFoliateEvents';
 import { getOSPlatform } from '@/utils/misc';
 import { getStyles } from '@/utils/style';
 import { useTheme } from '@/hooks/useTheme';
@@ -118,6 +118,7 @@ const FoliateViewer: React.FC<{
 
   const docLoadHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;
+    console.log('doc loaded:', detail);
     if (detail.doc) {
       const viewSettings = getViewSettings(bookKey)!;
       if (viewSettings.scrolled && shouldAutoHideScrollbar) {
@@ -237,11 +238,12 @@ const FoliateViewer: React.FC<{
       const view = wrappedFoliateView(document.createElement('foliate-view') as FoliateView);
       document.body.append(view);
       containerRef.current?.appendChild(view);
-      setFoliateView(bookKey, view);
 
       await view.open(bookDoc);
       // make sure we can listen renderer events after opening book
       viewRef.current = view;
+      setFoliateView(bookKey, view);
+
       const viewSettings = getViewSettings(bookKey)!;
       view.renderer.setStyles?.(getStyles(viewSettings, themeCode));
 

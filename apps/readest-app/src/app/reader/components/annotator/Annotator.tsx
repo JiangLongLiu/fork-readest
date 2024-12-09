@@ -105,7 +105,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     setSelection(selection);
   };
 
-  useFoliateEvents(view, { onLoad, onDrawAnnotation, onShowAnnotation }, [config]);
+  useFoliateEvents(view, { onLoad, onDrawAnnotation, onShowAnnotation });
 
   const handleDismissPopup = () => {
     setSelection(null);
