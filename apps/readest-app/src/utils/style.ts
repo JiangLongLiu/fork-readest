@@ -112,6 +112,11 @@ const getLayoutStyles = (
   aside[epub|type~="rearnote"] {
     display: none;
   }
+
+  .duokan-footnote-content,
+  .duokan-footnote-item {
+    display: none;
+  }
 `;
 
 export interface ThemeCode {
