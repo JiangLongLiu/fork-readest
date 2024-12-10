@@ -163,8 +163,7 @@ const WiktionaryPopup: React.FC<WiktionaryPopupProps> = ({
         width={popupWidth}
         height={popupHeight}
         position={position}
-        className='bg-neutral select-text overflow-y-auto'
-        triangleClassName='text-neutral'
+        className='select-text overflow-y-auto'
       >
         <main className='p-4 font-sans' />
         <footer className='hidden data-[state=loaded]:block data-[state=error]:hidden data-[state=loading]:hidden'>

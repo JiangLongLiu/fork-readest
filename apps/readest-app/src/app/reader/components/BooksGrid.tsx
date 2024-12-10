@@ -12,6 +12,7 @@ import Ribbon from './Ribbon';
 import SettingsDialog from './settings/SettingsDialog';
 import Annotator from './annotator/Annotator';
 import { useBookDataStore } from '@/store/bookDataStore';
+import FootnotePopup from './FootnotePopup';
 
 interface BooksGridProps {
   bookKeys: string[];
@@ -60,6 +61,7 @@ const BooksGrid: React.FC<BooksGridProps> = ({ bookKeys, onCloseBook }) => {
               onSetSettingsDialogOpen={setFontLayoutSettingsDialogOpen}
             />
             <FoliateViewer bookKey={bookKey} bookDoc={bookDoc} config={config} />
+            <FootnotePopup bookKey={bookKey} bookDoc={bookDoc} />
             {viewSettings.scrolled ? null : (
               <>
                 <SectionInfo section={sectionLabel} gapLeft={marginGap} />

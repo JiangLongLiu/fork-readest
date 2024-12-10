@@ -107,8 +107,7 @@ const WikipediaPopup: React.FC<WikipediaPopupProps> = ({
         height={popupHeight}
         position={position}
         trianglePosition={trianglePosition}
-        className='bg-neutral select-text overflow-y-auto'
-        triangleClassName='text-neutral'
+        className='select-text overflow-y-auto'
       >
         <main className='p-2 font-sans'></main>
         <footer className='hidden data-[state=loaded]:block data-[state=error]:hidden data-[state=loading]:hidden'>

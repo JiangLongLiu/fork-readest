@@ -12,8 +12,8 @@ const Popup = ({
 }: {
   width: number;
   height: number;
-  position: Position;
-  trianglePosition: Position;
+  position?: Position;
+  trianglePosition?: Position;
   children: React.ReactNode;
   className?: string;
   triangleClassName?: string;
@@ -21,24 +21,24 @@ const Popup = ({
 }) => (
   <div>
     <div
-      className={`triangle absolute z-10 ${triangleClassName}`}
+      className={`triangle text-base-200 absolute z-10 ${triangleClassName}`}
       style={{
-        left: `${trianglePosition.point.x}px`,
-        top: `${trianglePosition.point.y}px`,
+        left: `${trianglePosition ? trianglePosition.point.x : -999}px`,
+        top: `${trianglePosition ? trianglePosition.point.y : -999}px`,
         borderLeft: '6px solid transparent',
         borderRight: '6px solid transparent',
-        borderBottom: trianglePosition.dir === 'up' ? 'none' : `6px solid`,
-        borderTop: trianglePosition.dir === 'up' ? `6px solid` : 'none',
+        borderBottom: trianglePosition && trianglePosition.dir === 'up' ? 'none' : `6px solid`,
+        borderTop: trianglePosition && trianglePosition.dir === 'up' ? `6px solid` : 'none',
         transform: 'translateX(-50%)',
       }}
     />
     <div
-      className={`absolute rounded-lg font-sans shadow-lg ${className}`}
+      className={`bg-base-200 absolute rounded-lg font-sans shadow-xl ${className}`}
       style={{
         width: `${width}px`,
         height: `${height}px`,
-        left: `${position.point.x}px`,
-        top: `${position.point.y}px`,
+        left: `${position ? position.point.x : -999}px`,
+        top: `${position ? position.point.y : -999}px`,
         ...additionalStyle,
       }}
     >

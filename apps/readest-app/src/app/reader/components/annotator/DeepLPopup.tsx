@@ -120,8 +120,7 @@ const DeepLPopup: React.FC<DeepLPopupProps> = ({
         width={popupWidth}
         height={popupHeight}
         position={position}
-        className='bg-neutral select-text'
-        triangleClassName='text-neutral'
+        className='select-text'
       >
         <div className='text-neutral-content relative h-[50%] overflow-y-auto border-b border-neutral-400/75 p-4 font-sans'>
           <div className='mb-2 flex items-center justify-between'>

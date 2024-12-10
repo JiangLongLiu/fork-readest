@@ -42,9 +42,15 @@ const frameRect = (frame: Frame, rect: Rect, sx = 1, sy = 1) => {
 const pointIsInView = ({ x, y }: Point) =>
   x > 0 && y > 0 && x < window.innerWidth && y < window.innerHeight;
 
-const getIframeElement = (range: Range): HTMLIFrameElement | null => {
-  let node: Node | null = range.commonAncestorContainer;
-
+const getIframeElement = (nodeElement: Range | Element): HTMLIFrameElement | null => {
+  let node: Node | null;
+  if (nodeElement && typeof nodeElement === 'object' && 'tagName' in nodeElement) {
+    node = nodeElement as Element;
+  } else if (nodeElement && typeof nodeElement === 'object' && 'collapse' in nodeElement) {
+    node = nodeElement.commonAncestorContainer;
+  } else {
+    node = nodeElement;
+  }
   while (node) {
     if (node.nodeType === Node.DOCUMENT_NODE) {
       const doc = node as Document;
@@ -58,7 +64,7 @@ const getIframeElement = (range: Range): HTMLIFrameElement | null => {
   return null;
 };
 
-export const getPosition = (target: Range, rect: Rect) => {
+export const getPosition = (target: Range | Element, rect: Rect) => {
   // TODO: vertical text
   const frameElement = getIframeElement(target);
   const transform = frameElement ? getComputedStyle(frameElement).transform : '';

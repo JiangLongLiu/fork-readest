@@ -104,7 +104,7 @@ export const handleClick = (bookKey: string, event: MouseEvent) => {
     if (Date.now() - lastClickTime >= doubleClickThreshold) {
       let element: HTMLElement | null = event.target as HTMLElement;
       while (element) {
-        if (['a', 'audio', 'video'].includes(element.tagName.toLowerCase())) {
+        if (['sup', 'a', 'audio', 'video'].includes(element.tagName.toLowerCase())) {
           return;
         }
         element = element.parentElement;
