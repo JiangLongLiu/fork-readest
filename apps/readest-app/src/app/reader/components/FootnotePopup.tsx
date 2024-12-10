@@ -65,7 +65,8 @@ const FootnotePopup: React.FC<FootnotePopupProps> = ({ bookKey, bookDoc }) => {
     const gridFrame = document.querySelector(`#gridcell-${bookKey}`);
     if (!gridFrame) return;
     const rect = gridFrame.getBoundingClientRect();
-    const triangPos = getPosition(detail.a, rect);
+    const viewSettings = getViewSettings(bookKey)!;
+    const triangPos = getPosition(detail.a, rect, viewSettings.vertical);
     const popupPos = getPopupPosition(triangPos, rect, popupWidth, popupHeight, popupPadding);
     setTrianglePosition(triangPos);
     setPopupPosition(popupPos);

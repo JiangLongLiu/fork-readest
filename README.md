@@ -78,11 +78,11 @@ Stay tuned for continuous improvements and updates! Contributions and suggestion
 
 ![Annotations](./data/screenshots/annotations.png)
 
-![Wikipedia](./data/screenshots/wikipedia.png)
-
 ![DeepL](./data/screenshots/deepl.png)
 
 ![Footnote](./data/screenshots/footnote_popover.png)
+
+![Wikipedia](./data/screenshots/wikipedia_vertical.png)
 
 ![Dark Mode](./data/screenshots/dark_mode.png)
 

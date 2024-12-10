@@ -166,3 +166,12 @@ export class DocumentLoader {
     return { book, format } as { book: BookDoc; format: BookFormat };
   }
 }
+
+export const getDirection = (doc: Document) => {
+  const { defaultView } = doc;
+  const { writingMode, direction } = defaultView!.getComputedStyle(doc.body);
+  console.log('direction', writingMode, direction);
+  const vertical = writingMode === 'vertical-rl' || writingMode === 'vertical-lr';
+  const rtl = doc.body.dir === 'rtl' || direction === 'rtl' || doc.documentElement.dir === 'rtl';
+  return { vertical, rtl };
+};

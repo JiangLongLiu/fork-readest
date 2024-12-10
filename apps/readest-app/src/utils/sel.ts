@@ -15,7 +15,7 @@ export interface Point {
   y: number;
 }
 
-export type PositionDir = 'up' | 'down';
+export type PositionDir = 'up' | 'down' | 'left' | 'right';
 
 export interface Position {
   point: Point;
@@ -64,8 +64,7 @@ const getIframeElement = (nodeElement: Range | Element): HTMLIFrameElement | nul
   return null;
 };
 
-export const getPosition = (target: Range | Element, rect: Rect) => {
-  // TODO: vertical text
+export const getPosition = (target: Range | Element, rect: Rect, isVertical: boolean = false) => {
   const frameElement = getIframeElement(target);
   const transform = frameElement ? getComputedStyle(frameElement).transform : '';
   const match = transform.match(/matrix\((.+)\)/);
@@ -75,6 +74,22 @@ export const getPosition = (target: Range | Element, rect: Rect) => {
   const rects = Array.from(target.getClientRects());
   const first = frameRect(frame, rects[0] as Rect, sx, sy);
   const last = frameRect(frame, rects.at(-1) as Rect, sx, sy);
+
+  if (isVertical) {
+    const leftSpace = first.left - rect.left;
+    const rightSpace = rect.right - first.right;
+    const dir = leftSpace > rightSpace ? 'left' : 'right';
+    const position = {
+      point: {
+        x: dir === 'left' ? first.left - rect.left - 6 : first.right - rect.left + 6,
+        y: (first.top + first.bottom) / 2 - rect.top,
+      },
+      dir,
+    } as Position;
+    const inView = pointIsInView(position.point);
+    return inView ? position : ({ point: { x: 0, y: 0 }, dir } as Position);
+  }
+
   const start = {
     point: { x: (first.left + first.right) / 2 - rect.left, y: first.top - rect.top - 12 },
     dir: 'up',
@@ -98,10 +113,20 @@ export const getPopupPosition = (
   popupHeightPx: number,
   popupPaddingPx: number,
 ) => {
-  const popupPoint = {
-    x: position.point.x - popupWidthPx / 2,
-    y: position.dir === 'up' ? position.point.y - popupHeightPx : position.point.y + 6,
-  };
+  const popupPoint = { x: 0, y: 0 };
+  if (position.dir === 'up') {
+    popupPoint.x = position.point.x - popupWidthPx / 2;
+    popupPoint.y = position.point.y - popupHeightPx;
+  } else if (position.dir === 'down') {
+    popupPoint.x = position.point.x - popupWidthPx / 2;
+    popupPoint.y = position.point.y + 6;
+  } else if (position.dir === 'left') {
+    popupPoint.x = position.point.x - popupWidthPx;
+    popupPoint.y = position.point.y - popupHeightPx / 2;
+  } else if (position.dir === 'right') {
+    popupPoint.x = position.point.x + 6;
+    popupPoint.y = position.point.y - popupHeightPx / 2;
+  }
 
   if (popupPoint.x < popupPaddingPx) {
     popupPoint.x = popupPaddingPx;

@@ -42,6 +42,7 @@ export interface BookLayout {
   maxInlineSize: number;
   maxBlockSize: number;
   animated: boolean;
+  vertical: boolean;
 }
 
 export interface BookStyle {

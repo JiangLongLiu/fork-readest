@@ -23,13 +23,46 @@ const Popup = ({
     <div
       className={`triangle text-base-200 absolute z-10 ${triangleClassName}`}
       style={{
-        left: `${trianglePosition ? trianglePosition.point.x : -999}px`,
-        top: `${trianglePosition ? trianglePosition.point.y : -999}px`,
-        borderLeft: '6px solid transparent',
-        borderRight: '6px solid transparent',
-        borderBottom: trianglePosition && trianglePosition.dir === 'up' ? 'none' : `6px solid`,
-        borderTop: trianglePosition && trianglePosition.dir === 'up' ? `6px solid` : 'none',
-        transform: 'translateX(-50%)',
+        left:
+          trianglePosition?.dir === 'left'
+            ? `${trianglePosition.point.x}px`
+            : trianglePosition?.dir === 'right'
+              ? `${trianglePosition.point.x}px`
+              : `${trianglePosition ? trianglePosition.point.x : -999}px`,
+        top:
+          trianglePosition?.dir === 'up'
+            ? `${trianglePosition.point.y}px`
+            : trianglePosition?.dir === 'down'
+              ? `${trianglePosition.point.y}px`
+              : `${trianglePosition ? trianglePosition.point.y : -999}px`,
+        borderLeft:
+          trianglePosition?.dir === 'right'
+            ? 'none'
+            : trianglePosition?.dir === 'left'
+              ? `6px solid`
+              : '6px solid transparent',
+        borderRight:
+          trianglePosition?.dir === 'left'
+            ? 'none'
+            : trianglePosition?.dir === 'right'
+              ? `6px solid`
+              : '6px solid transparent',
+        borderTop:
+          trianglePosition?.dir === 'down'
+            ? 'none'
+            : trianglePosition?.dir === 'up'
+              ? `6px solid`
+              : '6px solid transparent',
+        borderBottom:
+          trianglePosition?.dir === 'up'
+            ? 'none'
+            : trianglePosition?.dir === 'down'
+              ? `6px solid`
+              : '6px solid transparent',
+        transform:
+          trianglePosition?.dir === 'left' || trianglePosition?.dir === 'right'
+            ? 'translateY(-50%)'
+            : 'translateX(-50%)',
       }}
     />
     <div

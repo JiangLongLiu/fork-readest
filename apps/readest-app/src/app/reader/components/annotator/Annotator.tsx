@@ -30,13 +30,14 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { envConfig } = useEnv();
   const { settings } = useSettingsStore();
   const { getConfig, saveConfig, getBookData, updateBooknotes } = useBookDataStore();
-  const { getProgress, getView, getViewsById } = useReaderStore();
+  const { getProgress, getView, getViewsById, getViewSettings } = useReaderStore();
   const { isNotebookPinned, isNotebookVisible } = useNotebookStore();
   const { setNotebookVisible, setNotebookNewAnnotation } = useNotebookStore();
   const config = getConfig(bookKey)!;
   const progress = getProgress(bookKey)!;
   const bookData = getBookData(bookKey)!;
   const view = getView(bookKey);
+  const viewSettings = getViewSettings(bookKey)!;
 
   const isShowingPopup = useRef(false);
   const isTextSelected = useRef(false);
@@ -48,6 +49,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const [trianglePosition, setTrianglePosition] = useState<Position>();
   const [annotPopupPosition, setAnnotPopupPosition] = useState<Position>();
   const [dictPopupPosition, setDictPopupPosition] = useState<Position>();
+  const [translatorPopupPosition, setTranslatorPopupPosition] = useState<Position>();
   const [toastMessage, setToastMessage] = useState('');
   const [highlightOptionsVisible, setHighlightOptionsVisible] = useState(false);
 
@@ -59,7 +61,9 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   );
 
   const dictPopupWidth = 480;
-  const dictPopupHeight = 360;
+  const dictPopupHeight = 300;
+  const transPopupWidth = 480;
+  const transPopupHeight = 360;
   const annotPopupWidth = 280;
   const annotPopupHeight = 44;
   const popupPadding = 10;
@@ -148,7 +152,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       const gridFrame = document.querySelector(`#gridcell-${bookKey}`);
       if (!gridFrame) return;
       const rect = gridFrame.getBoundingClientRect();
-      const triangPos = getPosition(selection.range, rect);
+      const triangPos = getPosition(selection.range, rect, viewSettings.vertical);
       const annotPopupPos = getPopupPosition(
         triangPos,
         rect,
@@ -163,13 +167,22 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
         dictPopupHeight,
         popupPadding,
       );
+      const transPopupPos = getPopupPosition(
+        triangPos,
+        rect,
+        transPopupWidth,
+        transPopupHeight,
+        popupPadding,
+      );
       if (triangPos.point.x == 0 || triangPos.point.y == 0) return;
       setShowAnnotPopup(true);
       setAnnotPopupPosition(annotPopupPos);
       setDictPopupPosition(dictPopupPos);
+      setTranslatorPopupPosition(transPopupPos);
       setTrianglePosition(triangPos);
       isShowingPopup.current = true;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selection, bookKey]);
 
   useEffect(() => {
@@ -357,13 +370,13 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
           popupHeight={dictPopupHeight}
         />
       )}
-      {showDeepLPopup && trianglePosition && dictPopupPosition && (
+      {showDeepLPopup && trianglePosition && translatorPopupPosition && (
         <DeepLPopup
           text={selection?.text as string}
-          position={dictPopupPosition}
+          position={translatorPopupPosition}
           trianglePosition={trianglePosition}
-          popupWidth={dictPopupWidth}
-          popupHeight={dictPopupHeight}
+          popupWidth={transPopupWidth}
+          popupHeight={transPopupHeight}
         />
       )}
       {showAnnotPopup && trianglePosition && annotPopupPosition && (

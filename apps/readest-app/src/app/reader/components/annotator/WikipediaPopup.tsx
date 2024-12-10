@@ -96,7 +96,8 @@ const WikipediaPopup: React.FC<WikipediaPopupProps> = ({
       }
     };
 
-    const langCode = typeof lang === 'string' ? lang : lang?.[0];
+    const bookLang = typeof lang === 'string' ? lang : lang?.[0];
+    const langCode = bookLang ? bookLang.split('-')[0]! : 'en';
     fetchSummary(text, langCode);
   }, [text, lang]);
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { BookDoc } from '@/libs/document';
+import { BookDoc, getDirection } from '@/libs/document';
 import { BookConfig, BookNote, BookSearchConfig, BookSearchResult } from '@/types/book';
 import { useReaderStore } from '@/store/readerStore';
 import { useParallelViewStore } from '@/store/parallelViewStore';
@@ -76,7 +76,7 @@ const FoliateViewer: React.FC<{
   const viewRef = useRef<FoliateView | null>(null);
   const isViewCreated = useRef(false);
   const { getView, setView: setFoliateView, setProgress, getViewSettings } = useReaderStore();
-  const { hoveredBookKey, setHoveredBookKey } = useReaderStore();
+  const { hoveredBookKey, setHoveredBookKey, setViewSettings } = useReaderStore();
   const { getParallels } = useParallelViewStore();
   const { themeCode } = useTheme();
 
@@ -120,7 +120,10 @@ const FoliateViewer: React.FC<{
     const detail = (event as CustomEvent).detail;
     console.log('doc loaded:', detail);
     if (detail.doc) {
+      const writingDir = viewRef.current?.renderer.setStyles && getDirection(detail.doc);
       const viewSettings = getViewSettings(bookKey)!;
+      viewSettings.vertical = writingDir?.vertical || false;
+      setViewSettings(bookKey, viewSettings);
       if (viewSettings.scrolled && shouldAutoHideScrollbar) {
         handleScrollbarAutoHide(detail.doc);
       }
