@@ -1,7 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
 import { MdInfoOutline } from 'react-icons/md';
-import { formatAuthors } from '@/utils/book';
 
 interface BookCardProps {
   cover: string;
@@ -24,7 +23,7 @@ const BookCard: React.FC<BookCardProps> = ({ cover, title, author }) => {
       />
       <div className='min-w-0 flex-1'>
         <h4 className='line-clamp-2 w-[90%] text-sm font-semibold'>{title}</h4>
-        <p className='text-neutral-content truncate text-xs'>{formatAuthors(author)}</p>
+        <p className='text-neutral-content truncate text-xs'>{author}</p>
       </div>
       <button
         className='btn btn-ghost hover:bg-base-300 h-6 min-h-6 w-6 rounded-full p-0 transition-colors'

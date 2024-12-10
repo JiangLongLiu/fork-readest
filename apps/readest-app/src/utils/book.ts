@@ -37,11 +37,13 @@ interface Contributor {
   name: LanguageMap;
 }
 
+const userLang = navigator?.language || 'en';
+
 const formatLanguageMap = (x: string | LanguageMap): string => {
   if (!x) return '';
   if (typeof x === 'string') return x;
   const keys = Object.keys(x);
-  return x[keys[0]!]!;
+  return x[userLang] || x[keys[0]!]!;
 };
 
 const listFormat = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' });
@@ -56,3 +58,7 @@ export const formatAuthors = (contributors: string | Contributor | [string | Con
     : typeof contributors === 'string'
       ? contributors
       : formatLanguageMap(contributors?.name);
+
+export const formatTitle = (title: string | LanguageMap) => {
+  return typeof title === 'string' ? title : formatLanguageMap(title);
+};

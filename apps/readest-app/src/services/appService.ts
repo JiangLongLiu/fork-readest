@@ -11,6 +11,8 @@ import {
   getConfigFilename,
   getLibraryFilename,
   INIT_BOOK_CONFIG,
+  formatTitle,
+  formatAuthors,
 } from '@/utils/book';
 import { RemoteFile } from '@/utils/file';
 import { partialMD5 } from '@/utils/md5';
@@ -130,8 +132,8 @@ export abstract class BaseAppService implements AppService {
       const book: Book = {
         hash,
         format,
-        title: loadedBook.metadata.title,
-        author: loadedBook.metadata.author,
+        title: formatTitle(loadedBook.metadata.title),
+        author: formatAuthors(loadedBook.metadata.author),
         lastUpdated: Date.now(),
       };
       if (!(await this.fs.exists(getDir(book), 'Books'))) {
