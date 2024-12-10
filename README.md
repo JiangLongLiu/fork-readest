@@ -8,10 +8,11 @@
 [Readest][link-website] is an open-source ebook reader designed for immersive and deep reading experiences. Built as a modern rewrite of [Foliate](https://github.com/johnfactotum/foliate), it leverages [Next.js 15](https://github.com/vercel/next.js) and [Tauri v2](https://github.com/tauri-apps/tauri) to offer a seamless cross-platform experience on macOS, Windows, Linux and Web, with support for mobile platforms coming soon.
 
 [![Website][badge-website]][link-website]
-[![AGPL Licence][badge-license]](LICENSE)
+[![Web App][badge-web-app]][link-web-readest]
 [![OS][badge-platforms]][link-website]
 [![][badge-discord]][link-discord]
 <br>
+[![AGPL Licence][badge-license]](LICENSE)
 [![Latest release][badge-release]][link-gh-releases]
 [![Last commit][badge-last-commit]][link-gh-commits]
 [![Commits][badge-commit-activity]][link-gh-pulse]
@@ -30,7 +31,7 @@
 
 <div align="center">
   <a href="https://readest.com" target="_blank">
-    <img src="./data/screenshots/readest_landing_preview.png" alt="Readest Banner" width="100%" />
+    <img src="./data/screenshots/landing_preview.png" alt="Readest Banner" width="100%" />
   </a>
 </div>
 
@@ -75,13 +76,15 @@ Stay tuned for continuous improvements and updates! Contributions and suggestion
 
 ## Screenshots
 
-![Annotations](./data/screenshots/annotations.jpeg)
+![Annotations](./data/screenshots/annotations.png)
 
-![Wikipedia](./data/screenshots/wikipedia.jpeg)
+![Wikipedia](./data/screenshots/wikipedia.png)
 
-![DeepL](./data/screenshots/deepl.jpeg)
+![DeepL](./data/screenshots/deepl.png)
 
-![Dark Mode](./data/screenshots/dark_mode.jpeg)
+![Footnote](./data/screenshots/footnote_popover.png)
+
+![Dark Mode](./data/screenshots/dark_mode.png)
 
 ---
 
@@ -165,13 +168,21 @@ Readest is open-source, and contributions are welcome! Feel free to open issues,
 
 ## License
 
-Readest is distributed under the AGPL-3.0 License. See the [LICENSE](LICENSE) file for details.
+Readest is free software: you can redistribute it and/or modify it under the terms of the [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.html) as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See the [LICENSE](LICENSE) file for details.
+
+The following JavaScript libraries are bundled in this software:
+
+- [foliate-js](https://github.com/johnfactotum/foliate-js), which is MIT licensed.
+- [zip.js](https://github.com/gildas-lormeau/zip.js), which is licensed under the BSD-3-Clause license.
+- [fflate](https://github.com/101arrowz/fflate), which is MIT licensed.
+- [PDF.js](https://github.com/mozilla/pdf.js), which is licensed under Apache License 2.0.
 
 ---
 
 <div align="center" style="color: gray;">Happy reading with Readest!</div>
 
 [badge-website]: https://img.shields.io/badge/website-readest.com-orange
+[badge-web-app]: https://img.shields.io/badge/read%20online-web.readest.com-orange
 [badge-license]: https://img.shields.io/github/license/chrox/readest?color=teal
 [badge-release]: https://img.shields.io/github/release/chrox/readest?color=green
 [badge-platforms]: https://img.shields.io/badge/OS-macOS%2C%20Windows%2C%20Linux%2C%20Web-green
