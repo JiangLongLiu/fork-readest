@@ -1,11 +1,11 @@
 import clsx from 'clsx';
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PiPlus } from 'react-icons/pi';
 import { MdDelete, MdOpenInNew } from 'react-icons/md';
 import { MdCheckCircle, MdCheckCircleOutline } from 'react-icons/md';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
 import { Book, BooksGroup } from '@/types/book';
@@ -49,16 +49,40 @@ interface BookshelfProps {
 
 const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImportBooks }) => {
   const router = useRouter();
-  const { envConfig } = useEnv();
+  const searchParams = useSearchParams();
+  const { envConfig, appService } = useEnv();
   const { deleteBook } = useLibraryStore();
   const [loading, setLoading] = useState(false);
   const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [clickedImage, setClickedImage] = useState<string | null>(null);
+  const [importBookUrl] = useState(searchParams.get('url') || '');
+  const isImportingBook = useRef(false);
 
-  React.useEffect(() => {
+  const { setLibrary } = useLibraryStore();
+
+  useEffect(() => {
     setSelectedBooks([]);
   }, [isSelectMode]);
+
+  useEffect(() => {
+    if (isImportingBook.current) return;
+    isImportingBook.current = true;
+
+    if (importBookUrl && appService) {
+      const importBook = async () => {
+        console.log('Importing book from URL:', importBookUrl);
+        const book = await appService.importBook(importBookUrl, libraryBooks);
+        if (book) {
+          setLibrary(libraryBooks);
+          appService.saveLibraryBooks(libraryBooks);
+          navigateToReader(router, [book.hash]);
+        }
+      };
+      importBook();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importBookUrl, appService]);
 
   const bookshelfItems = generateBookshelfItems(libraryBooks);
 

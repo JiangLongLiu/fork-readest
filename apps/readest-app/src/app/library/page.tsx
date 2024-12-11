@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Book } from '@/types/book';
@@ -207,11 +207,13 @@ const LibraryPage = () => {
       {libraryLoaded &&
         (libraryBooks.length > 0 ? (
           <div className='mt-12 flex-grow overflow-auto px-2'>
-            <Bookshelf
-              libraryBooks={libraryBooks}
-              isSelectMode={isSelectMode}
-              onImportBooks={handleImportBooks}
-            />
+            <Suspense>
+              <Bookshelf
+                libraryBooks={libraryBooks}
+                isSelectMode={isSelectMode}
+                onImportBooks={handleImportBooks}
+              />
+            </Suspense>
           </div>
         ) : (
           <div className='hero h-screen items-center justify-center'>

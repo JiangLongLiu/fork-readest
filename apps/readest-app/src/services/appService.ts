@@ -143,10 +143,10 @@ export abstract class BaseAppService implements AppService {
         await this.fs.createDir(getDir(book), 'Books');
       }
       if (saveBook && (!(await this.fs.exists(getFilename(book), 'Books')) || overwrite)) {
-        if (typeof file === 'string') {
+        if (typeof file === 'string' && !isValidURL(file)) {
           await this.fs.copyFile(file, getFilename(book), 'Books');
         } else {
-          await this.fs.writeFile(getFilename(book), 'Books', await file.arrayBuffer());
+          await this.fs.writeFile(getFilename(book), 'Books', await fileobj.arrayBuffer());
         }
       }
       if (saveCover && (!(await this.fs.exists(getCoverFilename(book), 'Books')) || overwrite)) {
@@ -187,16 +187,18 @@ export abstract class BaseAppService implements AppService {
 
   async loadBookContent(book: Book, settings: SystemSettings): Promise<BookContent> {
     let file: File;
-    if (book.url) {
-      file = await new RemoteFile(book.url).open();
-    } else {
-      const fp = getFilename(book);
+    const fp = getFilename(book);
+    if (await this.fs.exists(fp, 'Books')) {
       if (this.appPlatform === 'web') {
         const content = await this.fs.readFile(fp, 'Books', 'binary');
         file = new File([content], fp);
       } else {
         file = await new RemoteFile(this.fs.getURL(`${this.localBooksDir}/${fp}`), fp).open();
       }
+    } else if (book.url) {
+      file = await new RemoteFile(book.url).open();
+    } else {
+      throw new Error('Book file not found');
     }
     return { book, file, config: await this.loadBookConfig(book, settings) };
   }
