@@ -50,12 +50,12 @@ const getAdditionalFontFaces = () => `
   }
   @font-face {
     font-family: "Heiti";
-    src: url("https://db.onlinewebfonts.com/t/881ef4472a9f34e6d8beb1cad649d168.eot");
-    src: url("https://db.onlinewebfonts.com/t/881ef4472a9f34e6d8beb1cad649d168.eot?#iefix")format("embedded-opentype"),
-    url("https://db.onlinewebfonts.com/t/881ef4472a9f34e6d8beb1cad649d168.woff2")format("woff2"),
-    url("https://db.onlinewebfonts.com/t/881ef4472a9f34e6d8beb1cad649d168.woff")format("woff"),
-    url("https://db.onlinewebfonts.com/t/881ef4472a9f34e6d8beb1cad649d168.ttf")format("truetype"),
-    url("https://db.onlinewebfonts.com/t/881ef4472a9f34e6d8beb1cad649d168.svg#STHeiti SC Medium")format("svg");
+    src: url("https://db.onlinewebfonts.com/t/a4948b9d43a91468825a5251df1ec58d.eot");
+    src: url("https://db.onlinewebfonts.com/t/a4948b9d43a91468825a5251df1ec58d.eot?#iefix")format("embedded-opentype"),
+    url("https://db.onlinewebfonts.com/t/a4948b9d43a91468825a5251df1ec58d.woff2")format("woff2"),
+    url("https://db.onlinewebfonts.com/t/a4948b9d43a91468825a5251df1ec58d.woff")format("woff"),
+    url("https://db.onlinewebfonts.com/t/a4948b9d43a91468825a5251df1ec58d.ttf")format("truetype"),
+    url("https://db.onlinewebfonts.com/t/a4948b9d43a91468825a5251df1ec58d.svg#WenQuanYi Micro Hei")format("svg");
   }
 `;
 
@@ -108,14 +108,13 @@ const getLayoutStyles = (
     color: ${fg};
     zoom: ${zoomLevel}%; 
   }
-  body * {
+  body *:not(#b1):not(#b1 *):not(#b2):not(#b2 *) {
     color: inherit;
     border-color: currentColor !important;
     ${bg === '#ffffff' ? '' : `background-color: ${bg} !important;`}
   }
   svg, img {
     background-color: transparent !important;
-    mix-blend-mode: multiply;
   }
   p, li, blockquote, dd {
     text-align: ${justify ? 'justify' : 'start'};
