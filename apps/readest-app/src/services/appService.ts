@@ -25,6 +25,7 @@ import {
   SYSTEM_SETTINGS_VERSION,
   DEFAULT_BOOK_SEARCH_CONFIG,
 } from './constants';
+import { isValidURL } from '@/utils/misc';
 
 export abstract class BaseAppService implements AppService {
   localBooksDir: string = '';
@@ -95,6 +96,8 @@ export abstract class BaseAppService implements AppService {
   async importBook(
     file: string | File,
     books: Book[],
+    saveBook: boolean = true,
+    saveCover: boolean = true,
     overwrite: boolean = false,
   ): Promise<Book | null> {
     try {
@@ -139,14 +142,14 @@ export abstract class BaseAppService implements AppService {
       if (!(await this.fs.exists(getDir(book), 'Books'))) {
         await this.fs.createDir(getDir(book), 'Books');
       }
-      if (!(await this.fs.exists(getFilename(book), 'Books')) || overwrite) {
+      if (saveBook && (!(await this.fs.exists(getFilename(book), 'Books')) || overwrite)) {
         if (typeof file === 'string') {
           await this.fs.copyFile(file, getFilename(book), 'Books');
         } else {
           await this.fs.writeFile(getFilename(book), 'Books', await file.arrayBuffer());
         }
       }
-      if (!(await this.fs.exists(getCoverFilename(book), 'Books')) || overwrite) {
+      if (saveCover && (!(await this.fs.exists(getCoverFilename(book), 'Books')) || overwrite)) {
         const cover = await loadedBook.getCover();
         if (cover) {
           await this.fs.writeFile(getCoverFilename(book), 'Books', await cover.arrayBuffer());
@@ -158,6 +161,9 @@ export abstract class BaseAppService implements AppService {
         books.splice(0, 0, book);
       }
 
+      if (typeof file === 'string' && isValidURL(file)) {
+        book.url = file;
+      }
       if (this.appPlatform === 'web') {
         book.coverImageUrl = await this.getCoverImageBlobUrl(book);
       } else {
@@ -180,13 +186,17 @@ export abstract class BaseAppService implements AppService {
   }
 
   async loadBookContent(book: Book, settings: SystemSettings): Promise<BookContent> {
-    const fp = getFilename(book);
     let file: File;
-    if (this.appPlatform === 'web') {
-      const content = await this.fs.readFile(fp, 'Books', 'binary');
-      file = new File([content], fp);
+    if (book.url) {
+      file = await new RemoteFile(book.url).open();
     } else {
-      file = await new RemoteFile(this.fs.getURL(`${this.localBooksDir}/${fp}`), fp).open();
+      const fp = getFilename(book);
+      if (this.appPlatform === 'web') {
+        const content = await this.fs.readFile(fp, 'Books', 'binary');
+        file = new File([content], fp);
+      } else {
+        file = await new RemoteFile(this.fs.getURL(`${this.localBooksDir}/${fp}`), fp).open();
+      }
     }
     return { book, file, config: await this.loadBookConfig(book, settings) };
   }

@@ -18,6 +18,7 @@ import { type as osType } from '@tauri-apps/plugin-os';
 import { Book } from '@/types/book';
 import { ToastType, FileSystem, BaseDir, AppPlatform } from '@/types/system';
 import { getCoverFilename } from '@/utils/book';
+import { isValidURL } from '@/utils/misc';
 
 import { BaseAppService } from './appService';
 import { LOCAL_BOOKS_SUBDIR } from './constants';
@@ -51,7 +52,7 @@ const resolvePath = (fp: string, base: BaseDir): { baseDir: number; base: BaseDi
 
 export const nativeFileSystem: FileSystem = {
   getURL(path: string) {
-    return convertFileSrc(path);
+    return isValidURL(path) ? path : convertFileSrc(path);
   },
   async getBlobURL(path: string, base: BaseDir) {
     const content = await this.readFile(path, base, 'binary');

@@ -23,6 +23,8 @@ export const makeSafeFilename = (filename: string, replacement = '_') => {
   return safeName.trim();
 };
 
+export const getUserLang = () => navigator?.language.split('-')[0] || 'en';
+
 export const getOSPlatform = () => {
   const userAgent = navigator.userAgent.toLowerCase();
 
@@ -33,4 +35,13 @@ export const getOSPlatform = () => {
   if (userAgent.includes('android')) return 'android';
 
   return '';
+};
+
+export const isValidURL = (url: string, allowedSchemes: string[] = ['http', 'https']) => {
+  try {
+    const { protocol } = new URL(url);
+    return allowedSchemes.some((scheme) => `${scheme}:` === protocol);
+  } catch {
+    return false;
+  }
 };

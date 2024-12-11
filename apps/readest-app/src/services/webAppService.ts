@@ -1,6 +1,7 @@
 import { Book } from '@/types/book';
 import { ToastType, FileSystem, BaseDir, AppPlatform } from '@/types/system';
 import { getCoverFilename } from '@/utils/book';
+import { isValidURL } from '@/utils/misc';
 
 import { BaseAppService } from './appService';
 import { LOCAL_BOOKS_SUBDIR } from './constants';
@@ -37,7 +38,11 @@ async function openIndexedDB(): Promise<IDBDatabase> {
 
 const indexedDBFileSystem: FileSystem = {
   getURL(path: string) {
-    return URL.createObjectURL(new Blob([path]));
+    if (isValidURL(path)) {
+      return path;
+    } else {
+      return URL.createObjectURL(new Blob([path]));
+    }
   },
   async getBlobURL(path: string, base: BaseDir) {
     try {

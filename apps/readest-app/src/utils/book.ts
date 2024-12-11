@@ -1,6 +1,6 @@
 import { EXTS } from '@/libs/document';
 import { Book, BookConfig } from '@/types/book';
-import { makeSafeFilename } from './misc';
+import { getUserLang, makeSafeFilename } from './misc';
 
 export const getDir = (book: Book) => {
   return `${book.hash}`;
@@ -37,7 +37,7 @@ interface Contributor {
   name: LanguageMap;
 }
 
-const userLang = navigator?.language || 'en';
+const userLang = getUserLang();
 
 const formatLanguageMap = (x: string | LanguageMap): string => {
   if (!x) return '';

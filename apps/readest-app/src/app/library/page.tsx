@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Book } from '@/types/book';
@@ -16,10 +16,11 @@ import { useEnv } from '@/context/EnvContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useLibraryStore } from '@/store/libraryStore';
 import { useSettingsStore } from '@/store/settingsStore';
+import { useDemoBooks } from './hooks/useDemoBooks';
 
 import Spinner from '@/components/Spinner';
-import LibraryHeader from '@/app/library/components/LibraryHeader';
-import Bookshelf from '@/app/library/components/Bookshelf';
+import LibraryHeader from './components/LibraryHeader';
+import Bookshelf from './components/Bookshelf';
 
 const LibraryPage = () => {
   const router = useRouter();
@@ -36,8 +37,9 @@ const LibraryPage = () => {
   const isInitiating = useRef(false);
   const [libraryLoaded, setLibraryLoaded] = useState(false);
   const [isSelectMode, setIsSelectMode] = useState(false);
+  const demoBooks = useDemoBooks();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const doAppUpdates = async () => {
       if (isTauriAppPlatform()) {
         await checkForAppUpdates();
@@ -67,7 +69,7 @@ const LibraryPage = () => {
     [],
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isInitiating.current) return;
     isInitiating.current = true;
 
@@ -107,6 +109,23 @@ const LibraryPage = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (demoBooks.length > 0 && libraryLoaded) {
+      const newLibrary = [...libraryBooks];
+      for (const book of demoBooks) {
+        const idx = newLibrary.findIndex((b) => b.hash === book.hash);
+        if (idx === -1) {
+          newLibrary.push(book);
+        } else {
+          newLibrary[idx] = book;
+        }
+      }
+      setLibrary(newLibrary);
+      appService?.saveLibraryBooks(newLibrary);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demoBooks, libraryLoaded]);
 
   const importBooks = async (files: [string | File]) => {
     setLoading(true);
