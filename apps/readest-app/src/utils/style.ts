@@ -109,7 +109,6 @@ const getLayoutStyles = (
     zoom: ${zoomLevel}%; 
   }
   body *:not(#b1):not(#b1 *):not(#b2):not(#b2 *):not(.bg):not(.bg *):not(.vol):not(.vol *):not(.background):not(.background *) {
-    color: inherit;
     border-color: currentColor !important;
     ${bg === '#ffffff' ? '' : `background-color: ${bg} !important;`}
   }
