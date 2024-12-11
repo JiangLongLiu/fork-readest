@@ -170,7 +170,6 @@ export class DocumentLoader {
 export const getDirection = (doc: Document) => {
   const { defaultView } = doc;
   const { writingMode, direction } = defaultView!.getComputedStyle(doc.body);
-  console.log('direction', writingMode, direction);
   const vertical = writingMode === 'vertical-rl' || writingMode === 'vertical-lr';
   const rtl = doc.body.dir === 'rtl' || direction === 'rtl' || doc.documentElement.dir === 'rtl';
   return { vertical, rtl };

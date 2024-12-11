@@ -5,7 +5,7 @@ import { useReaderStore } from '@/store/readerStore';
 import { useParallelViewStore } from '@/store/parallelViewStore';
 import { useFoliateEvents } from '../hooks/useFoliateEvents';
 import { getOSPlatform } from '@/utils/misc';
-import { getStyles } from '@/utils/style';
+import { getStyles, mountAdditionalFonts } from '@/utils/style';
 import { useTheme } from '@/hooks/useTheme';
 import { ONE_COLUMN_MAX_INLINE_SIZE } from '@/services/constants';
 import {
@@ -127,6 +127,9 @@ const FoliateViewer: React.FC<{
       if (viewSettings.scrolled && shouldAutoHideScrollbar) {
         handleScrollbarAutoHide(detail.doc);
       }
+
+      mountAdditionalFonts(detail.doc);
+
       if (!detail.doc.isEventListenersAdded) {
         detail.doc.isEventListenersAdded = true;
         detail.doc.addEventListener('keydown', handleKeydown.bind(null, bookKey));

@@ -29,6 +29,36 @@ const getFontStyles = (
   return fontStyles;
 };
 
+const getAdditionalFontFaces = () => `
+  @font-face {
+    font-family: "FangSong";
+    src: url("https://db.onlinewebfonts.com/t/2ecbfe1d9bfc191c6f15c0ccc23cbd43.eot");
+    src: url("https://db.onlinewebfonts.com/t/2ecbfe1d9bfc191c6f15c0ccc23cbd43.eot?#iefix") format("embedded-opentype"),
+    url("https://db.onlinewebfonts.com/t/2ecbfe1d9bfc191c6f15c0ccc23cbd43.woff2") format("woff2"),
+    url("https://db.onlinewebfonts.com/t/2ecbfe1d9bfc191c6f15c0ccc23cbd43.woff") format("woff"),
+    url("https://db.onlinewebfonts.com/t/2ecbfe1d9bfc191c6f15c0ccc23cbd43.ttf") format("truetype"),
+    url("https://db.onlinewebfonts.com/t/2ecbfe1d9bfc191c6f15c0ccc23cbd43.svg#FangSong") format("svg");
+  }
+  @font-face {
+    font-family: "Kaiti";
+    src: url("https://db.onlinewebfonts.com/t/1ee9941f1b8c128110ca4307dda59917.eot");
+    src: url("https://db.onlinewebfonts.com/t/1ee9941f1b8c128110ca4307dda59917.eot?#iefix")format("embedded-opentype"),
+    url("https://db.onlinewebfonts.com/t/1ee9941f1b8c128110ca4307dda59917.woff2")format("woff2"),
+    url("https://db.onlinewebfonts.com/t/1ee9941f1b8c128110ca4307dda59917.woff")format("woff"),
+    url("https://db.onlinewebfonts.com/t/1ee9941f1b8c128110ca4307dda59917.ttf")format("truetype"),
+    url("https://db.onlinewebfonts.com/t/1ee9941f1b8c128110ca4307dda59917.svg#STKaiti")format("svg");
+  }
+  @font-face {
+    font-family: "Heiti";
+    src: url("https://db.onlinewebfonts.com/t/881ef4472a9f34e6d8beb1cad649d168.eot");
+    src: url("https://db.onlinewebfonts.com/t/881ef4472a9f34e6d8beb1cad649d168.eot?#iefix")format("embedded-opentype"),
+    url("https://db.onlinewebfonts.com/t/881ef4472a9f34e6d8beb1cad649d168.woff2")format("woff2"),
+    url("https://db.onlinewebfonts.com/t/881ef4472a9f34e6d8beb1cad649d168.woff")format("woff"),
+    url("https://db.onlinewebfonts.com/t/881ef4472a9f34e6d8beb1cad649d168.ttf")format("truetype"),
+    url("https://db.onlinewebfonts.com/t/881ef4472a9f34e6d8beb1cad649d168.svg#STHeiti SC Medium")format("svg");
+  }
+`;
+
 const getLayoutStyles = (
   spacing: number,
   justify: boolean,
@@ -146,4 +176,10 @@ export const getStyles = (viewSettings: ViewSettings, themeCode: ThemeCode) => {
   );
   const userStylesheet = viewSettings.userStylesheet!;
   return `${layoutStyles}\n${fontStyles}\n${fontfacesCSS}\n${userStylesheet}`;
+};
+
+export const mountAdditionalFonts = (document: Document) => {
+  const style = document.createElement('style');
+  style.textContent = getAdditionalFontFaces();
+  document.head.appendChild(style);
 };
