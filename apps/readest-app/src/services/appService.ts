@@ -136,7 +136,7 @@ export abstract class BaseAppService implements AppService {
         hash,
         format,
         title: formatTitle(loadedBook.metadata.title),
-        author: formatAuthors(loadedBook.metadata.author),
+        author: formatAuthors(loadedBook.metadata.language, loadedBook.metadata.author),
         lastUpdated: Date.now(),
       };
       if (!(await this.fs.exists(getDir(book), 'Books'))) {

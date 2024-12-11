@@ -46,11 +46,29 @@ const formatLanguageMap = (x: string | LanguageMap): string => {
   return x[userLang] || x[keys[0]!]!;
 };
 
-const listFormat = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' });
+const listFormat = (lang: string) => {
+  if (lang === 'zh') {
+    return new Intl.ListFormat('en', { style: 'narrow', type: 'unit' });
+  } else {
+    return new Intl.ListFormat(lang, { style: 'long', type: 'conjunction' });
+  }
+};
 
-export const formatAuthors = (contributors: string | Contributor | [string | Contributor]) =>
+const getBookLangCode = (lang: string | string[] | undefined) => {
+  try {
+    const bookLang = typeof lang === 'string' ? lang : lang?.[0];
+    return bookLang ? bookLang.split('-')[0]! : 'en';
+  } catch {
+    return 'en';
+  }
+};
+
+export const formatAuthors = (
+  bookLang: string | string[] | undefined,
+  contributors: string | Contributor | [string | Contributor],
+) =>
   Array.isArray(contributors)
-    ? listFormat.format(
+    ? listFormat(getBookLangCode(bookLang)).format(
         contributors.map((contributor) =>
           typeof contributor === 'string' ? contributor : formatLanguageMap(contributor?.name),
         ),
