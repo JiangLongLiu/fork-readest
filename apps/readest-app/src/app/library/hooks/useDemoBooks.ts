@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useEnv } from '@/context/EnvContext';
 import { Book } from '@/types/book';
 import { getUserLang } from '@/utils/misc';
+import { isWebAppPlatform } from '@/services/environment';
 
 import libraryEn from '@/data/demo/library.en.json';
 import libraryZh from '@/data/demo/library.zh.json';
@@ -40,7 +41,7 @@ export const useDemoBooks = () => {
     };
 
     const demoBooksFetchedFlag = localStorage.getItem('demoBooksFetched');
-    if (!demoBooksFetchedFlag) {
+    if (isWebAppPlatform() && !demoBooksFetchedFlag) {
       fetchDemoBooks();
       localStorage.setItem('demoBooksFetched', 'true');
     }
