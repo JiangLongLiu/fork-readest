@@ -66,6 +66,7 @@ const Popup = ({
       }}
     />
     <div
+      id='popup-container'
       className={`bg-base-200 absolute rounded-lg font-sans shadow-xl ${className}`}
       style={{
         width: `${width}px`,

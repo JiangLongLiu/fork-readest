@@ -41,7 +41,13 @@ const FootnotePopup: React.FC<FootnotePopupProps> = ({ bookKey, bookDoc }) => {
       renderer.setAttribute('margin', '0px');
       renderer.setAttribute('gap', '5%');
       const viewSettings = getViewSettings(bookKey)!;
-      renderer.setStyles?.(getStyles(viewSettings, themeCode));
+      const popupTheme = { ...themeCode };
+      const popupContainer = document.getElementById('popup-container');
+      if (popupContainer) {
+        const backgroundColor = getComputedStyle(popupContainer).backgroundColor;
+        popupTheme.bg = backgroundColor;
+      }
+      renderer.setStyles?.(getStyles(viewSettings, popupTheme));
     };
 
     const handleRender = (e: Event) => {
@@ -57,7 +63,7 @@ const FootnotePopup: React.FC<FootnotePopupProps> = ({ bookKey, bookDoc }) => {
       footnoteHandler.removeEventListener('render', handleRender);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view]);
+  }, [view, themeCode]);
 
   const docLinkHandler = async (event: Event) => {
     const detail = (event as CustomEvent).detail;
