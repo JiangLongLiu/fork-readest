@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { useEnv } from '@/context/EnvContext';
@@ -38,7 +38,7 @@ const ReaderContent: React.FC<{ ids?: string; settings: SystemSettings }> = ({ i
 
   useBookShortcuts({ sideBarBookKey, bookKeys });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isInitiating.current) return;
     isInitiating.current = true;
 
@@ -60,16 +60,28 @@ const ReaderContent: React.FC<{ ids?: string; settings: SystemSettings }> = ({ i
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const saveConfigAndCloseBook = (bookKey: string) => {
-    console.log('Closing book', bookKey);
-    getView(bookKey)?.close();
-    getView(bookKey)?.remove();
+  useEffect(() => {
+    window.addEventListener('beforeunload', handleCloseBooks);
+    return () => {
+      window.removeEventListener('beforeunload', handleCloseBooks);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookKeys]);
+
+  const saveBookConfig = (bookKey: string) => {
     const config = getConfig(bookKey);
     const { book } = getBookData(bookKey) || {};
     const { isPrimary } = getViewState(bookKey) || {};
     if (isPrimary && book && config) {
       saveConfig(envConfig, bookKey, config, settings);
     }
+  };
+
+  const saveConfigAndCloseBook = async (bookKey: string) => {
+    console.log('Closing book', bookKey);
+    getView(bookKey)?.close();
+    getView(bookKey)?.remove();
+    saveBookConfig(bookKey);
     clearViewState(bookKey);
   };
 
@@ -82,7 +94,12 @@ const ReaderContent: React.FC<{ ids?: string; settings: SystemSettings }> = ({ i
     bookKeys.forEach((key) => {
       saveConfigAndCloseBook(key);
     });
-    saveSettingsAndGoToLibrary();
+    saveSettings(envConfig, settings);
+  };
+
+  const handleCloseBooksToLibrary = () => {
+    handleCloseBooks();
+    navigateToLibrary(router);
   };
 
   const handleCloseBook = async (bookKey: string) => {
@@ -116,7 +133,7 @@ const ReaderContent: React.FC<{ ids?: string; settings: SystemSettings }> = ({ i
 
   return (
     <div className='flex h-screen'>
-      <SideBar onGoToLibrary={handleCloseBooks} />
+      <SideBar onGoToLibrary={handleCloseBooksToLibrary} />
       <BooksGrid bookKeys={bookKeys} onCloseBook={handleCloseBook} />
       <Notebook />
     </div>
