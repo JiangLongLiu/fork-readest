@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
 
 import { tauriHandleMinimize, tauriHandleToggleMaximize, tauriHandleClose } from '@/utils/window';
+import { isTauriAppPlatform } from '@/services/environment';
 
 interface WindowButtonsProps {
   className?: string;
@@ -66,6 +67,7 @@ const WindowButtons: React.FC<WindowButtonsProps> = ({
   };
 
   useEffect(() => {
+    if (!isTauriAppPlatform()) return;
     const headerElement = headerRef?.current;
     headerElement?.addEventListener('mousedown', handleMouseDown);
 
