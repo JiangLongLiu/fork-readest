@@ -195,6 +195,6 @@ The following JavaScript libraries are bundled in this software:
 [link-gh-releases]: https://github.com/chrox/readest/releases
 [link-gh-commits]: https://github.com/chrox/readest/commits/main
 [link-gh-pulse]: https://github.com/chrox/readest/pulse
-[link-discord]: https://discord.gg/jb2nzDts
+[link-discord]: https://discord.gg/gntyVNk3BJ
 [link-parallel-read]: https://readest.com/#parallel-read
 [link-koreader]: https://github.com/koreader/koreader
