@@ -44,10 +44,10 @@
     "epubjs": "^0.3.93",
     "foliate-js": "workspace:*",
     "js-md5": "^0.8.3",
-    "next": "15.0.3",
+    "next": "15.1.0",
     "posthog-js": "^1.194.1",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "react-icons": "^5.3.0",
     "tinycolor2": "^1.6.0",
     "zustand": "5.0.1"
