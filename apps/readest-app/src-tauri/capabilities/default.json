@@ -58,6 +58,8 @@
     "updater:default",
     "process:default",
     "process:allow-restart",
-    "cli:default"
+    "cli:default",
+    "oauth:allow-start",
+    "oauth:allow-cancel"
   ]
 }

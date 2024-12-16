@@ -7,6 +7,9 @@ import { PiSelectionAllDuotone } from 'react-icons/pi';
 import { useEnv } from '@/context/EnvContext';
 import useTrafficLight from '@/hooks/useTrafficLight';
 import WindowButtons from '@/components/WindowButtons';
+import Dropdown from '@/components/Dropdown';
+import { MdOutlineMenu } from 'react-icons/md';
+import SettingsMenu from './SettingsMenu';
 
 interface LibraryHeaderProps {
   isSelectMode: boolean;
@@ -85,12 +88,21 @@ const LibraryHeader: React.FC<LibraryHeaderProps> = ({
             </button>
           </div>
         </div>
-        <WindowButtons
-          headerRef={headerRef}
-          showMinimize={!isTrafficLightVisible && appService?.appPlatform !== 'web'}
-          showMaximize={!isTrafficLightVisible && appService?.appPlatform !== 'web'}
-          showClose={!isTrafficLightVisible && appService?.appPlatform !== 'web'}
-        />
+        <div className='flex h-full items-center'>
+          <Dropdown
+            className='exclude-title-bar-mousedown dropdown-bottom dropdown-end mr-2'
+            buttonClassName='btn btn-ghost h-8 min-h-8 w-8 p-0'
+            toggleButton={<MdOutlineMenu size={16} />}
+          >
+            <SettingsMenu />
+          </Dropdown>
+          <WindowButtons
+            headerRef={headerRef}
+            showMinimize={!isTrafficLightVisible && appService?.appPlatform !== 'web'}
+            showMaximize={!isTrafficLightVisible && appService?.appPlatform !== 'web'}
+            showClose={!isTrafficLightVisible && appService?.appPlatform !== 'web'}
+          />
+        </div>
       </div>
     </div>
   );

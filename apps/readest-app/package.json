@@ -28,6 +28,10 @@
     "release-macos-universial-appstore": "dotenv -e .env.tauri.local -e .env.apple-appstore.local -- bash scripts/release-mac-appstore.sh"
   },
   "dependencies": {
+    "@fabianlars/tauri-plugin-oauth": "2",
+    "@supabase/auth-ui-react": "^0.4.7",
+    "@supabase/auth-ui-shared": "^0.1.8",
+    "@supabase/supabase-js": "^2.47.7",
     "@tauri-apps/api": "2.1.1",
     "@tauri-apps/plugin-cli": "^2.0.0",
     "@tauri-apps/plugin-dialog": "^2.0.1",

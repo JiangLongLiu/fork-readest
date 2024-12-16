@@ -3,6 +3,7 @@ import React from 'react';
 
 interface MenuItemProps {
   label: string;
+  labelClass?: string;
   shortcut?: string;
   disabled?: boolean;
   noIcon?: boolean;
@@ -13,6 +14,7 @@ interface MenuItemProps {
 
 const MenuItem: React.FC<MenuItemProps> = ({
   label,
+  labelClass,
   shortcut,
   disabled,
   noIcon = false,
@@ -31,7 +33,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
     >
       <div className='flex items-center'>
         {!noIcon && <span style={{ minWidth: '20px' }}>{icon}</span>}
-        <span className='ml-2 max-w-32 truncate'>{label}</span>
+        <span className={clsx('ml-2 max-w-32 truncate', labelClass)}>{label}</span>
       </div>
       {shortcut && <span className='text-neutral-content text-sm'>{shortcut}</span>}
     </button>

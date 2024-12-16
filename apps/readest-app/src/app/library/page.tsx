@@ -21,6 +21,7 @@ import { useDemoBooks } from './hooks/useDemoBooks';
 import Spinner from '@/components/Spinner';
 import LibraryHeader from './components/LibraryHeader';
 import Bookshelf from './components/Bookshelf';
+import { AboutWindow } from '@/components/AboutWindow';
 
 const LibraryPage = () => {
   const router = useRouter();
@@ -230,6 +231,7 @@ const LibraryPage = () => {
             </div>
           </div>
         ))}
+      <AboutWindow />
     </div>
   );
 };
