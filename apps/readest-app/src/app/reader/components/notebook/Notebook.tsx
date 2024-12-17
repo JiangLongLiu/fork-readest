@@ -72,7 +72,6 @@ const Notebook: React.FC = ({}) => {
       type: 'annotation',
       cfi,
       note,
-      href: selection.href || '',
       text: selection.text,
       created: Date.now(),
     };

@@ -2,7 +2,7 @@ import React from 'react';
 
 import * as CFI from 'foliate-js/epubcfi.js';
 import { useBookDataStore } from '@/store/bookDataStore';
-import { findParentPath } from '@/utils/toc';
+import { findTocItemBS } from '@/utils/toc';
 import { TOCItem } from '@/libs/document';
 import { BookNote, BookNoteType } from '@/types/book';
 import BooknoteItem from './BooknoteItem';
@@ -26,17 +26,14 @@ const BooknoteView: React.FC<{
 
   const booknoteGroups: { [href: string]: BooknoteGroup } = {};
   for (const booknote of booknotes) {
-    const parentPath = findParentPath(toc, booknote.href);
-    if (parentPath.length > 0) {
-      const href = parentPath[0]!.href || '';
-      const label = parentPath[0]!.label || '';
-      const id = toc.findIndex((item) => item.href === href) || Infinity;
-      booknote.href = href;
-      if (!booknoteGroups[href]) {
-        booknoteGroups[href] = { id, href, label, booknotes: [] };
-      }
-      booknoteGroups[href].booknotes.push(booknote);
+    const tocItem = findTocItemBS(toc, booknote.cfi);
+    const href = tocItem?.href || '';
+    const label = tocItem?.label || '';
+    const id = tocItem?.id || 0;
+    if (!booknoteGroups[href]) {
+      booknoteGroups[href] = { id, href, label, booknotes: [] };
     }
+    booknoteGroups[href].booknotes.push(booknote);
   }
 
   Object.values(booknoteGroups).forEach((group) => {

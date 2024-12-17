@@ -3,8 +3,8 @@ import { create } from 'zustand';
 import { BookContent, BookConfig, PageInfo, BookProgress, ViewSettings } from '@/types/book';
 import { EnvConfigType } from '@/services/environment';
 import { FoliateView } from '@/app/reader/components/FoliateViewer';
-import { BookDoc, DocumentLoader, TOCItem } from '@/libs/document';
-import { updateTocID } from '@/utils/toc';
+import { BookDoc, DocumentLoader, SectionItem, TOCItem } from '@/libs/document';
+import { updateTocCFI, updateTocID } from '@/utils/toc';
 import { useSettingsStore } from './settingsStore';
 import { useBookDataStore } from './bookDataStore';
 import { useLibraryStore } from './libraryStore';
@@ -114,8 +114,13 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
         console.log('Loading book', key);
         const { book: loadedBookDoc } = await new DocumentLoader(file).open();
         const bookDoc = loadedBookDoc as BookDoc;
-        if (bookDoc.toc) {
+        if (bookDoc.toc && bookDoc.sections) {
           updateTocID(bookDoc.toc);
+          const sections = bookDoc.sections.reduce((map: Record<string, SectionItem>, section) => {
+            map[section.id] = section;
+            return map;
+          }, {});
+          updateTocCFI(bookDoc.toc, sections);
         }
         useBookDataStore.setState((state) => ({
           booksData: {

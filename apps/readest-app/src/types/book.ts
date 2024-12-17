@@ -27,7 +27,6 @@ export interface BookNote {
   id: string;
   type: BookNoteType;
   cfi: string;
-  href: string;
   text?: string;
   style?: HighlightStyle;
   color?: HighlightColor;
@@ -111,10 +110,7 @@ export interface BookConfig {
   lastUpdated: number;
   progress?: [number, number];
   location?: string;
-
   booknotes?: BookNote[];
-  removedNotesTimestamps?: Record<string, number>;
-
   searchConfig?: BookSearchConfig;
   viewSettings?: Partial<ViewSettings>;
 }

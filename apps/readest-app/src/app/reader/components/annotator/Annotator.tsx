@@ -217,14 +217,12 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
 
     const { booknotes: annotations = [] } = config;
     if (selection) navigator.clipboard.writeText(selection.text);
-    const { sectionHref: href } = progress;
     const cfi = view?.getCFI(selection.index, selection.range);
     if (!cfi) return;
     const annotation: BookNote = {
       id: uniqueId(),
       type: 'excerpt',
       cfi,
-      href,
       text: selection.text,
       note: '',
       created: Date.now(),
@@ -250,7 +248,6 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     if (!selection || !selection.text) return;
     setHighlightOptionsVisible(true);
     const { booknotes: annotations = [] } = config;
-    const { sectionHref: href } = progress;
     const cfi = view?.getCFI(selection.index, selection.range);
     if (!cfi) return;
     const style = settings.globalReadSettings.highlightStyle;
@@ -259,7 +256,6 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
       id: uniqueId(),
       type: 'annotation',
       cfi,
-      href,
       style,
       color,
       text: selection.text,

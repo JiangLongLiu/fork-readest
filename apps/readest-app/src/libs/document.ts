@@ -1,4 +1,5 @@
 import { BookFormat } from '@/types/book';
+import * as epubcfi from 'foliate-js/epubcfi.js';
 
 // A groupBy polyfill for foliate-js
 Object.groupBy ??= (iterable, callbackfn) => {
@@ -30,13 +31,22 @@ Map.groupBy ??= (iterable, callbackfn) => {
   return map;
 };
 
+export const CFI = epubcfi;
+
 export type DocumentFile = File;
 
 export interface TOCItem {
   id: number;
   label: string;
   href: string;
+  cfi?: string;
   subitems?: TOCItem[];
+}
+
+export interface SectionItem {
+  id: string;
+  cfi: string;
+  size: number;
 }
 
 export interface BookDoc {
@@ -48,6 +58,7 @@ export interface BookDoc {
     publisher?: string;
   };
   toc: Array<TOCItem>;
+  sections: Array<SectionItem>;
   getCover(): Promise<Blob | null>;
 }
 
