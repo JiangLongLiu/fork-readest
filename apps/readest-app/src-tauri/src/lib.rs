@@ -129,7 +129,7 @@ pub fn run() {
                 )?;
             }
             let win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
-                .title("")
+                .title("Readest")
                 .inner_size(800.0, 600.0)
                 .resizable(true)
                 .maximized(true);
