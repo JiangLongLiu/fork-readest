@@ -57,6 +57,7 @@ const SettingsMenu: React.FC<BookMenuProps> = ({ setIsDropdownOpen }) => {
                 src={avatarUrl}
                 alt='User Avatar'
                 className='h-5 w-5 rounded-full'
+                referrerPolicy='no-referrer'
                 width={20}
                 height={20}
               />
