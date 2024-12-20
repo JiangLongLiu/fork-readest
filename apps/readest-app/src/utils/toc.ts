@@ -1,4 +1,4 @@
-import { SectionItem, TOCItem, CFI } from '@/libs/document';
+import { SectionItem, TOCItem, CFI, BookDoc } from '@/libs/document';
 
 export const findParentPath = (toc: TOCItem[], href: string): TOCItem[] => {
   for (const item of toc) {
@@ -47,17 +47,21 @@ export const updateTocID = (items: TOCItem[], index = 0): number => {
   return index;
 };
 
-export const updateTocCFI = (items: TOCItem[], sections: { [id: string]: SectionItem }): void => {
+export const updateTocCFI = (
+  bookDoc: BookDoc,
+  items: TOCItem[],
+  sections: { [id: string]: SectionItem },
+): void => {
   items.forEach((item) => {
     if (item.href) {
-      const id = item.href.split('#')[0]!;
+      const id = bookDoc.splitTOCHref(item.href)[0]!;
       const section = sections[id];
       if (section) {
         item.cfi = section.cfi;
       }
     }
     if (item.subitems) {
-      updateTocCFI(item.subitems, sections);
+      updateTocCFI(bookDoc, item.subitems, sections);
     }
   });
 };

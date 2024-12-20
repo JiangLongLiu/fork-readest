@@ -114,13 +114,13 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
         console.log('Loading book', key);
         const { book: loadedBookDoc } = await new DocumentLoader(file).open();
         const bookDoc = loadedBookDoc as BookDoc;
-        if (bookDoc.toc && bookDoc.sections) {
+        if (bookDoc.toc?.length > 0 && bookDoc.sections?.length > 0) {
           updateTocID(bookDoc.toc);
           const sections = bookDoc.sections.reduce((map: Record<string, SectionItem>, section) => {
             map[section.id] = section;
             return map;
           }, {});
-          updateTocCFI(bookDoc.toc, sections);
+          updateTocCFI(bookDoc, bookDoc.toc, sections);
         }
         useBookDataStore.setState((state) => ({
           booksData: {
