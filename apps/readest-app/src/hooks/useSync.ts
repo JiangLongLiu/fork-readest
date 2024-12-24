@@ -32,8 +32,7 @@ const computeMaxTimestamp = (records: BookDataRecord[]): number => {
 
 export function useSync(bookKey?: string) {
   const { settings } = useSettingsStore();
-  const { getConfig } = useBookDataStore();
-
+  const { getConfig, setConfig } = useBookDataStore();
   const config = bookKey ? getConfig(bookKey) : null;
 
   const [syncingBooks, setSyncingBooks] = useState(false);
@@ -79,6 +78,7 @@ export function useSync(bookKey?: string) {
       const result = await syncClient.pullChanges(since, type, bookId);
       const maxTime = computeMaxTimestamp(result[type]);
       setLastSyncedAt(maxTime);
+      setSyncResult(result);
       switch (type) {
         case 'books':
           settings.lastSyncedAtBooks = maxTime;
@@ -86,15 +86,17 @@ export function useSync(bookKey?: string) {
         case 'configs':
           if (!bookId) {
             settings.lastSyncedAtConfigs = maxTime;
-          } else if (config) {
+          } else if (bookKey && config) {
             config.lastSyncedAtConfig = maxTime;
+            setConfig(bookKey, config);
           }
           break;
         case 'notes':
           if (!bookId) {
             settings.lastSyncedAtNotes = maxTime;
-          } else if (config) {
+          } else if (bookKey && config) {
             config.lastSyncedAtNotes = maxTime;
+            setConfig(bookKey, config);
           }
           break;
       }
