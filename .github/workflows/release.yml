@@ -96,9 +96,6 @@ jobs:
       - name: copy .env.local to apps/readest-app
         run: cp .env.local apps/readest-app/.env.local
 
-      - name: fix dynamic route for Next.js, see https://github.com/vercel/next.js/discussions/55393
-        run: rimraf "apps/readest-app/src/app/reader/[ids]"
-
       - name: install dependencies (ubuntu only)
         if: matrix.config.os == 'ubuntu-latest'
         run: |

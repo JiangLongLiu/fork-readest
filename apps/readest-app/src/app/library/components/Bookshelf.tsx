@@ -56,7 +56,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
   const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [clickedImage, setClickedImage] = useState<string | null>(null);
-  const [importBookUrl] = useState(searchParams.get('url') || '');
+  const [importBookUrl] = useState(searchParams?.get('url') || '');
   const isImportingBook = useRef(false);
 
   const { setLibrary } = useLibraryStore();

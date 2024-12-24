@@ -1,3 +1,5 @@
+import Cors from 'cors';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import { NextRequest, NextResponse } from 'next/server';
 import { PostgrestError } from '@supabase/supabase-js';
 import { supabase, createSupabaseClient } from '@/utils/supabase';
@@ -207,3 +209,72 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
+
+// Helper method to wait for a middleware to execute before continuing
+// And to throw an error when an error happens in a middleware
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+function runMiddleware(req: NextApiRequest, res: NextApiResponse, fn: Function) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result: unknown) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+
+      return resolve(result);
+    });
+  });
+}
+
+const cors = Cors({
+  methods: ['POST', 'GET', 'HEAD'],
+});
+
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  if (!req.url) {
+    return res.status(400).json({ error: 'Invalid request URL' });
+  }
+
+  const protocol = process.env['PROTOCOL'] || 'http';
+  const host = process.env['HOST'] || 'localhost:3000';
+  const url = new URL(req.url, `${protocol}://${host}`);
+
+  await runMiddleware(req, res, cors);
+
+  try {
+    let response: Response;
+
+    if (req.method === 'GET') {
+      const nextReq = new NextRequest(url.toString(), {
+        headers: new Headers(req.headers as Record<string, string>),
+        method: 'GET',
+      });
+      response = await GET(nextReq);
+    } else if (req.method === 'POST') {
+      const nextReq = new NextRequest(url.toString(), {
+        headers: new Headers(req.headers as Record<string, string>),
+        method: 'POST',
+        body: JSON.stringify(req.body), // Ensure the body is a string
+      });
+      response = await POST(nextReq);
+    } else {
+      res.setHeader('Allow', ['GET', 'POST']);
+      return res.status(405).end(`Method ${req.method} Not Allowed`);
+    }
+
+    res.status(response.status);
+
+    response.headers.forEach((value, key) => {
+      res.setHeader(key, value);
+    });
+
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    res.send(buffer);
+  } catch (error) {
+    console.error('Error processing request:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+export default handler;

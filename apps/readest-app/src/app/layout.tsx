@@ -1,8 +1,5 @@
 import * as React from 'react';
-import { AuthProvider } from '@/context/AuthContext';
-import { EnvProvider } from '@/context/EnvContext';
-import { CSPostHogProvider } from '@/context/PHContext';
-import { SyncProvider } from '@/context/SyncContext';
+import Providers from '@/components/Providers';
 
 import '../styles/globals.css';
 import '../styles/fonts.css';
@@ -39,15 +36,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name='twitter:description' content={description} />
         <meta name='twitter:image' content={previewImage} />
       </head>
-      <CSPostHogProvider>
-        <body>
-          <EnvProvider>
-            <AuthProvider>
-              <SyncProvider>{children}</SyncProvider>
-            </AuthProvider>
-          </EnvProvider>
-        </body>
-      </CSPostHogProvider>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

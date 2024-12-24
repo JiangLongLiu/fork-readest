@@ -21,7 +21,7 @@ const useBooksManager = () => {
     if (shouldUpdateSearchParams) {
       const ids = bookKeys.map((key) => key.split('-')[0]!);
       if (ids) {
-        navigateToReader(router, ids, searchParams.toString(), { scroll: false });
+        navigateToReader(router, ids, searchParams?.toString() || '', { scroll: false });
       }
       setShouldUpdateSearchParams(false);
     }
