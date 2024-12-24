@@ -2,11 +2,11 @@ import { useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSync } from '@/hooks/useSync';
 import { BookConfig } from '@/types/book';
-import { deserializeConfig, serializeConfig } from '@/utils/serializer';
 import { useBookDataStore } from '@/store/bookDataStore';
-import { DEFAULT_BOOK_SEARCH_CONFIG, SYNC_PROGRESS_INTERVAL_SEC } from '@/services/constants';
 import { useReaderStore } from '@/store/readerStore';
 import { useSettingsStore } from '@/store/settingsStore';
+import { deserializeConfig, serializeConfig } from '@/utils/serializer';
+import { DEFAULT_BOOK_SEARCH_CONFIG, SYNC_PROGRESS_INTERVAL_SEC } from '@/services/constants';
 
 export const useProgressSync = (
   bookKey: string,

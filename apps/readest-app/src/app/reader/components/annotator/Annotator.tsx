@@ -13,10 +13,12 @@ import { Overlayer } from 'foliate-js/overlayer.js';
 import { useEnv } from '@/context/EnvContext';
 import { BookNote, HighlightColor, HighlightStyle } from '@/types/book';
 import { uniqueId } from '@/utils/misc';
+import { useBookDataStore } from '@/store/bookDataStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useReaderStore } from '@/store/readerStore';
 import { useNotebookStore } from '@/store/notebookStore';
 import { useFoliateEvents } from '../../hooks/useFoliateEvents';
+import { useNotesSync } from '../../hooks/useNotesSync';
 import { getPopupPosition, getPosition, Position, TextSelection } from '@/utils/sel';
 import { eventDispatcher } from '@/utils/event';
 import Toast from '@/components/Toast';
@@ -24,7 +26,6 @@ import AnnotationPopup from './AnnotationPopup';
 import WiktionaryPopup from './WiktionaryPopup';
 import WikipediaPopup from './WikipediaPopup';
 import DeepLPopup from './DeepLPopup';
-import { useBookDataStore } from '@/store/bookDataStore';
 
 const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { envConfig } = useEnv();
@@ -33,6 +34,9 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
   const { getProgress, getView, getViewsById, getViewSettings } = useReaderStore();
   const { isNotebookPinned, isNotebookVisible } = useNotebookStore();
   const { setNotebookVisible, setNotebookNewAnnotation } = useNotebookStore();
+
+  useNotesSync(bookKey);
+
   const config = getConfig(bookKey)!;
   const progress = getProgress(bookKey)!;
   const bookData = getBookData(bookKey)!;
@@ -198,6 +202,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
     const { booknotes = [] } = config;
     const annotations = booknotes.filter(
       (item) =>
+        !item.deletedAt &&
         item.type === 'annotation' &&
         item.style &&
         CFI.compare(item.cfi, start) >= 0 &&
@@ -274,7 +279,7 @@ const Annotator: React.FC<{ bookKey: string }> = ({ bookKey }) => {
         annotations[existingIndex] = annotation;
         views.forEach((view) => view?.addAnnotation(annotation));
       } else {
-        annotations.splice(existingIndex, 1);
+        annotations[existingIndex]!.deletedAt = Date.now();
         setShowAnnotPopup(false);
       }
     } else {

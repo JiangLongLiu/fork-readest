@@ -76,6 +76,8 @@ export function useSync(bookKey?: string) {
 
     try {
       const result = await syncClient.pullChanges(since, type, bookId);
+      const records = result[type];
+      if (!records.length) return;
       const maxTime = computeMaxTimestamp(result[type]);
       setLastSyncedAt(maxTime);
       setSyncResult(result);
@@ -187,6 +189,9 @@ export function useSync(bookKey?: string) {
     syncedBooks,
     syncedConfigs,
     syncedNotes,
+    lastSyncedAtBooks,
+    lastSyncedAtNotes,
+    lastSyncedAtConfigs,
     pullChanges,
     pushChanges,
     syncBooks,

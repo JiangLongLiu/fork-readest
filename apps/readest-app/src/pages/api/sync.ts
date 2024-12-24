@@ -151,6 +151,7 @@ export async function POST(req: NextRequest) {
           .insert(dbRec)
           .select()
           .single();
+        console.log('Inserted record:', inserted);
         if (insertError) return { error: insertError.message };
         authoritativeRecords.push(inserted);
       } else {
@@ -172,7 +173,7 @@ export async function POST(req: NextRequest) {
             .match(matchConditions)
             .select()
             .single();
-          console.log('Updating record:', updated);
+          console.log('Updated record:', updated);
           if (updateError) return { error: updateError.message };
           authoritativeRecords.push(updated);
         } else {
