@@ -39,18 +39,19 @@
 
 <div align="left">✅ Implemented</div>
 
-| **Feature**                             | **Description**                                                                  | **Status** |
-| --------------------------------------- | -------------------------------------------------------------------------------- | ---------- |
-| **Multi-Format Support**                | Support EPUB, MOBI, KF8 (AZW3), FB2, CBZ, PDF (experimental)                     | ✅         |
-| **Scroll/Page View Modes**              | Switch between scrolling or paginated reading modes.                             | ✅         |
-| **Full-Text Search**                    | Search across the entire book to find relevant sections.                         | ✅         |
-| **Annotations and Highlighting**        | Add highlights, bookmarks, and notes to enhance your reading experience.         | ✅         |
-| **Excerpt Text for Note-Taking**        | Easily excerpt text from books for detailed notes and analysis.                  | ✅         |
-| **Dictionary/Wikipedia Lookup**         | Instantly look up words and terms when reading.                                  | ✅         |
-| **Translate with DeepL**                | Translate selected text instantly using DeepL for accurate translations.         | ✅         |
-| **[Parallel Read][link-parallel-read]** | Read two books or documents simultaneously in a split-screen view.               | ✅         |
-| **Customize Font and Layout**           | Adjust font, layout, theme mode, and theme colors for a personalized experience. | ✅         |
-| **File Association and Open With**      | Quickly open files in Readest in your file browser with one-click.               | ✅         |
+| **Feature**                             | **Description**                                                                    | **Status** |
+| --------------------------------------- | ---------------------------------------------------------------------------------- | ---------- |
+| **Multi-Format Support**                | Support EPUB, MOBI, KF8 (AZW3), FB2, CBZ, PDF (experimental)                       | ✅         |
+| **Scroll/Page View Modes**              | Switch between scrolling or paginated reading modes.                               | ✅         |
+| **Full-Text Search**                    | Search across the entire book to find relevant sections.                           | ✅         |
+| **Annotations and Highlighting**        | Add highlights, bookmarks, and notes to enhance your reading experience.           | ✅         |
+| **Excerpt Text for Note-Taking**        | Easily excerpt text from books for detailed notes and analysis.                    | ✅         |
+| **Dictionary/Wikipedia Lookup**         | Instantly look up words and terms when reading.                                    | ✅         |
+| **Translate with DeepL**                | Translate selected text instantly using DeepL for accurate translations.           | ✅         |
+| **[Parallel Read][link-parallel-read]** | Read two books or documents simultaneously in a split-screen view.                 | ✅         |
+| **Customize Font and Layout**           | Adjust font, layout, theme mode, and theme colors for a personalized experience.   | ✅         |
+| **File Association and Open With**      | Quickly open files in Readest in your file browser with one-click.                 | ✅         |
+| **Sync across Platforms**               | Synchronize reading progress, notes, and bookmarks across all supported platforms. | ✅         |
 
 ## Planned Features
 
@@ -60,12 +61,11 @@
 | **Feature**                      | **Description**                                                                            | **Priority** |
 | -------------------------------- | ------------------------------------------------------------------------------------------ | ------------ |
 | **Support iOS and Android**      | Expand the APP to work on iOS and Android devices.                                         | 🛠           |
-| **Sync Across Platforms**        | Synchronize reading progress, notes, and bookmarks across all supported platforms.         | 🛠           |
+| **Text-to-Speech (TTS) Support** | Enable text-to-speech functionality for a more accessible reading experience.              | 🛠           |
 | **Sync with Koreader**           | Synchronize reading progress, notes, and bookmarks with [Koreader][link-koreader] devices. | 🔄           |
 | **Keyboard Navigation**          | Implement vimium-style keybindings for book navigation.                                    | 🔄           |
 | **Library Management**           | Organize, sort, and manage your entire ebook library.                                      | 🔄           |
 | **Support OPDS/Calibre**         | Integrate OPDS/Calibre to access online libraries and catalogs.                            | 🔄           |
-| **Text-to-Speech (TTS) Support** | Enable text-to-speech functionality for a more accessible reading experience.              | 🔄           |
 | **Audiobook Support**            | Extend functionality to play and manage audiobooks.                                        | 🔄           |
 | **Handwriting Annotations**      | Add support for handwriting annotations using a pen on compatible devices.                 | 🔄           |
 | **Advanced Reading Stats**       | Track reading time, pages read, and more for detailed insights.                            | 🔄           |
@@ -162,7 +162,7 @@ Readest is open-source, and contributions are welcome! Feel free to open issues,
 
 <a href="https://github.com/chrox/readest/graphs/contributors">
   <p align="left">
-    <img width="50" src="https://contrib.rocks/image?repo=chrox/readest" alt="A table of avatars from the project's contributors" />
+    <img width="100" src="https://contrib.rocks/image?repo=chrox/readest" alt="A table of avatars from the project's contributors" />
   </p>
 </a>
 
