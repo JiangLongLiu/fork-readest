@@ -129,7 +129,6 @@ pub fn run() {
                 )?;
             }
             let win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
-                .title("Readest")
                 .inner_size(800.0, 600.0)
                 .resizable(true)
                 .maximized(true);
@@ -137,10 +136,10 @@ pub fn run() {
             #[cfg(target_os = "macos")]
             let win_builder = win_builder
                 .decorations(true)
-                .title_bar_style(TitleBarStyle::Overlay);
+                .title_bar_style(TitleBarStyle::Overlay).title("");
 
             #[cfg(not(target_os = "macos"))]
-            let win_builder = win_builder.decorations(false).transparent(true);
+            let win_builder = win_builder.decorations(false).transparent(true).title("Readest");
 
             win_builder.build().unwrap();
             // let win = win_builder.build().unwrap();
