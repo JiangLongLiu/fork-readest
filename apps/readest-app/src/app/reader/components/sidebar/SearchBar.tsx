@@ -34,7 +34,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const view = getView(bookKey)!;
   const config = getConfig(bookKey)!;
   const progress = getProgress(bookKey)!;
-  const searchConfig = config.searchConfig!;
+  const searchConfig = config.searchConfig! as BookSearchConfig;
 
   const queuedSearchTerm = useRef('');
   const isSearchPending = useRef(false);

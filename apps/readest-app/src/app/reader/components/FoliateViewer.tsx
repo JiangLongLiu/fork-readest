@@ -39,7 +39,7 @@ const FoliateViewer: React.FC<{
     return () => clearTimeout(timer);
   }, [toastMessage]);
 
-  useProgressSync(bookKey, config, setToastMessage);
+  useProgressSync(bookKey, setToastMessage);
 
   const progressRelocateHandler = (event: Event) => {
     const detail = (event as CustomEvent).detail;

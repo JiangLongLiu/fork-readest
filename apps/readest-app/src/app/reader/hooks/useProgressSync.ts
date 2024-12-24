@@ -10,17 +10,18 @@ import { useSettingsStore } from '@/store/settingsStore';
 
 export const useProgressSync = (
   bookKey: string,
-  config: BookConfig,
   setToastMessage?: React.Dispatch<React.SetStateAction<string>>,
 ) => {
-  const { setConfig } = useBookDataStore();
+  const { getConfig, setConfig } = useBookDataStore();
   const { getView } = useReaderStore();
   const { settings } = useSettingsStore();
   const { syncedConfigs, syncConfigs } = useSync();
   const { user } = useAuth();
   const view = getView(bookKey);
+  const config = getConfig(bookKey);
 
-  const pushConfig = (bookKey: string, config: BookConfig) => {
+  const pushConfig = (bookKey: string, config: BookConfig | null) => {
+    if (!config || !user) return;
     const bookHash = bookKey.split('-')[0]!;
     const newConfig = { bookHash, ...config };
     const compressedConfig = JSON.parse(
@@ -30,7 +31,7 @@ export const useProgressSync = (
   };
 
   useEffect(() => {
-    if (!user) return;
+    if (!config || !user) return;
     const bookHash = bookKey.split('-')[0]!;
     syncConfigs([], bookHash, 'pull');
     return () => {
@@ -42,7 +43,7 @@ export const useProgressSync = (
   const lastProgressSyncTime = useRef<number>(0);
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (!user) return;
+    if (!config || !user) return;
     const now = Date.now();
     const timeSinceLastSync = now - lastProgressSyncTime.current;
     if (configSynced.current && timeSinceLastSync > SYNC_PROGRESS_INTERVAL_SEC * 1000) {
@@ -75,9 +76,9 @@ export const useProgressSync = (
         );
         setConfig(bookKey, { ...config, ...newConfig });
         configSynced.current = true;
-        if ((syncedConfig.progress?.[1] ?? 0) > 0 && (config.progress?.[1] ?? 0) > 0) {
+        if ((syncedConfig.progress?.[1] ?? 0) > 0 && (config?.progress?.[1] ?? 0) > 0) {
           const syncedFraction = syncedConfig.progress![0] / syncedConfig.progress![1];
-          const configFraction = config.progress![0] / config.progress![1];
+          const configFraction = config!.progress![0] / config!.progress![1];
           if (syncedFraction > configFraction) {
             view?.goToFraction(syncedFraction);
             setToastMessage?.('Progress synced');
