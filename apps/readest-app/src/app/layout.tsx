@@ -2,13 +2,18 @@ import * as React from 'react';
 import { AuthProvider } from '@/context/AuthContext';
 import { EnvProvider } from '@/context/EnvContext';
 import { CSPostHogProvider } from '@/context/PHContext';
+import { SyncProvider } from '@/context/SyncContext';
 
 import '../styles/globals.css';
 import '../styles/fonts.css';
 
 const url = 'https://web.readest.com/';
 const title = 'Readest — Where You Read, Digest and Get Insight';
-const description = 'Readest brings your entire library to your fingertips.';
+const description =
+  'Discover Readest, the ultimate online ebook reader for immersive and organized reading. ' +
+  'Enjoy seamless access to your digital library, powerful tools for highlighting, bookmarking, ' +
+  'and note-taking, and support for multiple book views. ' +
+  'Perfect for deep reading, analysis, and understanding. Explore now!';
 const previewImage = 'https://cdn.readest.com/images/open_graph_preview_read_now.png';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -20,7 +25,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name='apple-mobile-web-app-status-bar-style' content='default' />
         <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1' />
         <link rel='apple-touch-icon' sizes='180x180' href='/apple-touch-icon.png' />
-        <link rel='icon' href='/favicon.ico' />
         <meta name='description' content={description} />
         <meta property='og:url' content={url} />
         <meta property='og:type' content='website' />
@@ -37,7 +41,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <CSPostHogProvider>
         <body>
           <EnvProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <SyncProvider>{children}</SyncProvider>
+            </AuthProvider>
           </EnvProvider>
         </body>
       </CSPostHogProvider>
