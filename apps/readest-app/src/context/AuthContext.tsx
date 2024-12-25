@@ -59,13 +59,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('user', JSON.stringify(newUser));
   };
 
-  const logout = () => {
+  const logout = async () => {
     console.log('Logging out');
-    setToken(null);
-    setUser(null);
+    await supabase.auth.refreshSession();
+    await supabase.auth.signOut();
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    supabase.auth.signOut();
+    setToken(null);
+    setUser(null);
   };
 
   return (
