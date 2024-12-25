@@ -31,7 +31,7 @@ export const useProgressSync = (
   };
 
   useEffect(() => {
-    if (!config || !user) return;
+    if (!user) return;
     const bookHash = bookKey.split('-')[0]!;
     syncConfigs([], bookHash, 'pull');
     return () => {
@@ -43,7 +43,7 @@ export const useProgressSync = (
   const lastProgressSyncTime = useRef<number>(0);
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (!config || !user) return;
+    if (!config?.location || !user) return;
     const now = Date.now();
     const timeSinceLastSync = now - lastProgressSyncTime.current;
     if (configSynced.current && timeSinceLastSync > SYNC_PROGRESS_INTERVAL_SEC * 1000) {

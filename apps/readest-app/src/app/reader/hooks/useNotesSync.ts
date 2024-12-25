@@ -13,7 +13,7 @@ export const useNotesSync = (bookKey: string) => {
   const bookHash = bookKey.split('-')[0]!;
 
   useEffect(() => {
-    if (!config || !user) return;
+    if (!user) return;
     syncNotes([], bookHash, 'pull');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -21,7 +21,7 @@ export const useNotesSync = (bookKey: string) => {
   const lastSyncTime = useRef<number>(0);
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (!config || !user) return;
+    if (!config?.location || !user) return;
     const bookNotes = config.booknotes ?? [];
     const newNotes = bookNotes.filter(
       (note) => lastSyncedAtNotes < note.updatedAt || lastSyncedAtNotes < (note.deletedAt ?? 0),
@@ -49,7 +49,7 @@ export const useNotesSync = (bookKey: string) => {
   }, [config]);
 
   useEffect(() => {
-    if (syncedNotes?.length && config) {
+    if (syncedNotes?.length && config?.location) {
       const newNotes = syncedNotes.filter((note) => note.bookHash === bookHash);
       if (!newNotes.length) return;
       const oldNotes = config.booknotes ?? [];

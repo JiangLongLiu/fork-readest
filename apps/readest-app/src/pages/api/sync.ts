@@ -101,7 +101,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: errorMsg }, { status: 500 });
     }
 
-    return NextResponse.json(results, { status: 200 });
+    const response = NextResponse.json(results, { status: 200 });
+    response.headers.set('Cache-Control', 'no-store');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.delete('ETag');
+    return response;
   } catch (error: unknown) {
     console.error(error);
     const errorMessage = (error as PostgrestError).message || 'Unknown error';

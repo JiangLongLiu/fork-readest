@@ -1,8 +1,14 @@
 import { supabase } from '@/utils/supabase';
 import { Book, BookConfig, BookNote, BookDataRecord } from '@/types/book';
 import { READEST_WEB_BASE_URL } from '@/services/constants';
+import { isWebAppPlatform } from '@/services/environment';
 
-const BASE_URL = process.env['NODE_ENV'] === 'production' ? READEST_WEB_BASE_URL : '';
+// Develop Sync API only in development mode and web platform
+// with command `pnpm dev-web`
+const SYNC_API_ENDPOINT =
+  process.env['NODE_ENV'] === 'development' && isWebAppPlatform()
+    ? '/api/sync'
+    : `${READEST_WEB_BASE_URL}/api/sync`;
 
 export type SyncType = 'books' | 'configs' | 'notes';
 export type SyncOp = 'push' | 'pull' | 'both';
@@ -32,7 +38,7 @@ export class SyncClient {
     const token = await this.getAccessToken();
     if (!token) throw new Error('Not authenticated');
 
-    const url = `${BASE_URL}/api/sync?since=${encodeURIComponent(since)}&type=${type ?? ''}&book=${book ?? ''}`;
+    const url = `${SYNC_API_ENDPOINT}?since=${encodeURIComponent(since)}&type=${type ?? ''}&book=${book ?? ''}`;
     const res = await fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -55,7 +61,7 @@ export class SyncClient {
     const token = await this.getAccessToken();
     if (!token) throw new Error('Not authenticated');
 
-    const res = await fetch(`${BASE_URL}/api/sync`, {
+    const res = await fetch(SYNC_API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
