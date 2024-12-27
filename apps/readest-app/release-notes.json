@@ -1,5 +1,13 @@
 {
   "releases": {
+    "0.8.7": {
+      "date": "2024-12-27",
+      "notes": [
+        "Support i18n/l10n with popular languages.",
+        "Support information modal for book details.",
+        "Various fixes and enhancements."
+      ]
+    },
     "0.8.6": {
       "date": "2024-12-25",
       "notes": [
