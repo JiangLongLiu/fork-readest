@@ -1,6 +1,6 @@
 [package]
-name = "Readest"
-version = "0.2.0"
+name = "readest"
+version = "0.2.1"
 description = "Your online library"
 authors = ["Bilingify LLC"]
 license = ""

@@ -3,32 +3,6 @@
 version = 3
 
 [[package]]
-name = "Readest"
-version = "0.2.0"
-dependencies = [
- "cocoa 0.25.0",
- "log",
- "objc",
- "rand 0.8.5",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build 2.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "tauri-plugin-cli",
- "tauri-plugin-devtools",
- "tauri-plugin-dialog",
- "tauri-plugin-fs",
- "tauri-plugin-http",
- "tauri-plugin-log",
- "tauri-plugin-oauth",
- "tauri-plugin-opener",
- "tauri-plugin-os",
- "tauri-plugin-process",
- "tauri-plugin-shell",
- "tauri-plugin-updater",
-]
-
-[[package]]
 name = "addr2line"
 version = "0.24.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3884,6 +3858,32 @@ name = "raw-window-handle"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "20675572f6f24e9e76ef639bc5552774ed45f1c30e2951e1e99c59888861c539"
+
+[[package]]
+name = "readest"
+version = "0.2.1"
+dependencies = [
+ "cocoa 0.25.0",
+ "log",
+ "objc",
+ "rand 0.8.5",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build 2.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tauri-plugin-cli",
+ "tauri-plugin-devtools",
+ "tauri-plugin-dialog",
+ "tauri-plugin-fs",
+ "tauri-plugin-http",
+ "tauri-plugin-log",
+ "tauri-plugin-oauth",
+ "tauri-plugin-opener",
+ "tauri-plugin-os",
+ "tauri-plugin-process",
+ "tauri-plugin-shell",
+ "tauri-plugin-updater",
+]
 
 [[package]]
 name = "redox_syscall"
