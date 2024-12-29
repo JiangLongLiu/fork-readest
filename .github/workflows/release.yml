@@ -11,8 +11,8 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     outputs:
-      release_id: ${{ steps.get-release.outputs.result }}
-      release_note: ${{ steps.get-release-notes.outputs.result }}
+      release_id: ${{ steps.get-release.outputs.release_id }}
+      release_note: ${{ steps.get-release-notes.outputs.release_note }}
 
     steps:
       - uses: actions/checkout@v3
@@ -29,7 +29,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
             })
-            return data.id
+            core.setOutput('release_id', data.id);
       - name: get release notes
         id: get-release-notes
         uses: actions/github-script@v6
@@ -42,7 +42,7 @@ jobs:
             const notes = releaseNotes.notes || [];
             const releaseNote = notes.map((note, index) => `${index + 1}. ${note}`).join(' ');
             console.log('Formatted release note:', releaseNote);
-            return releaseNote;
+            core.setOutput('release_note', releaseNote);
 
   build-tauri:
     needs: get-release
