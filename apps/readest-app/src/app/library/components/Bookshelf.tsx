@@ -295,7 +295,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
       {showDeleteAlert && (
         <Alert
           title={_('Confirm Deletion')}
-          message='Are you sure to delete the selected books?'
+          message={_('Are you sure to delete the selected books?')}
           onClickCancel={() => setShowDeleteAlert(false)}
           onClickConfirm={confirmDelete}
         />
