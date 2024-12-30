@@ -35,6 +35,7 @@ export abstract class BaseAppService implements AppService {
   abstract appPlatform: AppPlatform;
   abstract isAppDataSandbox: boolean;
   abstract hasTrafficLight: boolean;
+  abstract hasWindowBar: boolean;
 
   abstract resolvePath(fp: string, base: BaseDir): { baseDir: number; base: BaseDir; fp: string };
   abstract getCoverImageUrl(book: Book): string;

@@ -180,6 +180,7 @@ export class WebAppService extends BaseAppService {
   appPlatform = 'web' as AppPlatform;
   isAppDataSandbox = false;
   hasTrafficLight = false;
+  hasWindowBar = false;
 
   override resolvePath(fp: string, base: BaseDir): { baseDir: number; base: BaseDir; fp: string } {
     return resolvePath(fp, base);
