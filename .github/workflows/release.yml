@@ -12,7 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release_id: ${{ steps.get-release.outputs.release_id }}
+      release_tag: ${{ steps.get-release.outputs.release_tag }}
       release_note: ${{ steps.get-release-notes.outputs.release_note }}
+      release_version: ${{ steps.get-release-notes.outputs.release_version }}
 
     steps:
       - uses: actions/checkout@v4
@@ -30,6 +32,7 @@ jobs:
               repo: context.repo.repo,
             })
             core.setOutput('release_id', data.id);
+            core.setOutput('release_tag', data.tag_name);
       - name: get release notes
         id: get-release-notes
         uses: actions/github-script@v7
@@ -42,6 +45,7 @@ jobs:
             const notes = releaseNotes.notes || [];
             const releaseNote = notes.map((note, index) => `${index + 1}. ${note}`).join(' ');
             console.log('Formatted release note:', releaseNote);
+            core.setOutput('release_version', version);
             core.setOutput('release_note', releaseNote);
 
   build-tauri:
@@ -138,6 +142,31 @@ jobs:
           releaseBody: ${{ needs.get-release.outputs.release_note }}
           args: ${{ matrix.config.args || '' }}
 
+      - name: upload portable binaries (Windows only)
+        if: matrix.config.os == 'windows-latest'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          echo "Uploading Portable Binaries"
+          arch=${{ matrix.config.arch }}
+          version=${{ needs.get-release.outputs.release_version }}
+
+          if [ "$arch" = "x86_64" ]; then
+            zip_name="Readest_${version}_x64-portable.zip"
+          elif [ "$arch" = "aarch64" ]; then
+            zip_name="Readest_${version}_arm64-portable.zip"
+          else
+            echo "Unknown architecture: $arch"
+            exit 1
+          fi
+
+          bin_path="apps/readest-app/src-tauri/target/${{ matrix.config.rust_target }}/release/readest.exe"
+          powershell.exe -Command "Compress-Archive -Path $bin_path -DestinationPath $zip_name -Force"
+
+          echo "Uploading $zip_name to GitHub release"
+          gh release upload ${{ needs.get-release.outputs.release_tag }} $zip_name --clobber
+
   update-release:
     permissions:
       contents: write
@@ -153,11 +182,12 @@ jobs:
           release_note: ${{ needs.get-release.outputs.release_note }}
         with:
           script: |
+            const body = `## Release Highlight\n${process.env.release_note}`;
             github.rest.repos.updateRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: process.env.release_id,
-              body: process.env.release_note,
+              body: body,
               draft: false,
               prerelease: false
             })
