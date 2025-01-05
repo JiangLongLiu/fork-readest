@@ -1,7 +1,7 @@
 ---
 name: Report a bug
 about: Report a bug or a functional regression
-title: 'Ex: In DarkMode, a blank square appears in bottom right corner while scrolling'
+title: 'Example: In DarkMode, a blank square appears in bottom right corner while scrolling'
 labels: ['type: bug']
 assignees: ''
 ---
@@ -30,9 +30,15 @@ The blank square should be transparent (invisible)
 
 ## Technical inputs
 
+Operating System:
+
+Readest Version:
+
 **Example:**
 
 ```
-- We are displaying custom scrollbars that disappear when the user is not scrolling. See ScrollWrapper.
-- Probably fixable with CSS
+Operating System: macOS 14.3.1
+Readest Version: 0.9.0
+We are displaying custom scrollbars that disappear when the user is not scrolling. See ScrollWrapper.
+Probably fixable with CSS
 ```
