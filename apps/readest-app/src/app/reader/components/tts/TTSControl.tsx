@@ -54,6 +54,11 @@ const TTSControl = () => {
 
     setBookKey(bookKey);
 
+    if (ttsControllerRef.current) {
+      ttsControllerRef.current.stop();
+      ttsControllerRef.current = null;
+    }
+
     try {
       const ttsController = new TTSController(view);
       await ttsController.init();
@@ -94,6 +99,8 @@ const TTSControl = () => {
       setIsPlaying(false);
       setIsPaused(true);
     } else if (isPaused) {
+      // start for forward/backward/setvoice-paused
+      // set rate don't pause the tts
       if (ttsController.state === 'paused') {
         ttsController.resume();
       } else {
@@ -163,6 +170,14 @@ const TTSControl = () => {
     return [];
   };
 
+  const handleGetVoiceId = () => {
+    const ttsController = ttsControllerRef.current;
+    if (ttsController) {
+      return ttsController.getVoiceId();
+    }
+    return '';
+  };
+
   const updatePanelPosition = () => {
     if (iconRef.current) {
       const rect = iconRef.current.getBoundingClientRect();
@@ -228,6 +243,7 @@ const TTSControl = () => {
             onSetRate={handleSetRate}
             onGetVoices={handleGetVoices}
             onSetVoice={handleSetVoice}
+            onGetVoiceId={handleGetVoiceId}
           />
         </Popup>
       )}

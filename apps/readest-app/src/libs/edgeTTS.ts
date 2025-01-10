@@ -1,4 +1,6 @@
+import { md5 } from 'js-md5';
 import { randomMd5 } from '@/utils/misc';
+import { LRUCache } from '@/utils/lru';
 
 const EDGE_SPEECH_URL =
   'wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1';
@@ -46,18 +48,25 @@ const genVoiceList = (voices: Record<string, string[]>) => {
 };
 
 export interface EdgeTTSPayload {
+  lang: string;
   text: string;
   voice: string;
   rate: number;
   pitch: number;
 }
 
+const hashPayload = (payload: EdgeTTSPayload): string => {
+  const base = JSON.stringify(payload);
+  return md5(base);
+};
+
 export class EdgeSpeechTTS {
   static voices = genVoiceList(EDGE_TTS_VOICES);
+  private static audioCache = new LRUCache<string, AudioBuffer>(200);
 
   constructor() {}
 
-  async #fetchEdgeSpeechWs({ text, voice, rate }: EdgeTTSPayload): Promise<Response> {
+  async #fetchEdgeSpeechWs({ lang, text, voice, rate }: EdgeTTSPayload): Promise<Response> {
     const connectId = randomMd5();
     const url = `${EDGE_SPEECH_URL}?ConnectionId=${connectId}&TrustedClientToken=${EDGE_API_TOKEN}`;
     const date = new Date().toString();
@@ -83,9 +92,9 @@ export class EdgeSpeechTTS {
       },
     });
 
-    const genSSML = (text: string, voice: string, rate: number) => {
+    const genSSML = (lang: string, text: string, voice: string, rate: number) => {
       return `
-        <speak version="1.0" xml:lang="en-US">
+        <speak version="1.0" xml:lang="${lang}">
           <voice name="${voice}">
             <prosody rate="${rate}">
               ${text}
@@ -126,7 +135,7 @@ export class EdgeSpeechTTS {
       return { headers, body };
     };
 
-    const ssml = genSSML(text, voice, rate);
+    const ssml = genSSML(lang, text, voice, rate);
     const content = genSendContent(contentHeaders, ssml);
     const config = genSendContent(configHeaders, configContent);
 
@@ -177,9 +186,19 @@ export class EdgeSpeechTTS {
   }
 
   async createAudio(payload: EdgeTTSPayload): Promise<AudioBuffer> {
-    const res = await this.create(payload);
-    const arrayBuffer = await res.arrayBuffer();
-    const audioContext = new AudioContext();
-    return await audioContext.decodeAudioData(arrayBuffer.slice(0));
+    const cacheKey = hashPayload(payload);
+    if (EdgeSpeechTTS.audioCache.has(cacheKey)) {
+      return EdgeSpeechTTS.audioCache.get(cacheKey)!;
+    }
+    try {
+      const res = await this.create(payload);
+      const arrayBuffer = await res.arrayBuffer();
+      const audioContext = new AudioContext();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer.slice(0));
+      EdgeSpeechTTS.audioCache.set(cacheKey, audioBuffer);
+      return audioBuffer;
+    } catch (error) {
+      throw error;
+    }
   }
 }

@@ -18,6 +18,7 @@ type TTSPanelProps = {
   onSetRate: (rate: number) => void;
   onGetVoices: (lang: string) => Promise<TTSVoice[]>;
   onSetVoice: (voice: string) => void;
+  onGetVoiceId: () => string;
 };
 
 const TTSPanel = ({
@@ -31,6 +32,7 @@ const TTSPanel = ({
   onSetRate,
   onGetVoices,
   onSetVoice,
+  onGetVoiceId,
 }: TTSPanelProps) => {
   const _ = useTranslation();
   const { getViewSettings, setViewSettings } = useReaderStore();
@@ -57,6 +59,12 @@ const TTSPanel = ({
     viewSettings.ttsVoice = voice;
     setViewSettings(bookKey, viewSettings);
   };
+
+  useEffect(() => {
+    const voiceId = onGetVoiceId();
+    setSelectedVoice(voiceId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const fetchVoices = async () => {
@@ -131,7 +139,7 @@ const TTSPanel = ({
                 key={`${index}-${voice.id}`}
                 onClick={() => !voice.disabled && handleSelectVoice(voice.id)}
               >
-                <div className='flex items-center px-0'>
+                <div className='flex items-center px-2'>
                   <span style={{ minWidth: '20px' }}>
                     {selectedVoice === voice.id && (
                       <MdCheck size={20} className='text-base-content' />
