@@ -16,6 +16,7 @@ export class TTSController extends EventTarget {
   view: FoliateView;
   #nossmlCnt: number = 0;
 
+  ttsRate: number = 1.0;
   ttsClient: TTSClient;
   ttsWebClient: TTSClient;
   ttsEdgeClient: TTSClient;
@@ -61,7 +62,7 @@ export class TTSController extends EventTarget {
       // FIXME: in case we are at the end of the book, need a better way to handle this
       if (this.#nossmlCnt < 10 && this.state === 'playing') {
         await this.view.next(1);
-        this.forward();
+        await this.forward();
       }
       return;
     } else {
@@ -78,7 +79,7 @@ export class TTSController extends EventTarget {
     }
 
     if (lastCode === 'end' && this.state === 'playing') {
-      this.forward();
+      await this.forward();
     }
   }
 
@@ -103,26 +104,26 @@ export class TTSController extends EventTarget {
     return this.#speak(resumeOrStart);
   }
 
-  pause() {
+  async pause() {
     this.state = 'paused';
-    this.ttsClient.pause().catch((e) => this.error(e));
+    await this.ttsClient.pause().catch((e) => this.error(e));
   }
 
-  resume() {
+  async resume() {
     this.state = 'playing';
-    this.ttsClient.resume().catch((e) => this.error(e));
+    await this.ttsClient.resume().catch((e) => this.error(e));
   }
 
-  stop() {
+  async stop() {
     this.state = 'stopped';
-    this.ttsClient.stop().catch((e) => this.error(e));
+    await this.ttsClient.stop().catch((e) => this.error(e));
   }
 
   // goto previous sentence
   async backward() {
-    this.initViewTTS();
+    await this.initViewTTS();
     if (this.state === 'playing') {
-      this.stop();
+      await this.stop();
       this.#speak(this.view.tts?.prev());
     } else {
       this.state = 'backward-paused';
@@ -134,7 +135,7 @@ export class TTSController extends EventTarget {
   async forward() {
     await this.initViewTTS();
     if (this.state === 'playing') {
-      this.stop();
+      await this.stop();
       this.#speak(this.view.tts?.next());
     } else {
       this.state = 'forward-paused';
@@ -143,7 +144,8 @@ export class TTSController extends EventTarget {
   }
 
   async setRate(rate: number) {
-    this.ttsClient.setRate(rate);
+    this.ttsRate = rate;
+    await this.ttsClient.setRate(this.ttsRate);
   }
 
   async getVoices(lang: string) {
@@ -154,14 +156,16 @@ export class TTSController extends EventTarget {
 
   async setVoice(voiceId: string) {
     this.state = 'setvoice-paused';
-    this.ttsClient.stop();
+    await this.ttsClient.stop();
     const useEdgeTTS = !!this.ttsEdgeVoices.find(
       (voice) => (voiceId === '' || voice.id === voiceId) && !voice.disabled,
     );
     if (useEdgeTTS) {
       this.ttsClient = this.ttsEdgeClient;
+      await this.ttsClient.setRate(this.ttsRate);
     } else {
       this.ttsClient = this.ttsWebClient;
+      await this.ttsClient.setRate(this.ttsRate);
     }
     await this.ttsClient.setVoice(voiceId);
   }
@@ -175,8 +179,8 @@ export class TTSController extends EventTarget {
     this.state = 'stopped';
   }
 
-  kill() {
+  async kill() {
     this.state = 'stopped';
-    this.ttsClient.stop();
+    await this.ttsClient.stop();
   }
 }
