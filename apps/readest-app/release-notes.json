@@ -1,5 +1,12 @@
 {
   "releases": {
+    "0.9.3": {
+      "date": "2025-01-11",
+      "notes": [
+        "Hotfix occasionally current speak not stopped when changing voice or rate",
+        "Inherit tts rate when changing tts engine"
+      ]
+    },
     "0.9.2": {
       "date": "2025-01-10",
       "notes": [
