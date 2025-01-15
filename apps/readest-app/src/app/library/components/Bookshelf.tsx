@@ -25,6 +25,7 @@ import { isTauriAppPlatform, isWebAppPlatform } from '@/services/environment';
 import Alert from '@/components/Alert';
 import Spinner from '@/components/Spinner';
 import BookDetailModal from '@/components/BookDetailModal';
+import ReadingProgress from './ReadingProgress';
 
 type BookshelfItem = Book | BooksGroup;
 
@@ -242,17 +243,50 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
                       )}
                     </div>
                   </div>
-                  <div className='flex flex-row items-center justify-between p-0 pt-2'>
-                    <h4 className='card-title line-clamp-1 text-[0.6em] text-xs font-semibold'>
-                      {(item as Book).title}
-                    </h4>
-                    {isWebAppPlatform() && (
-                      <div
-                        className='show-detail-button self-start opacity-0 group-hover:opacity-100'
-                        role='button'
-                        onClick={showBookDetailsModal.bind(null, item as Book)}
-                      >
-                        <CiCircleMore size={15} />
+                  <div
+                    className={clsx(
+                      'flex w-full p-0 pt-2',
+                      isWebAppPlatform() ? 'flex-col' : 'flex-row justify-between',
+                    )}
+                  >
+                    <div className='min-w-0 flex-1'>
+                      <h4 className='block overflow-hidden text-ellipsis whitespace-nowrap text-[0.6em] text-xs font-semibold'>
+                        {(item as Book).title}
+                      </h4>
+                    </div>
+                    {item.progress && (
+                      <div className={'flex items-center justify-between'}>
+                        <ReadingProgress book={item as Book} />
+                        {isWebAppPlatform() && (
+                          <button
+                            type='button'
+                            className='show-detail-button opacity-0 group-hover:opacity-100'
+                            onClick={showBookDetailsModal.bind(null, item as Book)}
+                            onKeyUp={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                showBookDetailsModal(item as Book);
+                              }
+                            }}
+                          >
+                            <CiCircleMore size={15} />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {!item.progress && isWebAppPlatform() && (
+                      <div className={'flex items-center justify-end'}>
+                        <button
+                          type='button'
+                          className='show-detail-button opacity-0 group-hover:opacity-100'
+                          onClick={showBookDetailsModal.bind(null, item as Book)}
+                          onKeyUp={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              showBookDetailsModal(item as Book);
+                            }
+                          }}
+                        >
+                          <CiCircleMore size={15} />
+                        </button>
                       </div>
                     )}
                   </div>
@@ -270,6 +304,11 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
                           className='h-48 w-full object-cover'
                         />
                       </figure>
+                      <div className='card-body p-4'>
+                        <h3 className='card-title line-clamp-2 text-sm'>{book.title}</h3>
+                        <p className='text-neutral-content line-clamp-1 text-xs'>{book.author}</p>
+                        <ReadingProgress book={book} />
+                      </div>
                     </div>
                   ))}
                   <h2 className='mb-2 text-lg font-bold'>{(item as BooksGroup).name}</h2>

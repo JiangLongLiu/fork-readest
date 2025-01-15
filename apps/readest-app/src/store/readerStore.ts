@@ -64,7 +64,10 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
   getView: (key: string | null) => (key && get().viewStates[key]?.view) || null,
   setView: (key: string, view) =>
     set((state) => ({
-      viewStates: { ...state.viewStates, [key]: { ...state.viewStates[key]!, view } },
+      viewStates: {
+        ...state.viewStates,
+        [key]: { ...state.viewStates[key]!, view },
+      },
     })),
   getViews: () => Object.values(get().viewStates).map((state) => state.view!),
   getViewsById: (id: string) => {
@@ -213,13 +216,31 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
       const bookData = useBookDataStore.getState().booksData[id];
       const viewState = state.viewStates[key];
       if (!viewState || !bookData) return state;
+
+      const progress: [number, number] = [pageinfo.current, pageinfo.total];
+
+      // Update library book progress
+      const { library, setLibrary } = useLibraryStore.getState();
+      const bookIndex = library.findIndex((b) => b.hash === id);
+      if (bookIndex !== -1) {
+        const updatedLibrary = [...library];
+        const existingBook = updatedLibrary[bookIndex]!;
+        updatedLibrary[bookIndex] = {
+          ...existingBook,
+          progress,
+          updatedAt: Date.now(),
+        };
+        setLibrary(updatedLibrary);
+      }
+
       const oldConfig = bookData.config;
       const newConfig = {
         ...bookData.config,
         updatedAt: Date.now(),
-        progress: [pageinfo.current, pageinfo.total] as [number, number],
+        progress,
         location,
       };
+
       useBookDataStore.setState((state) => ({
         booksData: {
           ...state.booksData,
@@ -229,6 +250,7 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
           },
         },
       }));
+
       return {
         viewStates: {
           ...state.viewStates,
@@ -248,7 +270,6 @@ export const useReaderStore = create<ReaderStore>((set, get) => ({
         },
       };
     }),
-
   setBookmarkRibbonVisibility: (key: string, visible: boolean) =>
     set((state) => ({
       viewStates: {
