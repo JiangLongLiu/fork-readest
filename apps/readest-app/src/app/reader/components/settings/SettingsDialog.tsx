@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { BookConfig } from '@/types/book';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -8,12 +8,13 @@ import { RiDashboardLine } from 'react-icons/ri';
 import { VscSymbolColor } from 'react-icons/vsc';
 import { PiDotsThreeVerticalBold } from 'react-icons/pi';
 import { IoAccessibilityOutline } from 'react-icons/io5';
+import { MdArrowBackIosNew } from 'react-icons/md';
 
 import FontPanel from './FontPanel';
 import LayoutPanel from './LayoutPanel';
 import ColorPanel from './ColorPanel';
-import WindowButtons from '@/components/WindowButtons';
 import Dropdown from '@/components/Dropdown';
+import Dialog from '@/components/Dialog';
 import DialogMenu from './DialogMenu';
 import MiscPanel from './MiscPanel';
 
@@ -29,20 +30,6 @@ const SettingsDialog: React.FC<{ bookKey: string; config: BookConfig }> = ({ boo
   const _ = useTranslation();
   const [activePanel, setActivePanel] = useState<SettingsPanelType>('Font');
   const { setFontLayoutSettingsDialogOpen } = useSettingsStore();
-
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      setFontLayoutSettingsDialogOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const tabConfig = [
     {
@@ -67,50 +54,77 @@ const SettingsDialog: React.FC<{ bookKey: string; config: BookConfig }> = ({ boo
     },
   ] as TabConfig[];
 
-  return (
-    <dialog className='modal modal-open sm:min-w-90 h-full w-full !bg-[rgba(0,0,0,0.2)] sm:w-full'>
-      <div className='modal-box settings-content flex h-full max-h-full w-full max-w-full flex-col rounded-none p-0 sm:h-[65%] sm:w-1/2 sm:min-w-[480px] sm:max-w-full sm:rounded-2xl'>
-        <div className='dialog-header bg-base-100 sticky top-0 z-10 flex items-center justify-center px-4 pt-2'>
-          <div className='dialog-tabs flex h-10 max-w-[75%] flex-grow items-center justify-around sm:max-w-[80%]'>
-            {tabConfig.map(({ tab, icon: Icon, label }) => (
-              <button
-                key={tab}
-                className={clsx(
-                  'btn btn-ghost text-base-content h-8 min-h-8',
-                  activePanel === tab ? 'btn-active' : '',
-                )}
-                onClick={() => setActivePanel(tab)}
-              >
-                <Icon size={20} className='mr-0' />
-                {window.innerWidth >= 500 ? label : ''}
-              </button>
-            ))}
-          </div>
-          <div className='flex h-full items-center justify-end'>
-            <Dropdown
-              className='dropdown-bottom dropdown-end'
-              buttonClassName='btn btn-ghost h-8 min-h-8 w-8 p-0'
-              toggleButton={<PiDotsThreeVerticalBold size={16} />}
-            >
-              <DialogMenu />
-            </Dropdown>
-            <WindowButtons
-              className='window-buttons absolute right-4 !ml-2 flex h-full items-center'
-              showMinimize={false}
-              showMaximize={false}
-              onClose={() => setFontLayoutSettingsDialogOpen(false)}
-            />
-          </div>
-        </div>
+  const handleClose = () => {
+    setFontLayoutSettingsDialogOpen(false);
+  };
 
-        <div className='text-base-content mt-2 flex-grow overflow-y-auto px-[10%]'>
-          {activePanel === 'Font' && <FontPanel bookKey={bookKey} />}
-          {activePanel === 'Layout' && <LayoutPanel bookKey={bookKey} />}
-          {activePanel === 'Color' && <ColorPanel bookKey={bookKey} />}
-          {activePanel === 'Misc' && <MiscPanel bookKey={bookKey} />}
-        </div>
-      </div>
-    </dialog>
+  return (
+    <>
+      <Dialog
+        isOpen={true}
+        onClose={handleClose}
+        className='modal-open'
+        boxClassName='sm:w-1/2 sm:min-w-[480px]'
+        header={
+          <div className='flex w-full items-center justify-between'>
+            <button
+              tabIndex={-1}
+              onClick={handleClose}
+              className={
+                'btn btn-ghost btn-circle flex h-6 min-h-6 w-6 hover:bg-transparent focus:outline-none sm:hidden'
+              }
+            >
+              <MdArrowBackIosNew size={20} />
+            </button>
+            <div className='dialog-tabs flex h-10 max-w-[100%] flex-grow items-center justify-around pl-4'>
+              {tabConfig.map(({ tab, icon: Icon, label }) => (
+                <button
+                  key={tab}
+                  className={clsx(
+                    'btn btn-ghost text-base-content h-8 min-h-8',
+                    activePanel === tab ? 'btn-active' : '',
+                  )}
+                  onClick={() => setActivePanel(tab)}
+                >
+                  <Icon size={20} className='mr-0' />
+                  {window.innerWidth >= 500 ? label : ''}
+                </button>
+              ))}
+            </div>
+            <div className='flex h-full items-center justify-end gap-x-2'>
+              <Dropdown
+                className='dropdown-bottom dropdown-end'
+                buttonClassName='btn btn-ghost h-8 min-h-8 w-8 p-0'
+                toggleButton={<PiDotsThreeVerticalBold size={16} />}
+              >
+                <DialogMenu />
+              </Dropdown>
+              <button
+                onClick={handleClose}
+                className={'bg-base-300/65 btn btn-ghost btn-circle hidden h-6 min-h-6 w-6 sm:flex'}
+              >
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  width='1em'
+                  height='1em'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    fill='currentColor'
+                    d='M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z'
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        }
+      >
+        {activePanel === 'Font' && <FontPanel bookKey={bookKey} />}
+        {activePanel === 'Layout' && <LayoutPanel bookKey={bookKey} />}
+        {activePanel === 'Color' && <ColorPanel bookKey={bookKey} />}
+        {activePanel === 'Misc' && <MiscPanel bookKey={bookKey} />}
+      </Dialog>
+    </>
   );
 };
 
