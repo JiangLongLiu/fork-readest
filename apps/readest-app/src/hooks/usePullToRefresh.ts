@@ -22,6 +22,7 @@ export const usePullToRefresh = (ref: React.RefObject<HTMLDivElement>, onTrigger
 
       if (el.scrollTop > 0) return;
 
+      const initialX = startEvent.touches[0]!.clientX;
       const initialY = startEvent.touches[0]!.clientY;
 
       el.addEventListener('touchmove', handleTouchMove, { passive: false });
@@ -31,10 +32,12 @@ export const usePullToRefresh = (ref: React.RefObject<HTMLDivElement>, onTrigger
         const el = ref.current;
         if (!el) return;
 
+        const currentX = moveEvent.touches[0]!.clientX;
         const currentY = moveEvent.touches[0]!.clientY;
+        const dx = currentX - initialX;
         const dy = currentY - initialY;
+        if (dy < 0 || Math.abs(dx) * 2 > Math.abs(dy)) return;
 
-        if (dy < 0) return;
         const parentEl = el.parentNode as HTMLDivElement;
         if (dy > TRIGGER_THRESHOLD) {
           flipArrow(parentEl);

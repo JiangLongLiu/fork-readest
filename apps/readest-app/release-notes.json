@@ -1,5 +1,13 @@
 {
   "releases": {
+    "0.9.11": {
+      "date": "2025-02-14",
+      "notes": [
+        "Organize the library with customizable groups/folders",
+        "Alpha release for Android and iOS platforms",
+        "Various fixes and enhancements on Android and iOS platforms"
+      ]
+    },
     "0.9.10": {
       "date": "2025-02-08",
       "notes": [
