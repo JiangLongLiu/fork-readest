@@ -150,6 +150,8 @@ For Windows targets, “Build Tools for Visual Studio 2022” (or a higher editi
 
 ```bash
 pnpm tauri dev
+# or start development for the Web version only
+pnpm dev-web
 ```
 
 For Android:
