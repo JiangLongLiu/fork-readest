@@ -6,7 +6,7 @@ labels: enhancement
 assignees: ''
 ---
 
-**Does your feature request involve difficulty completing a task? Please describe.**
+**Does your feature request involve difficulty for you to complete a task? Please describe.**
 A clear and concise description of what the problem is. Ex. I think it takes too many steps to [...]
 
 **Describe the solution you'd like**
