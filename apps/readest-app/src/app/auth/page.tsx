@@ -22,6 +22,7 @@ import { start, cancel, onUrl, onInvalidUrl } from '@fabianlars/tauri-plugin-oau
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { handleAuthCallback } from '@/helpers/auth';
 import { getAppleIdAuth, Scope } from './utils/appleIdAuth';
+import { authWithSafari } from './utils/safariAuth';
 
 type OAuthProvider = 'google' | 'apple' | 'azure' | 'github';
 
@@ -66,12 +67,16 @@ export default function AuthPage() {
   const isOAuthServerRunning = useRef(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  const getTauriRedirectTo = () => {
-    return process.env.NODE_ENV === 'production' || appService?.isMobile
-      ? appService?.isMobile
-        ? WEB_AUTH_CALLBACK
-        : DEEPLINK_CALLBACK
-      : `http://localhost:${port}`; // only for development env on Desktop
+  const getTauriRedirectTo = (isOAuth: boolean) => {
+    if (process.env.NODE_ENV === 'production' || appService?.isMobile) {
+      if (appService?.isIOSApp) {
+        return isOAuth ? DEEPLINK_CALLBACK : WEB_AUTH_CALLBACK;
+      } else if (appService?.isAndroidApp) {
+        return WEB_AUTH_CALLBACK;
+      }
+      return DEEPLINK_CALLBACK;
+    }
+    return `http://localhost:${port}`; // only for development env on Desktop
   };
 
   const tauriSignInApple = async () => {
@@ -103,7 +108,7 @@ export default function AuthPage() {
       provider,
       options: {
         skipBrowserRedirect: true,
-        redirectTo: getTauriRedirectTo(),
+        redirectTo: getTauriRedirectTo(true),
       },
     });
 
@@ -111,7 +116,16 @@ export default function AuthPage() {
       console.error('Authentication error:', error);
       return;
     }
-    await openUrl(data.url);
+    // Open the OAuth URL in a ASWebAuthenticationSession on iOS to comply with Apple's guidelines
+    // for other platforms, open the OAuth URL in the default browser
+    if (appService?.isIOSApp) {
+      const res = await authWithSafari({ authUrl: data.url });
+      if (res) {
+        handleOAuthUrl(res.redirectUrl);
+      }
+    } else {
+      await openUrl(data.url);
+    }
   };
 
   const handleOAuthUrl = async (url: string) => {
@@ -318,16 +332,20 @@ export default function AuthPage() {
           Icon={FaGithub}
           label={_('Sign in with GitHub')}
         />
-        <hr className='my-3 mt-6 w-64 border-t border-gray-200' />
-        <Auth
-          supabaseClient={supabase}
-          appearance={{ theme: ThemeSupa }}
-          theme={isDarkMode ? 'dark' : 'light'}
-          magicLink={true}
-          providers={[]}
-          redirectTo={getTauriRedirectTo()}
-          localization={getAuthLocalization()}
-        />
+        {!appService?.isIOSApp && (
+          <div>
+            <hr className='my-3 mt-6 w-64 border-t border-gray-200' />
+            <Auth
+              supabaseClient={supabase}
+              appearance={{ theme: ThemeSupa }}
+              theme={isDarkMode ? 'dark' : 'light'}
+              magicLink={true}
+              providers={[]}
+              redirectTo={getTauriRedirectTo(false)}
+              localization={getAuthLocalization()}
+            />
+          </div>
+        )}
       </div>
     </div>
   ) : (
