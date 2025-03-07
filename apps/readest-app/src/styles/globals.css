@@ -10,6 +10,19 @@
   overscroll-behavior: none;
 }
 
+/* Fixes the scrollbar gutter issue for DaisyUI */
+/* https://github.com/saadeghi/daisyui/issues/3040#issuecomment-2250530354 */
+:root:has(
+    :is(
+        .modal-open,
+        .modal:target,
+        .modal-toggle:checked + .modal,
+        .modal[open]
+      )
+  ) {
+  scrollbar-gutter: unset !important;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #222222;
