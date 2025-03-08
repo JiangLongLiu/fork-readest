@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Share an idea or suggestion
-title: 'FR: [a handful of words describing the FR]'
+title: 'FR: describing your feature request'
 labels: enhancement
 assignees: ''
 ---
