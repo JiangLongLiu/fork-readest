@@ -84,7 +84,7 @@ jobs:
             args: '--target aarch64-pc-windows-msvc --bundles nsis'
 
     runs-on: ${{ matrix.config.os }}
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -149,6 +149,9 @@ jobs:
 
       - name: build and upload Android apks
         if: matrix.config.release == 'android'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
         run: |
           cd apps/readest-app/
           rm -rf src-tauri/gen/android
@@ -176,8 +179,6 @@ jobs:
           gh release upload ${{ needs.get-release.outputs.release_tag }} $universial_apk --clobber
           echo "Uploading $arm64_apk to GitHub release"
           gh release upload ${{ needs.get-release.outputs.release_tag }} $arm64_apk --clobber
-        env:
-          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
 
       - uses: tauri-apps/tauri-action@v0
         if: matrix.config.release != 'android'
