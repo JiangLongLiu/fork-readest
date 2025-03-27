@@ -24,6 +24,7 @@ import { openUrl } from '@tauri-apps/plugin-opener';
 import { handleAuthCallback } from '@/helpers/auth';
 import { getAppleIdAuth, Scope } from './utils/appleIdAuth';
 import { authWithSafari } from './utils/safariAuth';
+import { READEST_WEB_BASE_URL } from '@/services/constants';
 import WindowButtons from '@/components/WindowButtons';
 
 type OAuthProvider = 'google' | 'apple' | 'azure' | 'github';
@@ -40,7 +41,7 @@ interface ProviderLoginProp {
   label: string;
 }
 
-const WEB_AUTH_CALLBACK = 'https://web.readest.com/auth/callback';
+const WEB_AUTH_CALLBACK = `${READEST_WEB_BASE_URL}/auth/callback`;
 const DEEPLINK_CALLBACK = 'readest://auth/callback';
 
 const ProviderLogin: React.FC<ProviderLoginProp> = ({ provider, handleSignIn, Icon, label }) => {
@@ -82,6 +83,12 @@ export default function AuthPage() {
       return DEEPLINK_CALLBACK;
     }
     return `http://localhost:${port}`; // only for development env on Desktop
+  };
+
+  const getWebRedirectTo = () => {
+    return process.env.NODE_ENV === 'production'
+      ? WEB_AUTH_CALLBACK
+      : `${window.location.origin}/auth/callback`;
   };
 
   const tauriSignInApple = async () => {
@@ -141,9 +148,10 @@ export default function AuthPage() {
       const params = new URLSearchParams(hash);
       const accessToken = params.get('access_token');
       const refreshToken = params.get('refresh_token');
+      const type = params.get('type');
       const next = params.get('next') ?? '/';
       if (accessToken) {
-        handleAuthCallback({ accessToken, refreshToken, next, login, navigate: router.push });
+        handleAuthCallback({ accessToken, refreshToken, type, next, login, navigate: router.push });
       }
     }
   };
@@ -239,13 +247,6 @@ export default function AuthPage() {
           loading_button_label: _('Sending reset instructions ...'),
           link_text: _('Forgot your password?'),
           confirmation_text: _('Check your email for the password reset link'),
-        },
-        update_password: {
-          password_label: _('New Password'),
-          password_input_placeholder: _('Your new password'),
-          button_label: _('Update password'),
-          loading_button_label: _('Updating password ...'),
-          confirmation_text: _('Your password has been updated'),
         },
         verify_otp: {
           email_input_label: _('Email address'),
@@ -374,7 +375,7 @@ export default function AuthPage() {
         theme={isDarkMode ? 'dark' : 'light'}
         magicLink={true}
         providers={['google', 'apple', 'github']}
-        redirectTo='/auth/callback'
+        redirectTo={getWebRedirectTo()}
         localization={getAuthLocalization()}
       />
     </div>

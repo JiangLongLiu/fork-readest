@@ -6,7 +6,11 @@ interface UseAuthCallbackOptions {
   refreshToken?: string | null;
   login: (accessToken: string, user: User) => void;
   navigate: (path: string) => void;
+  type?: string | null;
   next?: string;
+  error?: string | null;
+  errorCode?: string | null;
+  errorDescription?: string | null;
 }
 
 export function handleAuthCallback({
@@ -14,22 +18,28 @@ export function handleAuthCallback({
   refreshToken,
   login,
   navigate,
+  type,
   next = '/',
+  error,
 }: UseAuthCallbackOptions) {
   async function finalizeSession() {
-    if (!accessToken || !refreshToken) {
-      console.error('No access token or refresh token');
+    if (error) {
       navigate('/auth/error');
       return;
     }
 
-    const { error } = await supabase.auth.setSession({
+    if (!accessToken || !refreshToken) {
+      navigate('/library');
+      return;
+    }
+
+    const { error: err } = await supabase.auth.setSession({
       access_token: accessToken,
       refresh_token: refreshToken,
     });
 
-    if (error) {
-      console.error('Error setting session:', error);
+    if (err) {
+      console.error('Error setting session:', err);
       navigate('/auth/error');
       return;
     }
@@ -39,6 +49,10 @@ export function handleAuthCallback({
     } = await supabase.auth.getUser();
     if (user) {
       login(accessToken, user);
+      if (type === 'recovery') {
+        navigate('/auth/recovery');
+        return;
+      }
       navigate(next);
     } else {
       console.error('Error fetching user data');
