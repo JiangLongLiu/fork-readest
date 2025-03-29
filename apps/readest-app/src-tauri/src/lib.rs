@@ -46,6 +46,7 @@ fn allow_file_in_scopes(app: &AppHandle, files: Vec<PathBuf>) {
     }
 }
 
+#[cfg(desktop)]
 fn get_files_from_argv(argv: Vec<String>) -> Vec<PathBuf> {
     let mut files = Vec::new();
     // NOTICE: `args` may include URL protocol (`your-app-protocol://`)
@@ -143,6 +144,7 @@ pub fn run() {
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_native_bridge::init())
         .plugin(tauri_plugin_fs::init());
 
     #[cfg(desktop)]
@@ -172,9 +174,6 @@ pub fn run() {
 
     #[cfg(target_os = "ios")]
     let builder = builder.plugin(tauri_plugin_sign_in_with_apple::init());
-
-    #[cfg(target_os = "ios")]
-    let builder = builder.plugin(tauri_plugin_safari_auth::init());
 
     #[cfg(any(target_os = "ios", target_os = "android"))]
     let builder = builder.plugin(tauri_plugin_haptics::init());
