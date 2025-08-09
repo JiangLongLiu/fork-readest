@@ -165,7 +165,8 @@ export const DEFAULT_VIEW_CONFIG: ViewConfig = {
   showBarsOnScroll: false,
   showRemainingTime: false,
   showRemainingPages: false,
-  showPageNumber: true,
+  showProgressInfo: true,
+  progressStyle: 'fraction',
 };
 
 export const DEFAULT_TTS_CONFIG: TTSConfig = {

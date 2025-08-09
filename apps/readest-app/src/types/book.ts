@@ -149,8 +149,9 @@ export interface ViewConfig {
   showFooter: boolean;
   showRemainingTime: boolean;
   showRemainingPages: boolean;
-  showPageNumber: boolean;
+  showProgressInfo: boolean;
   showBarsOnScroll: boolean;
+  progressStyle: 'percentage' | 'fraction';
 }
 
 export interface TTSConfig {
