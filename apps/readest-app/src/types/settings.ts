@@ -6,6 +6,9 @@ export type LibraryViewModeType = 'grid' | 'list';
 export type LibrarySortByType = 'title' | 'author' | 'updated' | 'created' | 'size' | 'format';
 export type LibraryCoverFitType = 'crop' | 'fit';
 
+export type KoreaderSyncChecksumMethod = 'binary' | 'filename';
+export type KoreaderSyncStrategy = 'prompt' | 'silent' | 'send' | 'receive' | 'disabled';
+
 export interface ReadSettings {
   sideBarWidth: string;
   isSideBarPinned: boolean;
@@ -39,6 +42,15 @@ export interface SystemSettings {
   librarySortBy: LibrarySortByType;
   librarySortAscending: boolean;
   libraryCoverFit: LibraryCoverFitType;
+
+  koreaderSyncServerUrl: string;
+  koreaderSyncUsername: string;
+  koreaderSyncUserkey: string;
+  koreaderSyncDeviceId: string;
+  koreaderSyncDeviceName: string;
+  koreaderSyncChecksumMethod: KoreaderSyncChecksumMethod;
+  koreaderSyncStrategy: KoreaderSyncStrategy;
+  koreaderSyncPercentageTolerance: number;
 
   lastSyncedAtBooks: number;
   lastSyncedAtConfigs: number;

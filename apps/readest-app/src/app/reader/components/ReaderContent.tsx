@@ -1,8 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
-import * as React from 'react';
-import { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Book } from '@/types/book';
@@ -75,6 +74,10 @@ const ReaderContent: React.FC<{ ids?: string; settings: SystemSettings }> = ({ i
       return true;
     };
     eventDispatcher.onSync('show-book-details', handleShowBookDetails);
+
+    return () => {
+      eventDispatcher.offSync('show-book-details', handleShowBookDetails);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -106,8 +109,9 @@ const ReaderContent: React.FC<{ ids?: string; settings: SystemSettings }> = ({ i
     const { book } = getBookData(bookKey) || {};
     const { isPrimary } = getViewState(bookKey) || {};
     if (isPrimary && book && config) {
-      eventDispatcher.dispatch('sync-book-progress', { bookKey });
       const settings = useSettingsStore.getState().settings;
+      eventDispatcher.dispatch('sync-book-progress', { bookKey });
+      eventDispatcher.dispatch('flush-koreader-sync', { bookKey });
       await saveConfig(envConfig, bookKey, config, settings);
     }
   };
