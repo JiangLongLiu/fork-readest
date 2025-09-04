@@ -311,7 +311,7 @@ The following fonts are utilized in this software, either bundled within the app
 [badge-donate]: https://donate.readest.com/badge.svg
 [badge-deepwiki]: https://deepwiki.com/badge.svg
 [badge-reddit]: https://img.shields.io/reddit/subreddit-subscribers/readest?style=flat&logo=reddit&color=F37E41
-[badge-language-coverage]: https://img.shields.io/badge/coverage-52%%20population%20🌍-green
+[badge-language-coverage]: https://img.shields.io/badge/coverage-52%25%20population%20🌍-green
 [link-donate]: https://donate.readest.com/?tickers=btc%2Ceth%2Csol%2Cusdc
 [link-appstore]: https://apps.apple.com/app/apple-store/id6738622779?pt=127463130&ct=github&mt=8
 [link-website]: https://readest.com?utm_source=github&utm_medium=referral&utm_campaign=readme
