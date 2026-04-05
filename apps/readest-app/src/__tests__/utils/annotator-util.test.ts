@@ -1,6 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
-import { getExternalDragHandle, toParentViewportPoint } from '@/app/reader/utils/annotatorUtil';
+import {
+  getExternalDragHandle,
+  getHighlightColorLabel,
+  toParentViewportPoint,
+} from '@/app/reader/utils/annotatorUtil';
 import { Point } from '@/utils/sel';
+import { UserHighlightColor } from '@/types/book';
+import { SystemSettings } from '@/types/settings';
 
 describe('getExternalDragHandle', () => {
   const currentStart: Point = { x: 100, y: 200 };
@@ -97,5 +103,40 @@ describe('toParentViewportPoint', () => {
 
     const result = toParentViewportPoint(doc, 50, 100);
     expect(result).toEqual({ x: 300, y: 100 });
+  });
+});
+
+describe('getHighlightColorLabel', () => {
+  const makeSettings = (
+    userHighlightColors: UserHighlightColor[],
+    defaultHighlightLabels: Partial<Record<string, string>> = {},
+  ): SystemSettings =>
+    ({
+      globalReadSettings: {
+        userHighlightColors,
+        defaultHighlightLabels,
+      },
+    }) as SystemSettings;
+
+  it('returns the user-set label for a built-in color', () => {
+    const settings = makeSettings([], { yellow: 'Foreshadowing' });
+    expect(getHighlightColorLabel(settings, 'yellow')).toBe('Foreshadowing');
+  });
+
+  it('returns the user-set label for a hex color, matching case-insensitively', () => {
+    const settings = makeSettings([{ hex: '#aabbcc', label: 'Romance' }]);
+    expect(getHighlightColorLabel(settings, '#AABBCC')).toBe('Romance');
+  });
+
+  it('returns undefined when the user has not set a label', () => {
+    const settings = makeSettings([]);
+    expect(getHighlightColorLabel(settings, 'green')).toBeUndefined();
+    expect(getHighlightColorLabel(settings, '#123456')).toBeUndefined();
+  });
+
+  it('ignores labels that collapse to whitespace', () => {
+    const settings = makeSettings([{ hex: '#abcdef', label: '   ' }], { red: '  ' });
+    expect(getHighlightColorLabel(settings, '#abcdef')).toBeUndefined();
+    expect(getHighlightColorLabel(settings, 'red')).toBeUndefined();
   });
 });
