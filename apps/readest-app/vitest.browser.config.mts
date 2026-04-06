@@ -1,4 +1,5 @@
 import tsconfigPaths from 'vite-tsconfig-paths';
+import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 import { playwright } from '@vitest/browser-playwright';
 import { loadEnvFile } from './vitest.env.mts';
@@ -7,7 +8,7 @@ import { loadEnvFile } from './vitest.env.mts';
 const env = { ...loadEnvFile('.env'), ...loadEnvFile('.env.web') };
 
 export default defineConfig({
-  plugins: [tsconfigPaths()],
+  plugins: [tsconfigPaths(), react()],
   define: {
     'process.env': JSON.stringify(env),
   },
@@ -42,14 +43,33 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['src/**/*.browser.test.ts'],
+    include: ['src/**/*.browser.test.ts', 'src/**/*.browser.test.tsx'],
     onConsoleLog(_log, type) {
       if (type === 'stdout') return false;
     },
     browser: {
       enabled: true,
-      provider: playwright(),
+      headless: true,
+      provider: playwright({
+        contextOptions: {
+          viewport: { width: 1920, height: 1080 },
+          deviceScaleFactor: 2,
+        },
+      }),
       instances: [{ browser: 'chromium' }],
+      expect: {
+        toMatchScreenshot: {
+          comparatorName: 'pixelmatch',
+          comparatorOptions: {
+            threshold: 0.1,
+            allowedMismatchedPixelRatio: 0.02,
+          },
+          // Strip platform from the path so one baseline works on macOS and Linux.
+          // The path is relative to the project root (not the test file).
+          resolveScreenshotPath: ({ arg, browserName, ext, testFileDirectory, testFileName }) =>
+            `${testFileDirectory}/__screenshots__/${testFileName}/${arg}-${browserName}${ext}`,
+        },
+      },
     },
   },
 });
