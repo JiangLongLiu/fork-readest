@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { Fragment, useState, useEffect, useMemo, useCallback } from 'react';
 import { md5 } from 'js-md5';
 import { type as osType } from '@tauri-apps/plugin-os';
 import { useEnv } from '@/context/EnvContext';
@@ -218,7 +218,7 @@ export const KOSyncSettingsWindow: React.FC = () => {
       {isOpen && (
         <div className='mb-4 mt-0 flex flex-col gap-4 p-2 sm:p-4'>
           {isConfigured ? (
-            <>
+            <Fragment key='configured'>
               <div className='text-center'>
                 <p className='text-base-content/80 text-sm'>
                   {_('Sync as {{userDisplayName}}', {
@@ -275,9 +275,9 @@ export const KOSyncSettingsWindow: React.FC = () => {
                   onChange={handleDeviceNameChange}
                 />
               </div>
-            </>
+            </Fragment>
           ) : (
-            <>
+            <Fragment key='login'>
               <p className='text-base-content/70 text-center text-sm'>
                 {_('Connect to your KOReader Sync server.')}
               </p>
@@ -333,7 +333,7 @@ export const KOSyncSettingsWindow: React.FC = () => {
               {connectionStatus && (
                 <div className='text-error h-4 text-center text-sm'>{connectionStatus}</div>
               )}
-            </>
+            </Fragment>
           )}
         </div>
       )}
