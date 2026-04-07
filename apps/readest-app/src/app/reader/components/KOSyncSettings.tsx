@@ -148,6 +148,7 @@ export const KOSyncSettingsWindow: React.FC = () => {
       serverUrl: url,
       username,
       userkey: md5(password),
+      password,
       deviceName,
       enabled: true,
     };
