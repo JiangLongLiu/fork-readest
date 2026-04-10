@@ -4,12 +4,12 @@ import { FaHeadphones } from 'react-icons/fa6';
 import { RiArrowLeftSLine, RiArrowRightSLine } from 'react-icons/ri';
 import { RiArrowGoBackLine, RiArrowGoForwardLine } from 'react-icons/ri';
 import { RiArrowLeftDoubleLine, RiArrowRightDoubleLine } from 'react-icons/ri';
-import { getNavigationIcon, getNavigationLabel, getNavigationHandler } from './utils';
 import { useReaderStore } from '@/store/readerStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useBookDataStore } from '@/store/bookDataStore';
-import { FooterBarChildProps } from './types';
 import { formatProgress } from '@/utils/progress';
+import { FooterBarChildProps } from './types';
+import { getNavigationIcon } from './utils';
 import Button from '@/components/Button';
 
 const DesktopFooterBar: React.FC<FooterBarChildProps> = ({
@@ -86,23 +86,15 @@ const DesktopFooterBar: React.FC<FooterBarChildProps> = ({
             <RiArrowLeftDoubleLine />,
             <RiArrowRightDoubleLine />,
           )}
-          onClick={getNavigationHandler(
-            viewSettings?.rtl,
-            navigationHandlers.onPrevSection,
-            navigationHandlers.onNextSection,
-          )}
-          label={getNavigationLabel(viewSettings?.rtl, _('Previous Section'), _('Next Section'))}
+          onClick={navigationHandlers.onPrevSection}
+          label={_('Previous Section')}
         />
       )}
       {!viewSettings?.showPaginationButtons && (
         <Button
           icon={getNavigationIcon(viewSettings?.rtl, <RiArrowLeftSLine />, <RiArrowRightSLine />)}
-          onClick={getNavigationHandler(
-            viewSettings?.rtl,
-            navigationHandlers.onPrevPage,
-            navigationHandlers.onNextPage,
-          )}
-          label={getNavigationLabel(viewSettings?.rtl, _('Previous Page'), _('Next Page'))}
+          onClick={navigationHandlers.onPrevPage}
+          label={_('Previous Page')}
         />
       )}
       <Button
@@ -144,12 +136,8 @@ const DesktopFooterBar: React.FC<FooterBarChildProps> = ({
       {!viewSettings?.showPaginationButtons && (
         <Button
           icon={getNavigationIcon(viewSettings?.rtl, <RiArrowRightSLine />, <RiArrowLeftSLine />)}
-          onClick={getNavigationHandler(
-            viewSettings?.rtl,
-            navigationHandlers.onNextPage,
-            navigationHandlers.onPrevPage,
-          )}
-          label={getNavigationLabel(viewSettings?.rtl, _('Next Page'), _('Previous Page'))}
+          onClick={navigationHandlers.onNextPage}
+          label={_('Next Page')}
         />
       )}
       {!viewSettings?.showPaginationButtons && (
@@ -159,12 +147,8 @@ const DesktopFooterBar: React.FC<FooterBarChildProps> = ({
             <RiArrowRightDoubleLine />,
             <RiArrowLeftDoubleLine />,
           )}
-          onClick={getNavigationHandler(
-            viewSettings?.rtl,
-            navigationHandlers.onNextSection,
-            navigationHandlers.onPrevSection,
-          )}
-          label={getNavigationLabel(viewSettings?.rtl, _('Next Section'), _('Previous Section'))}
+          onClick={navigationHandlers.onNextSection}
+          label={_('Next Section')}
         />
       )}
     </div>
