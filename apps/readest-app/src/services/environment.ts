@@ -1,6 +1,7 @@
 import { AppService } from '@/types/system';
 import { READEST_NODE_BASE_URL, READEST_WEB_BASE_URL } from './constants';
 import { getRuntimeConfig } from './runtimeConfig';
+import { getStoredServerConfig } from '@/utils/supabase';
 
 declare global {
   interface Window {
@@ -12,11 +13,25 @@ export const isTauriAppPlatform = () => process.env['NEXT_PUBLIC_APP_PLATFORM'] 
 export const isWebAppPlatform = () => process.env['NEXT_PUBLIC_APP_PLATFORM'] === 'web';
 export const hasCli = () => window.__READEST_CLI_ACCESS === true;
 export const isPWA = () => window.matchMedia('(display-mode: standalone)').matches;
-export const getBaseUrl = () =>
-  getRuntimeConfig()?.apiBaseUrl ??
-  process.env['API_BASE_URL'] ??
-  process.env['NEXT_PUBLIC_API_BASE_URL'] ??
-  READEST_WEB_BASE_URL;
+export const getBaseUrl = () => {
+  // Web: runtime-config.js is authoritative; stored config is irrelevant
+  if (isWebAppPlatform()) {
+    return (
+      getRuntimeConfig()?.apiBaseUrl ??
+      process.env['API_BASE_URL'] ??
+      process.env['NEXT_PUBLIC_API_BASE_URL'] ??
+      READEST_WEB_BASE_URL
+    );
+  }
+  // Tauri: localStorage wizard config takes highest priority
+  const stored = getStoredServerConfig();
+  return (
+    stored?.apiBaseUrl ??
+    stored?.supabaseUrl ??
+    process.env['NEXT_PUBLIC_API_BASE_URL'] ??
+    READEST_WEB_BASE_URL
+  );
+};
 export const getNodeBaseUrl = () =>
   process.env['NEXT_PUBLIC_NODE_BASE_URL'] ?? READEST_NODE_BASE_URL;
 
