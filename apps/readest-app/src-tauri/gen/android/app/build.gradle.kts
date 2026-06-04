@@ -23,7 +23,7 @@ android {
         keystoreProperties.load(FileInputStream(keystorePropertiesFile))
     }
     defaultConfig {
-        manifestPlaceholders["usesCleartextTraffic"] = "false"
+        manifestPlaceholders["usesCleartextTraffic"] = "true"
         applicationId = "com.bilingify.readest"
         minSdk = 26
         targetSdk = 36
@@ -75,6 +75,14 @@ android {
     }
     buildFeatures {
         buildConfig = true
+    }
+    applicationVariants.all {
+        val variant = this
+        variant.outputs.all {
+            val timestamp = java.text.SimpleDateFormat("yyyyMMdd-HHmmss").format(java.util.Date())
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
+                "Readest-arm64-${timestamp}.apk"
+        }
     }
 }
 
