@@ -117,6 +117,17 @@ services:
       mc mb --ignore-existing myminio/${S3_BUCKET_NAME}
       "
 
+  nginx-s3-proxy:
+    image: nginx:alpine
+    container_name: readest-nginx-s3
+    restart: unless-stopped
+    ports:
+      - "9002:9002"
+    volumes:
+      - ./nginx-s3-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - minio
+
   client:
     container_name: readest-client
     image: ${READEST_IMAGE:-ghcr.io/readest/readest:latest}
@@ -131,7 +142,7 @@ services:
       SUPABASE_ADMIN_KEY: ${SERVICE_ROLE_KEY}
       API_BASE_URL: ${SITE_URL}
       S3_ENDPOINT: http://minio:9000
-      S3_PUBLIC_ENDPOINT: http://${HOST_IP}:9000
+      S3_PUBLIC_ENDPOINT: http://${HOST_IP}:9002
       S3_REGION: us-east-1
       S3_BUCKET_NAME: ${S3_BUCKET_NAME}
       S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
