@@ -312,16 +312,34 @@ jobs:
           npx tauri android init
         continue-on-error: true
 
-      - name: Debug print build.gradle.kts
+      - name: Patch build.gradle.kts for Tauri compatibility
         run: |
-          GRADLE_FILE="apps/readest-app/src-tauri/gen/android/app/build.gradle.kts"
-          if [ -f "$GRADLE_FILE" ]; then
-            echo "=== build.gradle.kts contents ==="
-            cat "$GRADLE_FILE"
-            echo "=== end ==="
-          else
-            echo "File not found: $GRADLE_FILE"
-          fi
+          python3 << 'PYEOF'
+          import os, re
+          gradle_file = "apps/readest-app/src-tauri/gen/android/app/build.gradle.kts"
+          if not os.path.exists(gradle_file):
+              print(f"File not found: {gradle_file}")
+              exit(0)
+          with open(gradle_file) as f:
+              content = f.read()
+          modified = False
+          # Remove storeFlavor line and missingDimensionStrategy line
+          lines = content.split("\n")
+          new_lines = []
+          for line in lines:
+              if "storeFlavor" in line or "missingDimensionStrategy" in line:
+                  print(f"Removing: {line.strip()}")
+                  modified = True
+                  continue
+              new_lines.append(line)
+          if modified:
+              content = "\n".join(new_lines)
+              with open(gradle_file, "w") as f:
+                  f.write(content)
+              print("Patched build.gradle.kts")
+          else:
+              print("No changes needed")
+          PYEOF
 
       - name: Build Android APK (aarch64)
         env:
