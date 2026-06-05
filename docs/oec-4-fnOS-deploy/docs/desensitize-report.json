@@ -1,0 +1,19 @@
+{
+  "file": "config/compose.yaml",
+  "timestamp": "2026-06-05 17:03:46.211437",
+  "total_changes": 2,
+  "changes": [
+    {
+      "path": "services.auth.environment.GOTRUE_DB_DATABASE_URL",
+      "original": "postgres://supabase_...",
+      "replacement": "${GOTRUE_DB_DATABASE_URL}",
+      "status": "replaced"
+    },
+    {
+      "path": "services.rest.environment.PGRST_DB_URI",
+      "original": "postgres://authentic...",
+      "replacement": "${PGRST_DB_URI}",
+      "status": "replaced"
+    }
+  ]
+}
