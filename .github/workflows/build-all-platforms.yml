@@ -312,24 +312,77 @@ jobs:
           npx tauri android init
         continue-on-error: true
 
-      - name: Patch build.gradle.kts for Tauri compatibility
+      - name: Patch Gradle configs for CI build
         run: |
           python3 << 'PYEOF'
           import os
-          gradle_file = "apps/readest-app/src-tauri/gen/android/app/build.gradle.kts"
-          if not os.path.exists(gradle_file):
-              print(f"File not found: {gradle_file}")
+
+          # ── 1. Patch plugin: remove store flavor dimension, add foss sources ──
+          plugin_gradle = "apps/readest-app/src-tauri/plugins/tauri-plugin-native-bridge/android/build.gradle.kts"
+          if os.path.exists(plugin_gradle):
+              with open(plugin_gradle) as f:
+                  lines = f.readlines()
+              new_lines = []
+              skip_depth = 0
+              in_product_flavors = False
+              source_sets_added = False
+              for i, line in enumerate(lines):
+                  stripped = line.strip()
+                  # Skip flavorDimensions line
+                  if 'flavorDimensions' in stripped and '"store"' in stripped:
+                      print(f"Plugin: removing {stripped}")
+                      continue
+                  # Skip googleplayImplementation dependencies
+                  if 'googleplayImplementation' in stripped:
+                      print(f"Plugin: removing {stripped}")
+                      continue
+                  # Track productFlavors block with nested braces
+                  if stripped.startswith('productFlavors') and '{' in stripped:
+                      in_product_flavors = True
+                      skip_depth = 1
+                      print("Plugin: removing productFlavors block")
+                      continue
+                  if in_product_flavors:
+                      skip_depth += stripped.count('{') - stripped.count('}')
+                      if skip_depth <= 0:
+                          in_product_flavors = False
+                          skip_depth = 0
+                      continue
+                  # Insert sourceSets before "dependencies {" (outside android block)
+                  if not source_sets_added and stripped == 'dependencies {':
+                      # Check if previous non-empty line is "}" (closing android block)
+                      new_lines.append('\n')
+                      new_lines.append('android {\n')
+                      new_lines.append('    sourceSets {\n')
+                      new_lines.append('        getByName("main") {\n')
+                      new_lines.append('            java.srcDirs("src/foss/java")\n')
+                      new_lines.append('        }\n')
+                      new_lines.append('    }\n')
+                      new_lines.append('}\n')
+                      new_lines.append('\n')
+                      source_sets_added = True
+                      print("Plugin: added sourceSets for foss")
+                  new_lines.append(line)
+              with open(plugin_gradle, "w") as f:
+                  f.writelines(new_lines)
+              print("Patched plugin build.gradle.kts")
+          else:
+              print(f"Plugin gradle not found: {plugin_gradle}")
+
+          # ── 2. Patch app: remove storeFlavor + missingDimensionStrategy, conditional tauri apply ──
+          app_gradle = "apps/readest-app/src-tauri/gen/android/app/build.gradle.kts"
+          if not os.path.exists(app_gradle):
+              print(f"App gradle not found: {app_gradle}")
               exit(0)
-          with open(gradle_file) as f:
+          with open(app_gradle) as f:
               content = f.read()
-          modified = False
           new_lines = []
+          modified = False
           for line in content.split("\n"):
               if "storeFlavor" in line or "missingDimensionStrategy" in line:
                   print(f"Removing: {line.strip()}")
                   modified = True
                   continue
-              # Make tauri.build.gradle.kts apply conditional
               if 'apply(from = "tauri.build.gradle.kts")' in line:
                   new_lines.append('if (file("tauri.build.gradle.kts").exists()) { apply(from = "tauri.build.gradle.kts") }')
                   modified = True
@@ -337,11 +390,11 @@ jobs:
                   continue
               new_lines.append(line)
           if modified:
-              with open(gradle_file, "w") as f:
+              with open(app_gradle, "w") as f:
                   f.write("\n".join(new_lines))
-              print("Patched build.gradle.kts")
+              print("Patched app build.gradle.kts")
           else:
-              print("No changes needed")
+              print("App gradle: no changes needed")
           PYEOF
 
       - name: Build Android APK (aarch64)
