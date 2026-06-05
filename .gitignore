@@ -30,6 +30,14 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# Tauri client build config (contains real server secrets)
+apps/readest-app/.env.tauri
+
+# Build artifacts
+*.apk
+*.idsig
+*.jks
+
 # vercel
 .vercel
 
