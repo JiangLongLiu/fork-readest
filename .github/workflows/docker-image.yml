@@ -34,10 +34,11 @@ jobs:
       BUILD_ARGS: |
         NEXT_PUBLIC_APP_PLATFORM=web
     steps:
-      - name: Prepare platform pair
+      - name: Prepare platform pair and lowercase owner
         run: |
           platform=${{ matrix.platform }}
           echo "PLATFORM_PAIR=${platform//\//-}" >> "$GITHUB_ENV"
+          echo "REPO_OWNER_LOWER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
@@ -57,7 +58,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
         with:
-          images: ghcr.io/${{ toLower(github.repository_owner) }}/readest
+          images: ghcr.io/${{ env.REPO_OWNER_LOWER }}/readest
 
       - name: Build and push by digest
         id: build
@@ -69,9 +70,9 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: ${{ env.BUILD_ARGS }}
-          cache-from: type=registry,ref=ghcr.io/${{ toLower(github.repository_owner) }}/readest:buildcache-${{ env.PLATFORM_PAIR }}
-          cache-to: type=registry,ref=ghcr.io/${{ toLower(github.repository_owner) }}/readest:buildcache-${{ env.PLATFORM_PAIR }},mode=max
-          outputs: type=image,name=ghcr.io/${{ toLower(github.repository_owner) }}/readest,push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=registry,ref=ghcr.io/${{ env.REPO_OWNER_LOWER }}/readest:buildcache-${{ env.PLATFORM_PAIR }}
+          cache-to: type=registry,ref=ghcr.io/${{ env.REPO_OWNER_LOWER }}/readest:buildcache-${{ env.PLATFORM_PAIR }},mode=max
+          outputs: type=image,name=ghcr.io/${{ env.REPO_OWNER_LOWER }}/readest,push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
         run: |
@@ -94,6 +95,10 @@ jobs:
       packages: write
     runs-on: ubuntu-latest
     steps:
+      - name: Compute lowercase owner
+        run: |
+          echo "REPO_OWNER_LOWER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+
       - name: Download digests
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -132,7 +137,7 @@ jobs:
         if: steps.dockerhub.outputs.enabled != 'true'
         uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
         with:
-          images: ghcr.io/${{ toLower(github.repository_owner) }}/readest
+          images: ghcr.io/${{ env.REPO_OWNER_LOWER }}/readest
           tags: |
             type=raw,value=main,enable={{is_default_branch}}
             type=raw,value=latest,enable={{is_default_branch}}
@@ -147,7 +152,7 @@ jobs:
         uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
         with:
           images: |
-            ghcr.io/${{ toLower(github.repository_owner) }}/readest
+            ghcr.io/${{ env.REPO_OWNER_LOWER }}/readest
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/readest
           tags: |
             type=raw,value=main,enable={{is_default_branch}}
@@ -165,7 +170,7 @@ jobs:
         run: |
           docker buildx imagetools create \
             $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf 'ghcr.io/${{ toLower(github.repository_owner) }}/readest@sha256:%s ' *)
+            $(printf "ghcr.io/${REPO_OWNER_LOWER}/readest@sha256:%s " *)
 
       - name: Create manifest list and push (GHCR + Docker Hub)
         if: steps.dockerhub.outputs.enabled == 'true'
@@ -175,7 +180,7 @@ jobs:
         run: |
           docker buildx imagetools create \
             $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf 'ghcr.io/${{ toLower(github.repository_owner) }}/readest@sha256:%s ' *)
+            $(printf "ghcr.io/${REPO_OWNER_LOWER}/readest@sha256:%s " *)
 
       - name: Published image summary
         run: |
