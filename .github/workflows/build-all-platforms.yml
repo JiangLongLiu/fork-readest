@@ -322,8 +322,8 @@ jobs:
               exit(0)
           with open(gradle_file) as f:
               content = f.read()
-          if "splits" in content:
-              print("splits block already exists")
+          if "isUniversalApk" in content:
+              print("ABI splits block already exists")
               exit(0)
           splits_block = """    splits {
               abi {
