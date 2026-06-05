@@ -27,7 +27,7 @@ permissions:
 env:
   NODE_VERSION: '22'
   PNPM_VERSION: '11'
-  RUST_VERSION: '1.85.0'
+  RUST_VERSION: 'stable'
   TAURI_CLI_VERSION: '2'
 
 jobs:
