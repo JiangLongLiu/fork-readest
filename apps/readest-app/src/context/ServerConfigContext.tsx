@@ -70,6 +70,7 @@ function SetupWizard({ onComplete }: { onComplete: (config: ServerConfig) => voi
       supabaseUrl: url,
       ...(anonKey.trim() ? { supabaseAnonKey: anonKey.trim() } : {}),
       apiBaseUrl: url, // Kong gateway also serves the REST API
+      webBaseUrl: url, // Kong gateway also serves the web frontend and share pages
     };
     onComplete(config);
     setTesting(false);

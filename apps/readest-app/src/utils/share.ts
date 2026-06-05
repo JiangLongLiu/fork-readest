@@ -1,4 +1,5 @@
-import { READEST_WEB_BASE_URL, SHARE_BASE_URL, SHARE_TOKEN_LENGTH } from '@/services/constants';
+import { READEST_WEB_BASE_URL, SHARE_TOKEN_LENGTH } from '@/services/constants';
+import { getWebBaseUrl, getShareBaseUrl } from '@/services/environment';
 
 export interface ShareDeepLink {
   token: string;
@@ -13,11 +14,11 @@ const isValidToken = (raw: unknown): raw is string => typeof raw === 'string' &&
 
 // Canonical share URL embedded in the dialog, share sheet, and any "copy link"
 // affordance. Always points at the public web target.
-export const buildShareUrl = (token: string): string => `${SHARE_BASE_URL}/${token}`;
+export const buildShareUrl = (token: string): string => `${getShareBaseUrl()}/${token}`;
 
 // Parses both the custom-scheme and HTTPS forms used by the deeplink ingress.
 //   readest://share/{token}
-//   https://web.readest.com/s/{token}
+//   https://web.readest.com/s/{token}  (or self-hosted equivalent)
 // Returns null on invalid input so callers can fall through to other parsers.
 export const parseShareDeepLink = (url: string): ShareDeepLink | null => {
   if (!url) return null;
@@ -45,9 +46,12 @@ export const parseShareDeepLink = (url: string): ShareDeepLink | null => {
 };
 
 const isWebReadestHost = (host: string): boolean => {
-  // Matches the production host and any preview domain Readest may serve from.
-  // Conservative: accepts only the exact production host or a *.readest.com
-  // subdomain so a third-party site cannot impersonate a share URL.
+  // Accept the configured web base URL host (self-hosted or upstream).
+  try {
+    const configuredHost = new URL(getWebBaseUrl()).host;
+    if (host === configuredHost) return true;
+  } catch {}
+  // Also accept the upstream production host and *.readest.com subdomains.
   if (host === new URL(READEST_WEB_BASE_URL).host) return true;
   return host.endsWith('.readest.com');
 };

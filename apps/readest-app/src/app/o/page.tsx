@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { IoAlertCircleOutline, IoBookOutline, IoOpenOutline } from 'react-icons/io5';
-import { DOWNLOAD_READEST_URL, READEST_WEB_BASE_URL } from '@/services/constants';
+import { DOWNLOAD_READEST_URL } from '@/services/constants';
+import { getWebBaseUrl } from '@/services/environment';
 import { useTranslation } from '@/hooks/useTranslation';
 import { buildAnnotationAppUrl } from '@/utils/deeplink';
 import { BrandHeader } from '@/components/landing/BrandHeader';
@@ -69,7 +70,7 @@ const OpenAnnotationLanding = () => {
     const path = `book/${bookHash}/annotation/${noteId}${cfi ? `?cfi=${encodeURIComponent(cfi)}` : ''}`;
 
     if (platform === 'android-chromium') {
-      const absoluteFallback = `${READEST_WEB_BASE_URL}${webReaderUrl}`;
+      const absoluteFallback = `${getWebBaseUrl()}${webReaderUrl}`;
       window.location.replace(buildIntentUrl(path, absoluteFallback));
       return;
     }

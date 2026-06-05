@@ -32,6 +32,19 @@ export const getBaseUrl = () => {
     READEST_WEB_BASE_URL
   );
 };
+
+// Returns the public base URL of the web frontend (used for share links,
+// annotation links, OG metadata). In self-hosted deployments this points to
+// the Kong gateway so that share links like http://<IP>:8000/s/<token> work.
+export const getWebBaseUrl = () => {
+  if (isWebAppPlatform()) {
+    return getRuntimeConfig()?.webBaseUrl ?? process.env['WEB_BASE_URL'] ?? getBaseUrl();
+  }
+  const stored = getStoredServerConfig();
+  return stored?.webBaseUrl ?? process.env['NEXT_PUBLIC_WEB_BASE_URL'] ?? getBaseUrl();
+};
+
+export const getShareBaseUrl = () => `${getWebBaseUrl()}/s`;
 export const getNodeBaseUrl = () =>
   process.env['NEXT_PUBLIC_NODE_BASE_URL'] ?? READEST_NODE_BASE_URL;
 
