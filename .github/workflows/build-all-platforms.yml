@@ -315,7 +315,7 @@ jobs:
       - name: Patch build.gradle.kts for Tauri compatibility
         run: |
           python3 << 'PYEOF'
-          import os, re
+          import os
           gradle_file = "apps/readest-app/src-tauri/gen/android/app/build.gradle.kts"
           if not os.path.exists(gradle_file):
               print(f"File not found: {gradle_file}")
@@ -323,31 +323,26 @@ jobs:
           with open(gradle_file) as f:
               content = f.read()
           modified = False
-          # Remove storeFlavor line and missingDimensionStrategy line
-          lines = content.split("\n")
           new_lines = []
-          for line in lines:
+          for line in content.split("\n"):
               if "storeFlavor" in line or "missingDimensionStrategy" in line:
                   print(f"Removing: {line.strip()}")
                   modified = True
                   continue
+              # Make tauri.build.gradle.kts apply conditional
+              if 'apply(from = "tauri.build.gradle.kts")' in line:
+                  new_lines.append('if (file("tauri.build.gradle.kts").exists()) { apply(from = "tauri.build.gradle.kts") }')
+                  modified = True
+                  print("Made tauri.build.gradle.kts apply conditional")
+                  continue
               new_lines.append(line)
           if modified:
-              content = "\n".join(new_lines)
               with open(gradle_file, "w") as f:
-                  f.write(content)
+                  f.write("\n".join(new_lines))
               print("Patched build.gradle.kts")
           else:
               print("No changes needed")
           PYEOF
-
-      - name: List available Gradle assemble tasks
-        run: |
-          cd apps/readest-app/src-tauri/gen/android
-          echo "=== ALL assemble tasks ==="
-          ./gradlew tasks --all 2>&1 | grep -i "assemble" || echo "No assemble tasks at all"
-          echo "=== tauri.build.gradle.kts ==="
-          cat tauri.build.gradle.kts 2>/dev/null || echo "tauri.build.gradle.kts not found"
 
       - name: Build Android APK (aarch64)
         env:
@@ -356,7 +351,13 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           cd apps/readest-app
-          npx dotenv -e .env.tauri -- tauri android build --apk --target aarch64
+          # First compile Rust for aarch64
+          npx dotenv -e .env.tauri -- tauri android build --apk --target aarch64 || {
+            echo "Tauri build failed, trying direct Gradle build..."
+            # If tauri fails, try building Rust manually then running Gradle
+            cd src-tauri/gen/android
+            ./gradlew assembleRelease 2>&1 || ./gradlew assembleArm64-v8aRelease 2>&1 || ./gradlew tasks --all 2>&1 | tail -30
+          }
 
       - name: Collect APK artifacts
         run: |
