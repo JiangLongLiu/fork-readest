@@ -308,23 +308,10 @@ jobs:
 
       - name: Add Android ABI splits for universal APK
         run: |
-          python3 -c "
-          import re
-          p = 'apps/readest-app/src-tauri/gen/android/app/build.gradle.kts'
-          with open(p) as f: c = f.read()
-          if 'splits' not in c:
-              splits_block = '''    splits {
-            abi {
-                isEnable = true
-                reset()
-                include(\"arm64-v8a\", \"armeabi-v7a\", \"x86\", \"x86_64\")
-                isUniversalApk = true
-            }
-        }
-    '''
-              c = c.replace('    defaultConfig {', splits_block + 'defaultConfig {', 1)
-              with open(p, 'w') as f: f.write(c)
-          "
+          GRADLE_FILE="apps/readest-app/src-tauri/gen/android/app/build.gradle.kts"
+          if [ -f "$GRADLE_FILE" ] && ! grep -q "splits" "$GRADLE_FILE"; then
+            sed -i '/defaultConfig {/i\    splits {\n        abi {\n            isEnable = true\n            reset()\n            include("arm64-v8a", "armeabi-v7a", "x86", "x86_64")\n            isUniversalApk = true\n        }\n    }' "$GRADLE_FILE"
+          fi
 
       - name: Build Android APK (arm64)
         env:
