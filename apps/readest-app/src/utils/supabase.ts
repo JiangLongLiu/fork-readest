@@ -40,20 +40,30 @@ export function hasServerConfig(): boolean {
 // from a previous server must NOT override it.
 const isWeb = process.env['NEXT_PUBLIC_APP_PLATFORM'] === 'web';
 
+/** Safely decode a base64 env var; returns '' when the var is unset. */
+function safeAtob(value: string | undefined): string {
+  if (!value) return '';
+  try {
+    return atob(value);
+  } catch {
+    return '';
+  }
+}
+
 function resolveSupabaseUrl(): string {
   if (isWeb) {
     return (
       getRuntimeConfig()?.supabaseUrl ||
       process.env['SUPABASE_URL'] ||
       process.env['NEXT_PUBLIC_SUPABASE_URL'] ||
-      atob(process.env['NEXT_PUBLIC_DEFAULT_SUPABASE_URL_BASE64']!)
+      safeAtob(process.env['NEXT_PUBLIC_DEFAULT_SUPABASE_URL_BASE64'])
     );
   }
   // Tauri: localStorage wizard config takes highest priority
   return (
     getStoredServerConfig()?.supabaseUrl ||
     process.env['NEXT_PUBLIC_SUPABASE_URL'] ||
-    atob(process.env['NEXT_PUBLIC_DEFAULT_SUPABASE_URL_BASE64']!)
+    safeAtob(process.env['NEXT_PUBLIC_DEFAULT_SUPABASE_URL_BASE64'])
   );
 }
 
@@ -63,18 +73,28 @@ function resolveSupabaseAnonKey(): string {
       getRuntimeConfig()?.supabaseAnonKey ||
       process.env['SUPABASE_ANON_KEY'] ||
       process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ||
-      atob(process.env['NEXT_PUBLIC_DEFAULT_SUPABASE_KEY_BASE64']!)
+      safeAtob(process.env['NEXT_PUBLIC_DEFAULT_SUPABASE_KEY_BASE64'])
     );
   }
   return (
     getStoredServerConfig()?.supabaseAnonKey ||
     process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ||
-    atob(process.env['NEXT_PUBLIC_DEFAULT_SUPABASE_KEY_BASE64']!)
+    safeAtob(process.env['NEXT_PUBLIC_DEFAULT_SUPABASE_KEY_BASE64'])
   );
 }
 
 // ── Lazy-initialized Supabase client ─────────────────────────────────
 let _supabase: SupabaseClient | null = null;
+let _clientVersion = 0;
+
+/**
+ * Returns a monotonically increasing version number that increments
+ * every time `reinitializeSupabase()` is called. Components can use
+ * this as a React effect dependency to detect client re-creation.
+ */
+export function getClientVersion(): number {
+  return _clientVersion;
+}
 
 /**
  * Returns the shared Supabase client. On first call the client is created
@@ -97,6 +117,7 @@ export function getSupabase(): SupabaseClient {
  */
 export function reinitializeSupabase(): void {
   _supabase = null;
+  _clientVersion++;
 }
 
 /**

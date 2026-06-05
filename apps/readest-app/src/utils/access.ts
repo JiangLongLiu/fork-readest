@@ -99,14 +99,30 @@ export const getDailyTranslationPlanData = (token: string) => {
 };
 
 export const getAccessToken = async (): Promise<string | null> => {
-  // In browser context there might be two instances of supabase one in the app route
-  // and the other in the pages route, and they might have different sessions
-  // making the access token invalid for API calls. In that case we should use localStorage.
+  // On web, use localStorage which is the single source of truth
+  // (avoids issues with multiple Supabase instances in app/pages routes).
   if (isWebAppPlatform()) {
     return localStorage.getItem('token') ?? null;
   }
-  const { data } = await supabase.auth.getSession();
-  return data?.session?.access_token ?? null;
+  // On Tauri, prefer the Supabase session (which auto-refreshes tokens),
+  // then fall back to localStorage for resilience after client re-init.
+  try {
+    const { data } = await supabase.auth.getSession();
+    if (data?.session?.access_token) {
+      // Keep localStorage in sync so other code paths see the latest token
+      const current = localStorage.getItem('token');
+      if (current !== data.session.access_token) {
+        localStorage.setItem('token', data.session.access_token);
+        if (data.session.refresh_token) {
+          localStorage.setItem('refresh_token', data.session.refresh_token);
+        }
+      }
+      return data.session.access_token;
+    }
+  } catch {
+    // Supabase session unavailable — fall through to localStorage
+  }
+  return localStorage.getItem('token') ?? null;
 };
 
 export const getUserID = async (): Promise<string | null> => {
@@ -114,8 +130,22 @@ export const getUserID = async (): Promise<string | null> => {
     const user = localStorage.getItem('user') ?? '{}';
     return JSON.parse(user).id ?? null;
   }
-  const { data } = await supabase.auth.getSession();
-  return data?.session?.user?.id ?? null;
+  // On Tauri, try Supabase session first, fall back to localStorage
+  try {
+    const { data } = await supabase.auth.getSession();
+    if (data?.session?.user?.id) return data.session.user.id;
+  } catch {
+    // Fall through
+  }
+  try {
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      return JSON.parse(userJson).id ?? null;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
 };
 
 export const validateUserAndToken = async (authHeader: string | null | undefined) => {

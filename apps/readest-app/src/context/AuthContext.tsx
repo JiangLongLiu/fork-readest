@@ -10,7 +10,7 @@ import {
   useEffect,
 } from 'react';
 import { User } from '@supabase/supabase-js';
-import { supabase } from '@/utils/supabase';
+import { supabase, getClientVersion } from '@/utils/supabase';
 import posthog from 'posthog-js';
 
 interface AuthContextType {
@@ -59,11 +59,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
       }
     };
-    const refreshSession = async () => {
+
+    const initAuth = async () => {
+      // After Supabase re-initialization (e.g. wizard config change),
+      // the new client has no session. Restore it from localStorage tokens
+      // so that auto-refresh and onAuthStateChange work correctly.
+      const storedToken = localStorage.getItem('token');
+      const storedRefresh = localStorage.getItem('refresh_token');
+      if (storedToken && storedRefresh) {
+        try {
+          const { data, error } = await supabase.auth.setSession({
+            access_token: storedToken,
+            refresh_token: storedRefresh,
+          });
+          if (error || !data.session) {
+            // Stored tokens are invalid (expired refresh token, etc.)
+            console.warn('Failed to restore session, clearing tokens');
+            syncSession(null);
+            return;
+          }
+          // setSession succeeded — syncSession will be called by onAuthStateChange
+        } catch {
+          syncSession(null);
+          return;
+        }
+      }
+
+      // Try to refresh the session to ensure we have a fresh access token
       try {
-        await supabase.auth.refreshSession();
+        const { data, error } = await supabase.auth.refreshSession();
+        if (error || !data.session) {
+          // No active session or refresh failed
+          if (!storedToken) syncSession(null);
+        }
       } catch {
-        syncSession(null);
+        if (!storedToken) syncSession(null);
       }
     };
 
@@ -71,11 +101,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       syncSession(session);
     });
 
-    refreshSession();
+    initAuth();
+
     return () => {
       subscription?.subscription.unsubscribe();
     };
-  }, []);
+    // Re-run when the Supabase client is re-initialized (wizard save)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getClientVersion()]);
 
   // setToken / setUser from useState are stable across renders, so the empty
   // deps array is correct. Wrapping in useCallback (and only including stable
