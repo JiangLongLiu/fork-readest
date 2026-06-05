@@ -11,7 +11,6 @@ import {
 } from 'react';
 import { isTauriAppPlatform } from '@/services/environment';
 import {
-  hasServerConfig,
   saveServerConfig,
   getStoredServerConfig,
   reinitializeSupabase,

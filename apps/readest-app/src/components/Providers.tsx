@@ -6,7 +6,7 @@ import i18n from '@/i18n/i18n';
 import { useEffect, useState } from 'react';
 import { IconContext } from 'react-icons';
 import { AuthProvider } from '@/context/AuthContext';
-import { ServerConfigProvider, useServerConfig } from '@/context/ServerConfigContext';
+import { ServerConfigProvider } from '@/context/ServerConfigContext';
 import { useEnv } from '@/context/EnvContext';
 import { CSPostHogProvider } from '@/context/PHContext';
 import { SyncProvider } from '@/context/SyncContext';
