@@ -144,7 +144,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p artifacts
-          find apps/readest-app/src-tauri/target/x86_64-pc-windows-msvc/release/bundle -name "*.exe" -exec cp {} artifacts/ \;
+          find target/x86_64-pc-windows-msvc/release/bundle -name "*.exe" -exec cp {} artifacts/ \;
 
       - uses: actions/upload-artifact@v4
         with:
@@ -229,8 +229,8 @@ jobs:
       - name: Collect artifacts
         run: |
           mkdir -p artifacts
-          find apps/readest-app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle -name "*.AppImage" -exec cp {} artifacts/ \;
-          find apps/readest-app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle -name "*.deb" -exec cp {} artifacts/ \;
+          find target/x86_64-unknown-linux-gnu/release/bundle -name "*.AppImage" -exec cp {} artifacts/ \;
+          find target/x86_64-unknown-linux-gnu/release/bundle -name "*.deb" -exec cp {} artifacts/ \;
 
       - uses: actions/upload-artifact@v4
         with:
@@ -359,9 +359,8 @@ jobs:
       - name: Collect APK artifacts
         run: |
           mkdir -p artifacts
-          find apps/readest-app/src-tauri/gen/android -name "*.apk" -exec cp {} artifacts/ \;
-          # Also check target directory
-          find apps/readest-app/src-tauri/target -name "*.apk" -exec cp {} artifacts/ \; 2>/dev/null || true
+          find apps/readest-app/src-tauri/gen/android -name "*.apk" -exec cp {} artifacts/ \; 2>/dev/null || true
+          find target -name "*.apk" -exec cp {} artifacts/ \; 2>/dev/null || true
 
       - uses: actions/upload-artifact@v4
         with:
@@ -434,7 +433,7 @@ jobs:
       - name: Collect artifacts
         run: |
           mkdir -p artifacts
-          find apps/readest-app/src-tauri/target/universal-apple-darwin/release/bundle -name "*.dmg" -exec cp {} artifacts/ \;
+          find target/universal-apple-darwin/release/bundle -name "*.dmg" -exec cp {} artifacts/ \;
 
       - uses: actions/upload-artifact@v4
         with:
