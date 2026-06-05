@@ -341,6 +341,11 @@ jobs:
               print("No changes needed")
           PYEOF
 
+      - name: List available Gradle assemble tasks
+        run: |
+          cd apps/readest-app/src-tauri/gen/android
+          ./gradlew tasks --all 2>&1 | grep -i "assemble.*release\|assemble.*universal\|assemble.*aarch" || echo "No matching tasks found"
+
       - name: Build Android APK (aarch64)
         env:
           NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
