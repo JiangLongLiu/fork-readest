@@ -1,0 +1,410 @@
+name: Build All Platforms
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 0.11.4)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: build-all-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  NODE_VERSION: '22'
+  PNPM_VERSION: '11'
+  RUST_VERSION: '1.77.2'
+  TAURI_CLI_VERSION: '2'
+
+jobs:
+  # ── Compute version and shared variables ──────────────────────────
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+            echo "tag=v${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            TAG="${GITHUB_REF_NAME#v}"
+            echo "version=$TAG" >> "$GITHUB_OUTPUT"
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Create build environment file
+        run: |
+          cat > apps/readest-app/.env.tauri << 'EOF'
+          NEXT_PUBLIC_APP_PLATFORM=tauri
+          AI_GATEWAY_API_KEY=${{ secrets.AI_GATEWAY_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL=${{ vars.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_API_BASE_URL=${{ vars.API_BASE_URL }}
+          NEXT_PUBLIC_WEB_BASE_URL=${{ vars.WEB_BASE_URL }}
+          NEXT_PUBLIC_OBJECT_STORAGE_TYPE=${{ vars.OBJECT_STORAGE_TYPE || 's3' }}
+          NEXT_PUBLIC_STORAGE_FIXED_QUOTA=${{ vars.STORAGE_FIXED_QUOTA || '21474836480' }}
+          NEXT_PUBLIC_TRANSLATION_FIXED_QUOTA=${{ vars.TRANSLATION_FIXED_QUOTA || '50000' }}
+          EOF
+
+          # Also create .env.tauri.local as an alias (build scripts reference it)
+          cp apps/readest-app/.env.tauri apps/readest-app/.env.tauri.local
+
+      - name: Upload build env artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-env
+          path: apps/readest-app/.env.tauri*
+          retention-days: 1
+
+  # ── Windows x64 ───────────────────────────────────────────────────
+  build-windows:
+    needs: prepare
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          targets: x86_64-pc-windows-msvc
+
+      - name: Download build env
+        uses: actions/download-artifact@v4
+        with:
+          name: build-env
+          path: apps/readest-app/
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup vendor assets
+        run: pnpm --filter @readest/readest-app setup-vendors
+        continue-on-error: true
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/readest-app/src-tauri
+
+      - name: Build Windows NSIS installer
+        shell: bash
+        run: |
+          cd apps/readest-app
+          npx dotenv -e .env.tauri -- tauri build --target x86_64-pc-windows-msvc --bundles nsis
+
+      - name: Collect artifacts
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          find apps/readest-app/src-tauri/target/x86_64-pc-windows-msvc/release/bundle -name "*.exe" -exec cp {} artifacts/ \;
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: readest-windows-x64
+          path: artifacts/*.exe
+          retention-days: 7
+
+  # ── Linux x64 ─────────────────────────────────────────────────────
+  build-linux:
+    needs: prepare
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            libjavascriptcoregtk-4.1-dev \
+            libsoup-3.0-dev \
+            libxdo-dev
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          targets: x86_64-unknown-linux-gnu
+
+      - name: Download build env
+        uses: actions/download-artifact@v4
+        with:
+          name: build-env
+          path: apps/readest-app/
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup vendor assets
+        run: pnpm --filter @readest/readest-app setup-vendors
+        continue-on-error: true
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/readest-app/src-tauri
+
+      - name: Build Linux AppImage + deb
+        run: |
+          cd apps/readest-app
+          npx dotenv -e .env.tauri -- tauri build --target x86_64-unknown-linux-gnu --bundles appimage,deb
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p artifacts
+          find apps/readest-app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle -name "*.AppImage" -exec cp {} artifacts/ \;
+          find apps/readest-app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle -name "*.deb" -exec cp {} artifacts/ \;
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: readest-linux-x64
+          path: |
+            artifacts/*.AppImage
+            artifacts/*.deb
+          retention-days: 7
+
+  # ── Android ARM64 APK ─────────────────────────────────────────────
+  build-android:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK
+        run: |
+          sdkmanager --install "ndk;28.0.13004108"
+          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/28.0.13004108" >> "$GITHUB_ENV"
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          targets: aarch64-linux-android
+
+      - name: Download build env
+        uses: actions/download-artifact@v4
+        with:
+          name: build-env
+          path: apps/readest-app/
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup vendor assets
+        run: pnpm --filter @readest/readest-app setup-vendors
+        continue-on-error: true
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/readest-app/src-tauri
+
+      - name: Initialize Tauri Android project
+        run: |
+          cd apps/readest-app
+          npx tauri android init
+        continue-on-error: true
+
+      - name: Build Android APK (arm64)
+        env:
+          NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
+        run: |
+          cd apps/readest-app
+          npx dotenv -e .env.tauri -- tauri android build --target aarch64-linux-android --apk
+
+      - name: Collect APK artifacts
+        run: |
+          mkdir -p artifacts
+          find apps/readest-app/src-tauri/gen/android -name "*.apk" -exec cp {} artifacts/ \;
+          # Also check target directory
+          find apps/readest-app/src-tauri/target -name "*.apk" -exec cp {} artifacts/ \; 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: readest-android-arm64
+          path: artifacts/*.apk
+          retention-days: 7
+
+  # ── macOS Universal (Intel + Apple Silicon) ───────────────────────
+  build-macos:
+    needs: prepare
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - name: Download build env
+        uses: actions/download-artifact@v4
+        with:
+          name: build-env
+          path: apps/readest-app/
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup vendor assets
+        run: pnpm --filter @readest/readest-app setup-vendors
+        continue-on-error: true
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/readest-app/src-tauri
+
+      - name: Build macOS Universal DMG
+        env:
+          # Ad-hoc signing (no certificate needed for self-hosted distribution)
+          APPLE_SIGNING_IDENTITY: '-'
+        run: |
+          cd apps/readest-app
+          npx dotenv -e .env.tauri -- tauri build --target universal-apple-darwin --bundles dmg
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p artifacts
+          find apps/readest-app/src-tauri/target/universal-apple-darwin/release/bundle -name "*.dmg" -exec cp {} artifacts/ \;
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: readest-macos-universal
+          path: artifacts/*.dmg
+          retention-days: 7
+
+  # ── Collect & Release ──────────────────────────────────────────────
+  release:
+    needs: [prepare, build-windows, build-linux, build-android, build-macos]
+    runs-on: ubuntu-latest
+    if: always() && needs.prepare.result == 'success'
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: readest-*
+          merge-multiple: true
+
+      - name: List collected artifacts
+        run: |
+          echo "## Build Artifacts" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          find artifacts -type f | while read f; do
+            SIZE=$(du -h "$f" | cut -f1)
+            NAME=$(basename "$f")
+            echo "- **$NAME** ($SIZE)" >> "$GITHUB_STEP_SUMMARY"
+            echo "  $NAME ($SIZE)"
+          done
+
+      - name: Generate changelog from recent commits
+        id: changelog
+        run: |
+          CHANGELOG=$(git log --oneline --no-merges -20 --pretty=format:"- %s" 2>/dev/null || echo "- Initial release")
+          echo "changelog<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$CHANGELOG" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+        working-directory: ${{ github.workspace }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          name: Readest v${{ needs.prepare.outputs.version }} (Self-hosted)
+          body: |
+            ## Readest v${{ needs.prepare.outputs.version }} — Self-hosted Build
+
+            ### Platforms
+            - Windows x64 (NSIS installer)
+            - Linux x64 (AppImage + deb)
+            - Android ARM64 (APK)
+            - macOS Universal (DMG, Intel + Apple Silicon)
+
+            ### Changelog
+            ${{ steps.changelog.outputs.changelog }}
+
+            ### Installation
+            Download the appropriate installer for your platform. For self-hosted server setup, refer to the [deployment guide](https://github.com/readest/readest-deploy).
+          draft: false
+          prerelease: ${{ inputs.prerelease || false }}
+          files: artifacts/*

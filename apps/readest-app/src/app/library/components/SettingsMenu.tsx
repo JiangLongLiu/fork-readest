@@ -5,6 +5,7 @@ import { PiUserCircle, PiUserCircleCheck, PiGear } from 'react-icons/pi';
 import { PiSun, PiMoon } from 'react-icons/pi';
 import { TbSunMoon } from 'react-icons/tb';
 import { MdCloudSync, MdSync, MdSyncProblem } from 'react-icons/md';
+import { RiServerLine } from 'react-icons/ri';
 
 import { invoke, PermissionState } from '@tauri-apps/api/core';
 import { isTauriAppPlatform, isWebAppPlatform } from '@/services/environment';
@@ -13,6 +14,7 @@ import { setBackupDialogVisible } from '@/app/library/components/BackupWindow';
 import { setCacheManagerDialogVisible } from '@/app/library/components/CacheManagerWindow';
 import { useAuth } from '@/context/AuthContext';
 import { useEnv } from '@/context/EnvContext';
+import { useServerConfig } from '@/context/ServerConfigContext';
 import { useThemeStore } from '@/store/themeStore';
 import { useQuotaStats } from '@/hooks/useQuotaStats';
 import { useLibraryStore } from '@/store/libraryStore';
@@ -50,6 +52,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ onPullLibrary, setIsDropdow
   const router = useRouter();
   const { envConfig, appService } = useEnv();
   const { user } = useAuth();
+  const { openWizard } = useServerConfig();
   const { userProfilePlan, quotas } = useQuotaStats(true);
   const { themeMode, setThemeMode } = useThemeStore();
   const { settings, setSettingsDialogOpen } = useSettingsStore();
@@ -191,6 +194,11 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ onPullLibrary, setIsDropdow
   const handleBackupRestore = () => {
     setIsDropdownOpen?.(false);
     setBackupDialogVisible(true);
+  };
+
+  const handleChangeServer = () => {
+    setIsDropdownOpen?.(false);
+    openWizard();
   };
 
   const handleManageCache = () => {
@@ -427,6 +435,9 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ onPullLibrary, setIsDropdow
       <hr aria-hidden='true' className='border-base-200 my-1' />
       <MenuItem label={_('Advanced Settings')}>
         <ul className='ms-0 flex flex-col ps-0 before:hidden'>
+          {isTauriAppPlatform() && (
+            <MenuItem label={_('Change Server')} Icon={RiServerLine} onClick={handleChangeServer} />
+          )}
           <MenuItem label={_('Backup & Restore')} onClick={handleBackupRestore} />
           {appService?.canCustomizeRootDir && (
             <MenuItem label={_('Change Data Location')} onClick={handleSetRootDir} />
