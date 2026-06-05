@@ -2,6 +2,7 @@ export interface ReadestRuntimeConfig {
   supabaseUrl?: string;
   supabaseAnonKey?: string;
   apiBaseUrl?: string;
+  webBaseUrl?: string;
   objectStorageType?: string;
   storageFixedQuota?: number;
   translationFixedQuota?: number;
@@ -27,6 +28,11 @@ export const getServerRuntimeConfig = (): ReadestRuntimeConfig => ({
   apiBaseUrl:
     process.env['API_BASE_URL'] ??
     process.env['NEXT_PUBLIC_API_BASE_URL'] ??
+    process.env['SITE_URL'],
+  webBaseUrl:
+    process.env['WEB_BASE_URL'] ??
+    process.env['NEXT_PUBLIC_WEB_BASE_URL'] ??
+    process.env['SUPABASE_PUBLIC_URL'] ??
     process.env['SITE_URL'],
   // These were previously baked as NEXT_PUBLIC_* build args; now read from runtime env so
   // the published image can be configured without rebuilding.

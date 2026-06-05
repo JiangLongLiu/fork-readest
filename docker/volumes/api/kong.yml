@@ -101,6 +101,15 @@ services:
         strip_path: false
         paths:
           - /api/
+      - name: share-page
+        strip_path: false
+        paths:
+          - /s/
+          - /s
+      - name: web-frontend
+        strip_path: false
+        paths:
+          - /
     plugins:
       - name: cors
         config:

@@ -8,6 +8,7 @@ export interface ServerConfig {
   supabaseUrl: string;
   supabaseAnonKey?: string;
   apiBaseUrl?: string;
+  webBaseUrl?: string;
 }
 
 export function getStoredServerConfig(): ServerConfig | null {

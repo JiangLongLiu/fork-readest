@@ -4,11 +4,11 @@ import { validateUserAndToken } from '@/utils/access';
 import { generateShareToken } from '@/libs/shareServer';
 import { objectExists } from '@/utils/object';
 import {
-  SHARE_BASE_URL,
   SHARE_CFI_MAX_LENGTH,
   SHARE_EXPIRATION_DAYS,
   SHARE_MAX_PER_USER,
 } from '@/services/constants';
+import { getShareBaseUrl } from '@/services/environment';
 
 interface CreateShareBody {
   bookHash?: unknown;
@@ -172,7 +172,7 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     token: raw,
-    url: `${SHARE_BASE_URL}/${raw}`,
+    url: `${getShareBaseUrl()}/${raw}`,
     expiresAt: expiresAt.toISOString(),
   });
 }
