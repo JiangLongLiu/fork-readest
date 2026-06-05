@@ -106,13 +106,16 @@ jobs:
           name: build-env
           path: apps/readest-app/
 
-      - name: Disable updater signing for self-hosted build
+      - name: Configure signing for self-hosted build
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           python3 -c "
           import json
           p = 'apps/readest-app/src-tauri/tauri.conf.json'
           with open(p) as f: c = json.load(f)
-          c.get('plugins', {}).get('updater', {}).pop('pubkey', None)
+          c.get('plugins', {}).get('updater', {})['pubkey'] = '${{ vars.TAURI_SIGNING_PUBKEY }}'
           with open(p, 'w') as f: json.dump(c, f, indent=2, ensure_ascii=False)
           "
 
@@ -187,13 +190,16 @@ jobs:
           name: build-env
           path: apps/readest-app/
 
-      - name: Disable updater signing for self-hosted build
+      - name: Configure signing for self-hosted build
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           python3 -c "
           import json
           p = 'apps/readest-app/src-tauri/tauri.conf.json'
           with open(p) as f: c = json.load(f)
-          c.get('plugins', {}).get('updater', {}).pop('pubkey', None)
+          c.get('plugins', {}).get('updater', {})['pubkey'] = '${{ vars.TAURI_SIGNING_PUBKEY }}'
           with open(p, 'w') as f: json.dump(c, f, indent=2, ensure_ascii=False)
           "
 
@@ -269,13 +275,16 @@ jobs:
           name: build-env
           path: apps/readest-app/
 
-      - name: Disable updater signing for self-hosted build
+      - name: Configure signing for self-hosted build
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           python3 -c "
           import json
           p = 'apps/readest-app/src-tauri/tauri.conf.json'
           with open(p) as f: c = json.load(f)
-          c.get('plugins', {}).get('updater', {}).pop('pubkey', None)
+          c.get('plugins', {}).get('updater', {})['pubkey'] = '${{ vars.TAURI_SIGNING_PUBKEY }}'
           with open(p, 'w') as f: json.dump(c, f, indent=2, ensure_ascii=False)
           "
 
@@ -296,6 +305,26 @@ jobs:
           cd apps/readest-app
           npx tauri android init
         continue-on-error: true
+
+      - name: Add Android ABI splits for universal APK
+        run: |
+          python3 -c "
+          import re
+          p = 'apps/readest-app/src-tauri/gen/android/app/build.gradle.kts'
+          with open(p) as f: c = f.read()
+          if 'splits' not in c:
+              splits_block = '''    splits {
+            abi {
+                isEnable = true
+                reset()
+                include(\"arm64-v8a\", \"armeabi-v7a\", \"x86\", \"x86_64\")
+                isUniversalApk = true
+            }
+        }
+    '''
+              c = c.replace('    defaultConfig {', splits_block + 'defaultConfig {', 1)
+              with open(p, 'w') as f: f.write(c)
+          "
 
       - name: Build Android APK (arm64)
         env:
@@ -344,13 +373,16 @@ jobs:
           name: build-env
           path: apps/readest-app/
 
-      - name: Disable updater signing for self-hosted build
+      - name: Configure signing for self-hosted build
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           python3 -c "
           import json
           p = 'apps/readest-app/src-tauri/tauri.conf.json'
           with open(p) as f: c = json.load(f)
-          c.get('plugins', {}).get('updater', {}).pop('pubkey', None)
+          c.get('plugins', {}).get('updater', {})['pubkey'] = '${{ vars.TAURI_SIGNING_PUBKEY }}'
           with open(p, 'w') as f: json.dump(c, f, indent=2, ensure_ascii=False)
           "
 
