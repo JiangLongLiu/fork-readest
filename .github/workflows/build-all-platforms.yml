@@ -362,11 +362,15 @@ jobs:
       - name: Collect APK artifacts
         run: |
           mkdir -p artifacts
-          echo "Searching for APK files..."
-          find apps/readest-app/src-tauri/gen/android -name "*.apk" 2>/dev/null || echo "No APK in gen/android"
-          find apps/readest-app/src-tauri/gen/android -name "*.apk" -exec cp {} artifacts/ \; 2>/dev/null || true
-          find target -name "*.apk" 2>/dev/null || echo "No APK in target"
-          find target -name "*.apk" -exec cp {} artifacts/ \; 2>/dev/null || true
+          echo "Searching for APK files everywhere..."
+          find . -name "*.apk" -not -path "*/node_modules/*" 2>/dev/null || echo "No APK found anywhere"
+          find . -name "*.apk" -not -path "*/node_modules/*" -exec cp {} artifacts/ \; 2>/dev/null || true
+          echo "Also checking for AAB..."
+          find . -name "*.aab" -not -path "*/node_modules/*" 2>/dev/null || echo "No AAB found"
+          echo "Build output directory:"
+          ls -la apps/readest-app/src-tauri/gen/android/app/build/outputs/ 2>/dev/null || echo "No outputs dir"
+          ls -la apps/readest-app/src-tauri/gen/android/app/build/outputs/apk/ 2>/dev/null || echo "No apk dir"
+          ls -laR apps/readest-app/src-tauri/gen/android/app/build/outputs/apk/ 2>/dev/null || echo "No apk subdir"
           echo "Artifacts collected:"
           ls -la artifacts/ 2>/dev/null || echo "No artifacts"
 
