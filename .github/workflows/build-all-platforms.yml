@@ -369,7 +369,7 @@ jobs:
           else:
               print(f"Plugin gradle not found: {plugin_gradle}")
 
-          # ── 2. Patch app: remove storeFlavor + missingDimensionStrategy, conditional tauri apply ──
+          # ── 2. Patch app: remove storeFlavor + missingDimensionStrategy, fix splits, conditional tauri apply ──
           app_gradle = "apps/readest-app/src-tauri/gen/android/app/build.gradle.kts"
           if not os.path.exists(app_gradle):
               print(f"App gradle not found: {app_gradle}")
@@ -382,6 +382,17 @@ jobs:
               if "storeFlavor" in line or "missingDimensionStrategy" in line:
                   print(f"Removing: {line.strip()}")
                   modified = True
+                  continue
+              # Only build for arm64-v8a since we only compile Rust for aarch64
+              if 'include("arm64-v8a"' in line and "armeabi" in line:
+                  new_lines.append(line.replace('"arm64-v8a", "armeabi-v7a", "x86", "x86_64"', '"arm64-v8a"'))
+                  modified = True
+                  print("Patched ABI splits to arm64-v8a only")
+                  continue
+              if 'isUniversalApk = true' in line:
+                  new_lines.append(line.replace('isUniversalApk = true', 'isUniversalApk = false'))
+                  modified = True
+                  print("Disabled universal APK (not needed for single ABI)")
                   continue
               if 'apply(from = "tauri.build.gradle.kts")' in line:
                   new_lines.append('if (file("tauri.build.gradle.kts").exists()) { apply(from = "tauri.build.gradle.kts") }')
