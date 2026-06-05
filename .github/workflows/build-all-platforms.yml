@@ -344,7 +344,10 @@ jobs:
       - name: List available Gradle assemble tasks
         run: |
           cd apps/readest-app/src-tauri/gen/android
-          ./gradlew tasks --all 2>&1 | grep -i "assemble.*release\|assemble.*universal\|assemble.*aarch" || echo "No matching tasks found"
+          echo "=== ALL assemble tasks ==="
+          ./gradlew tasks --all 2>&1 | grep -i "assemble" || echo "No assemble tasks at all"
+          echo "=== tauri.build.gradle.kts ==="
+          cat tauri.build.gradle.kts 2>/dev/null || echo "tauri.build.gradle.kts not found"
 
       - name: Build Android APK (aarch64)
         env:
