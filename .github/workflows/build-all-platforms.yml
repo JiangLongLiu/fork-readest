@@ -76,6 +76,7 @@ jobs:
           name: build-env
           path: apps/readest-app/.env.tauri*
           retention-days: 1
+          include-hidden-files: true
 
   # ── Windows x64 ───────────────────────────────────────────────────
   build-windows:
