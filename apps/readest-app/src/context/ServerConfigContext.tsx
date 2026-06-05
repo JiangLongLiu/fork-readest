@@ -14,7 +14,15 @@ import {
   saveServerConfig,
   getStoredServerConfig,
   reinitializeSupabase,
+  getSupabase,
+  getServerProfiles,
+  getActiveProfile,
+  switchActiveProfile,
+  addServerProfile,
+  removeServerProfile,
+  updateServerProfile,
   type ServerConfig,
+  type ServerProfile,
 } from '@/utils/supabase';
 
 interface ServerConfigContextType {
@@ -22,10 +30,22 @@ interface ServerConfigContextType {
   ready: boolean;
   /** The active server config (null if wizard hasn't been completed) */
   config: ServerConfig | null;
+  /** All saved server profiles (Tauri only) */
+  profiles: ServerProfile[];
+  /** ID of the currently active profile */
+  activeProfileId: string | null;
   /** Save a new config, re-initialize Supabase, and mark ready */
   saveAndContinue: (config: ServerConfig) => void;
   /** Open the wizard again to edit the server config */
   openWizard: () => void;
+  /** Switch to a different server profile (Tauri only) */
+  switchProfile: (id: string) => void;
+  /** Add a new server profile and switch to it (Tauri only) */
+  addProfile: (name: string, config: ServerConfig) => void;
+  /** Remove a server profile (Tauri only) */
+  deleteProfile: (id: string) => void;
+  /** Update an existing profile's name or config (Tauri only) */
+  editProfile: (id: string, patch: Partial<Omit<ServerProfile, 'id' | 'createdAt'>>) => void;
 }
 
 const ServerConfigContext = createContext<ServerConfigContextType | undefined>(undefined);
@@ -234,6 +254,14 @@ export function ServerConfigProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [config, setConfig] = useState<ServerConfig | null>(null);
   const [showWizard, setShowWizard] = useState(false);
+  const [profiles, setProfiles] = useState<ServerProfile[]>([]);
+  const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
+
+  const refreshProfiles = useCallback(() => {
+    setProfiles(getServerProfiles());
+    const active = getActiveProfile();
+    setActiveProfileId(active?.id ?? null);
+  }, []);
 
   useEffect(() => {
     // Only gate on Tauri platform — web uses runtime-config.js
@@ -242,6 +270,7 @@ export function ServerConfigProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    refreshProfiles();
     const stored = getStoredServerConfig();
     if (stored?.supabaseUrl) {
       setConfig(stored);
@@ -250,23 +279,132 @@ export function ServerConfigProvider({ children }: { children: ReactNode }) {
       // No config yet — show wizard
       setShowWizard(true);
     }
-  }, []);
+  }, [refreshProfiles]);
 
-  const saveAndContinue = useCallback((newConfig: ServerConfig) => {
-    saveServerConfig(newConfig);
-    reinitializeSupabase();
-    setConfig(newConfig);
-    setShowWizard(false);
-    setReady(true);
-  }, []);
+  const saveAndContinue = useCallback(
+    (newConfig: ServerConfig) => {
+      saveServerConfig(newConfig);
+      reinitializeSupabase();
+      setConfig(newConfig);
+      setShowWizard(false);
+      setReady(true);
+      refreshProfiles();
+    },
+    [refreshProfiles],
+  );
 
   const openWizard = useCallback(() => {
     setShowWizard(true);
   }, []);
 
+  const switchProfile = useCallback(
+    async (id: string) => {
+      if (id === activeProfileId) return;
+      // Sign out from current server before switching — auth tokens are server-specific
+      try {
+        await getSupabase().auth.signOut();
+      } catch {
+        // Non-critical: server may be unreachable
+      }
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+
+      const profile = switchActiveProfile(id);
+      if (!profile) return;
+      reinitializeSupabase();
+      const cfg: ServerConfig = {
+        supabaseUrl: profile.supabaseUrl,
+        supabaseAnonKey: profile.supabaseAnonKey,
+        apiBaseUrl: profile.apiBaseUrl,
+        webBaseUrl: profile.webBaseUrl,
+      };
+      setConfig(cfg);
+      refreshProfiles();
+    },
+    [activeProfileId, refreshProfiles],
+  );
+
+  const addProfile = useCallback(
+    (name: string, cfg: ServerConfig) => {
+      addServerProfile(name, cfg);
+      reinitializeSupabase();
+      setConfig(cfg);
+      refreshProfiles();
+    },
+    [refreshProfiles],
+  );
+
+  const deleteProfile = useCallback(
+    (id: string) => {
+      const wasActive = id === activeProfileId;
+      removeServerProfile(id);
+      refreshProfiles();
+      if (wasActive) {
+        // Auto-switched to the first remaining profile
+        const newActive = getActiveProfile();
+        if (newActive) {
+          reinitializeSupabase();
+          setConfig({
+            supabaseUrl: newActive.supabaseUrl,
+            supabaseAnonKey: newActive.supabaseAnonKey,
+            apiBaseUrl: newActive.apiBaseUrl,
+            webBaseUrl: newActive.webBaseUrl,
+          });
+        } else {
+          setConfig(null);
+          setShowWizard(true);
+        }
+      }
+    },
+    [activeProfileId, refreshProfiles],
+  );
+
+  const editProfile = useCallback(
+    (id: string, patch: Partial<Omit<ServerProfile, 'id' | 'createdAt'>>) => {
+      updateServerProfile(id, patch);
+      refreshProfiles();
+      // If editing the active profile, also update the live config
+      if (id === activeProfileId && (patch.supabaseUrl || patch.supabaseAnonKey !== undefined)) {
+        const updated = getServerProfiles().find((p) => p.id === id);
+        if (updated) {
+          reinitializeSupabase();
+          setConfig({
+            supabaseUrl: updated.supabaseUrl,
+            supabaseAnonKey: updated.supabaseAnonKey,
+            apiBaseUrl: updated.apiBaseUrl,
+            webBaseUrl: updated.webBaseUrl,
+          });
+        }
+      }
+    },
+    [activeProfileId, refreshProfiles],
+  );
+
   const value = useMemo(
-    () => ({ ready, config, saveAndContinue, openWizard }),
-    [ready, config, saveAndContinue, openWizard],
+    () => ({
+      ready,
+      config,
+      profiles,
+      activeProfileId,
+      saveAndContinue,
+      openWizard,
+      switchProfile,
+      addProfile,
+      deleteProfile,
+      editProfile,
+    }),
+    [
+      ready,
+      config,
+      profiles,
+      activeProfileId,
+      saveAndContinue,
+      openWizard,
+      switchProfile,
+      addProfile,
+      deleteProfile,
+      editProfile,
+    ],
   );
 
   if (showWizard) {

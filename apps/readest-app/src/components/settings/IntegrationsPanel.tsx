@@ -10,15 +10,18 @@ import {
   RiDiscordLine,
   RiSendPlaneLine,
   RiCloudLine,
+  RiServerLine,
 } from 'react-icons/ri';
 import { useEnv } from '@/context/EnvContext';
 import { useAuth } from '@/context/AuthContext';
+import { useServerConfig } from '@/context/ServerConfigContext';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useKeyDownActions } from '@/hooks/useKeyDownActions';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useCustomOPDSStore } from '@/store/customOPDSStore';
 import { useWebDAVSyncStore } from '@/store/webdavSyncStore';
 import { CatalogManager } from '@/app/opds/components/CatalogManager';
+import { isTauriAppPlatform } from '@/services/environment';
 import { saveSysSettings } from '@/helpers/settings';
 import { navigateToLogin } from '@/utils/nav';
 import KOSyncForm from './integrations/KOSyncForm';
@@ -26,10 +29,11 @@ import ReadwiseForm from './integrations/ReadwiseForm';
 import HardcoverForm from './integrations/HardcoverForm';
 import SendToReadestForm from './integrations/SendToReadestForm';
 import WebDAVForm from './integrations/WebDAVForm';
+import ServerManager from './integrations/ServerManager';
 import SubPageHeader from './SubPageHeader';
 import { SectionTitle, SettingLabel } from './primitives';
 
-type SubPage = 'kosync' | 'webdav' | 'readwise' | 'hardcover' | 'opds' | 'send' | null;
+type SubPage = 'kosync' | 'webdav' | 'readwise' | 'hardcover' | 'opds' | 'send' | 'servers' | null;
 
 /**
  * Integrations panel — single point of discovery for external service config:
@@ -48,6 +52,7 @@ const IntegrationsPanel: React.FC = () => {
   const router = useRouter();
   const { envConfig, appService } = useEnv();
   const { user } = useAuth();
+  const { profiles, activeProfileId } = useServerConfig();
   const { settings, requestedSubPage, setRequestedSubPage } = useSettingsStore();
   const opdsCatalogs = useCustomOPDSStore((s) => s.catalogs);
   const opdsCount = opdsCatalogs.filter((c) => !c.deletedAt).length;
@@ -92,7 +97,8 @@ const IntegrationsPanel: React.FC = () => {
       requestedSubPage === 'readwise' ||
       requestedSubPage === 'hardcover' ||
       requestedSubPage === 'opds' ||
-      requestedSubPage === 'send'
+      requestedSubPage === 'send' ||
+      requestedSubPage === 'servers'
     ) {
       setSubPage(requestedSubPage);
     }
@@ -103,6 +109,12 @@ const IntegrationsPanel: React.FC = () => {
   // SubPageHeader's "Integrations" label lands at the exact same Y position
   // as the list-view's h2 — clicking a row reads as a navigation morph
   // rather than a layout shift.
+  if (subPage === 'servers')
+    return (
+      <div className='my-4 w-full'>
+        <ServerManager onBack={() => setSubPage(null)} />
+      </div>
+    );
   if (subPage === 'kosync')
     return (
       <div className='my-4 w-full'>
@@ -164,6 +176,14 @@ const IntegrationsPanel: React.FC = () => {
   const opdsStatus =
     opdsCount > 0 ? _('{{count}} catalog', { count: opdsCount }) : _('No catalogs');
 
+  // Build a status string showing the active server name
+  const activeProfile = profiles.find((p) => p.id === activeProfileId);
+  const serverStatus = activeProfile
+    ? activeProfile.name
+    : isTauriAppPlatform()
+      ? _('No server configured')
+      : _('Managed by deployment');
+
   return (
     <div className='my-4 w-full space-y-6'>
       <div className='w-full px-4'>
@@ -172,6 +192,23 @@ const IntegrationsPanel: React.FC = () => {
           {_('Connect Readest to external services for sync, highlights, and catalogs.')}
         </p>
       </div>
+
+      {/* ── Server profiles (self-hosted) ─────────────────────── */}
+      {isTauriAppPlatform() && (
+        <div className='w-full' data-setting-id='settings.integrations.servers'>
+          <SectionTitle className='mb-2'>{_('Server')}</SectionTitle>
+          <div className='card eink-bordered border-base-200 bg-base-100 overflow-hidden border'>
+            <div className='divide-base-200 divide-y'>
+              <IntegrationRow
+                icon={RiServerLine}
+                title={_('Server Profiles')}
+                status={serverStatus}
+                onClick={() => setSubPage('servers')}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className='w-full' data-setting-id='settings.integrations.sync'>
         <SectionTitle className='mb-2'>{_('Reading Sync')}</SectionTitle>
