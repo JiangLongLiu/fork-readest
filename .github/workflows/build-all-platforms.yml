@@ -362,8 +362,13 @@ jobs:
       - name: Collect APK artifacts
         run: |
           mkdir -p artifacts
+          echo "Searching for APK files..."
+          find apps/readest-app/src-tauri/gen/android -name "*.apk" 2>/dev/null || echo "No APK in gen/android"
           find apps/readest-app/src-tauri/gen/android -name "*.apk" -exec cp {} artifacts/ \; 2>/dev/null || true
+          find target -name "*.apk" 2>/dev/null || echo "No APK in target"
           find target -name "*.apk" -exec cp {} artifacts/ \; 2>/dev/null || true
+          echo "Artifacts collected:"
+          ls -la artifacts/ 2>/dev/null || echo "No artifacts"
 
       - uses: actions/upload-artifact@v4
         with:
