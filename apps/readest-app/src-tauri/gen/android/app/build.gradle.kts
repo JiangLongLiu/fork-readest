@@ -1,10 +1,11 @@
 import java.util.Properties
 import java.io.FileInputStream
+import java.text.SimpleDateFormat
+import java.util.Date
 
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("rust")
 }
 
 val tauriProperties = Properties().apply {
@@ -79,15 +80,11 @@ android {
     applicationVariants.all {
         val variant = this
         variant.outputs.all {
-            val timestamp = java.text.SimpleDateFormat("yyyyMMdd-HHmmss").format(java.util.Date())
+            val timestamp = SimpleDateFormat("yyyyMMdd-HHmmss").format(Date())
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
                 "Readest-arm64-${timestamp}.apk"
         }
     }
-}
-
-rust {
-    rootDirRel = "../../../"
 }
 
 dependencies {
