@@ -418,28 +418,18 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           cd apps/readest-app
-          # First compile Rust for aarch64
           npx dotenv -e .env.tauri -- tauri android build --apk --target aarch64 || {
-            echo "Tauri build failed, trying direct Gradle build..."
-            # If tauri fails, try building Rust manually then running Gradle
+            echo "Tauri orchestration failed, falling back to direct Gradle build..."
             cd src-tauri/gen/android
-            ./gradlew assembleRelease 2>&1 || ./gradlew assembleArm64-v8aRelease 2>&1 || ./gradlew tasks --all 2>&1 | tail -30
+            ./gradlew assembleRelease
           }
 
       - name: Collect APK artifacts
         run: |
           mkdir -p artifacts
-          echo "Searching for APK files everywhere..."
-          find . -name "*.apk" -not -path "*/node_modules/*" 2>/dev/null || echo "No APK found anywhere"
-          find . -name "*.apk" -not -path "*/node_modules/*" -exec cp {} artifacts/ \; 2>/dev/null || true
-          echo "Also checking for AAB..."
-          find . -name "*.aab" -not -path "*/node_modules/*" 2>/dev/null || echo "No AAB found"
-          echo "Build output directory:"
-          ls -la apps/readest-app/src-tauri/gen/android/app/build/outputs/ 2>/dev/null || echo "No outputs dir"
-          ls -la apps/readest-app/src-tauri/gen/android/app/build/outputs/apk/ 2>/dev/null || echo "No apk dir"
-          ls -laR apps/readest-app/src-tauri/gen/android/app/build/outputs/apk/ 2>/dev/null || echo "No apk subdir"
-          echo "Artifacts collected:"
-          ls -la artifacts/ 2>/dev/null || echo "No artifacts"
+          find . -name "*.apk" -not -path "*/node_modules/*" -exec cp {} artifacts/ \;
+          ls -la artifacts/
+          test -n "$(ls artifacts/*.apk 2>/dev/null)" || { echo "ERROR: No APK files generated"; exit 1; }
 
       - uses: actions/upload-artifact@v4
         with:
