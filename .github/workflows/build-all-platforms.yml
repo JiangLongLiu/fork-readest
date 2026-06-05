@@ -27,7 +27,7 @@ permissions:
 env:
   NODE_VERSION: '22'
   PNPM_VERSION: '11'
-  RUST_VERSION: '1.77.2'
+  RUST_VERSION: '1.85.0'
   TAURI_CLI_VERSION: '2'
 
 jobs:
@@ -271,7 +271,7 @@ jobs:
           NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
         run: |
           cd apps/readest-app
-          npx dotenv -e .env.tauri -- tauri android build --target aarch64-linux-android --apk
+          npx dotenv -e .env.tauri -- tauri android build --target aarch64 --apk
 
       - name: Collect APK artifacts
         run: |
