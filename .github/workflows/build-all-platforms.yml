@@ -395,6 +395,20 @@ jobs:
               print("Patched app build.gradle.kts")
           else:
               print("App gradle: no changes needed")
+
+          # ── 3. Create missing ic_launcher_background color resource ──
+          res_values = "apps/readest-app/src-tauri/gen/android/app/src/main/res/values"
+          os.makedirs(res_values, exist_ok=True)
+          bg_file = os.path.join(res_values, "ic_launcher_background.xml")
+          if not os.path.exists(bg_file):
+              with open(bg_file, "w") as f:
+                  f.write('<?xml version="1.0" encoding="utf-8"?>\n')
+                  f.write('<resources>\n')
+                  f.write('  <color name="ic_launcher_background">#fff</color>\n')
+                  f.write('</resources>\n')
+              print(f"Created {bg_file}")
+          else:
+              print(f"Already exists: {bg_file}")
           PYEOF
 
       - name: Build Android APK (aarch64)
