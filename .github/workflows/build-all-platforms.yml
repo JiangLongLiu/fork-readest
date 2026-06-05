@@ -29,6 +29,7 @@ env:
   PNPM_VERSION: '11'
   RUST_VERSION: 'stable'
   TAURI_CLI_VERSION: '2'
+  NODE_OPTIONS: '--max-old-space-size=8192'
 
 jobs:
   # ── Compute version and shared variables ──────────────────────────
@@ -105,6 +106,16 @@ jobs:
           name: build-env
           path: apps/readest-app/
 
+      - name: Disable updater signing for self-hosted build
+        run: |
+          python3 -c "
+          import json
+          p = 'apps/readest-app/src-tauri/tauri.conf.json'
+          with open(p) as f: c = json.load(f)
+          c.get('plugins', {}).get('updater', {}).pop('pubkey', None)
+          with open(p, 'w') as f: json.dump(c, f, indent=2, ensure_ascii=False)
+          "
+
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
 
@@ -176,6 +187,16 @@ jobs:
           name: build-env
           path: apps/readest-app/
 
+      - name: Disable updater signing for self-hosted build
+        run: |
+          python3 -c "
+          import json
+          p = 'apps/readest-app/src-tauri/tauri.conf.json'
+          with open(p) as f: c = json.load(f)
+          c.get('plugins', {}).get('updater', {}).pop('pubkey', None)
+          with open(p, 'w') as f: json.dump(c, f, indent=2, ensure_ascii=False)
+          "
+
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
 
@@ -240,13 +261,23 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ env.RUST_VERSION }}
-          targets: aarch64-linux-android
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
 
       - name: Download build env
         uses: actions/download-artifact@v4
         with:
           name: build-env
           path: apps/readest-app/
+
+      - name: Disable updater signing for self-hosted build
+        run: |
+          python3 -c "
+          import json
+          p = 'apps/readest-app/src-tauri/tauri.conf.json'
+          with open(p) as f: c = json.load(f)
+          c.get('plugins', {}).get('updater', {}).pop('pubkey', None)
+          with open(p, 'w') as f: json.dump(c, f, indent=2, ensure_ascii=False)
+          "
 
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
@@ -271,7 +302,7 @@ jobs:
           NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
         run: |
           cd apps/readest-app
-          npx dotenv -e .env.tauri -- tauri android build --target aarch64 --apk
+          npx dotenv -e .env.tauri -- tauri android build --apk
 
       - name: Collect APK artifacts
         run: |
@@ -312,6 +343,16 @@ jobs:
         with:
           name: build-env
           path: apps/readest-app/
+
+      - name: Disable updater signing for self-hosted build
+        run: |
+          python3 -c "
+          import json
+          p = 'apps/readest-app/src-tauri/tauri.conf.json'
+          with open(p) as f: c = json.load(f)
+          c.get('plugins', {}).get('updater', {}).pop('pubkey', None)
+          with open(p, 'w') as f: json.dump(c, f, indent=2, ensure_ascii=False)
+          "
 
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
