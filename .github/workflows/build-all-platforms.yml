@@ -422,6 +422,20 @@ jobs:
               print(f"Already exists: {bg_file}")
           PYEOF
 
+      - name: Setup Android signing
+        env:
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
+        run: |
+          pushd apps/readest-app/src-tauri/gen/android
+          echo "keyAlias=${ANDROID_KEY_ALIAS}" > keystore.properties
+          echo "password=${ANDROID_KEY_PASSWORD}" >> keystore.properties
+          echo "${ANDROID_KEY_BASE64}" | base64 -d > "$RUNNER_TEMP/keystore.jks"
+          echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
+          popd
+          echo "Android signing configured"
+
       - name: Build Android APK (aarch64)
         env:
           NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
