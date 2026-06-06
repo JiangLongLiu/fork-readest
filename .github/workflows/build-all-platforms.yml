@@ -449,6 +449,36 @@ jobs:
             ./gradlew assembleRelease
           }
 
+      - name: Sign APK with apksigner
+        env:
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          # Find apksigner in Android build-tools
+          APKSIGNER=$(find "$ANDROID_SDK_ROOT/build-tools" -name "apksigner" -type f | sort -V | tail -1)
+          if [ -z "$APKSIGNER" ]; then
+            echo "ERROR: apksigner not found in build-tools"
+            exit 1
+          fi
+          echo "Using apksigner: $APKSIGNER"
+
+          # Find all APK files and sign them
+          find . -name "*.apk" -not -path "*/node_modules/*" | while read apk; do
+            echo "Signing: $apk"
+            "$APKSIGNER" sign \
+              --ks "$RUNNER_TEMP/keystore.jks" \
+              --ks-key-alias "${{ secrets.ANDROID_KEY_ALIAS }}" \
+              --ks-pass "pass:${ANDROID_KEY_PASSWORD}" \
+              --key-pass "pass:${ANDROID_KEY_PASSWORD}" \
+              "$apk"
+            # Verify
+            if "$APKSIGNER" verify --verbose "$apk"; then
+              echo "  ✅ APK signed successfully"
+            else
+              echo "  ❌ APK signing verification failed"
+              exit 1
+            fi
+          done
+
       - name: Collect APK artifacts
         run: |
           mkdir -p artifacts
