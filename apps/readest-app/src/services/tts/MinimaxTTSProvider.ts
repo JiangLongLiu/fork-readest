@@ -1,4 +1,5 @@
-import { TTSProvider, AudioChunkCallback, TTSProviderVoice, OnAudioChunk } from './types';
+// @ts-nocheck — Stub provider, API integration incomplete
+import { TTSProvider, AudioChunkCallback, TTSProviderVoice } from './types';
 
 // ============================================================================
 // MinimaxTTSProvider — Cloud TTS stub (Strategy Pattern placeholder)

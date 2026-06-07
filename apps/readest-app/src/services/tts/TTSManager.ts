@@ -1,6 +1,6 @@
 import { TTSProvider, TTSProviderVoice, AudioChunkCallback } from './types';
 import { KokoroTTSProvider } from './KokoroTTSProvider';
-import { MinimaxTTSProvider, MinimaxConfig } from './MinimaxTTSProvider';
+import { MinimaxTTSProvider } from './MinimaxTTSProvider';
 
 // ============================================================================
 // TTSManager — Unified manager for TTS Provider strategy switching

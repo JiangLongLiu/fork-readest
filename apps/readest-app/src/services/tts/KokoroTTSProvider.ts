@@ -286,7 +286,7 @@ export class KokoroTTSProvider implements TTSProvider {
       const unlistenAudio = await listen<KokoroAudioChunkPayload>(
         'kokoro-tts-audio-chunk',
         (event) => {
-          const { audioBase64, sampleRate, isLast, sentenceIndex } = event.payload;
+          const { audioBase64, sampleRate, isLast } = event.payload;
 
           // Decode base64 → Float32 PCM
           const pcmData = decodeBase64ToFloat32(audioBase64);
@@ -403,7 +403,7 @@ export class KokoroTTSProvider implements TTSProvider {
     if (voice) {
       // Parse index from the voice or use id as-is
       const match = voiceId.match(/^(\d+)$/);
-      this.voiceId = match ? parseInt(match[1], 10) : 0;
+      this.voiceId = match ? parseInt(match[1]!, 10) : 0;
       await invoke('plugin:kokoro-tts|set_voice', {
         args: { voiceId: this.voiceId },
       });

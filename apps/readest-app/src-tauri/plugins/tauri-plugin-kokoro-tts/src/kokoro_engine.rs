@@ -70,7 +70,12 @@ impl KokoroEngine {
     /// * `resource_dir` — Base directory containing:
     ///   - `kokoro-v0_19.onnx` (the FP16 or FP32 ONNX model)
     ///   - `tokens.txt` (token vocabulary file)
-    pub fn new(resource_dir: PathBuf) -> Result<Self> {
+    /// * `app_data_dir` — Writable application data directory for espeak-ng data extraction.
+    pub fn new(resource_dir: PathBuf, app_data_dir: PathBuf) -> Result<Self> {
+        // Configure espeak-ng data directory before any phonemization
+        let espeak_data_dir = app_data_dir.join("espeak-ng-data");
+        text_processing::set_espeak_data_dir(espeak_data_dir);
+
         let model_path = resource_dir.join("kokoro-v0_19.onnx");
         let tokens_path = resource_dir.join("tokens.txt");
 

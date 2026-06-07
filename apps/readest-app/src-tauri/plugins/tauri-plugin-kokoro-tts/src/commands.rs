@@ -35,6 +35,12 @@ pub(crate) async fn init<R: Runtime>(
         .resource_dir()
         .map_err(|e| Error::ModelLoadError(format!("Failed to get resource directory: {}", e)))?;
 
+    // Determine writable app data directory for espeak-ng data extraction
+    let app_data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| Error::ModelLoadError(format!("Failed to get app data directory: {}", e)))?;
+
     // Allow overriding model path via env var for development.
     // When using Tauri's resource_dir, model files are in the "kokoro-tts" subdirectory
     // (as configured in tauri.conf.json bundle.resources).
@@ -43,11 +49,12 @@ pub(crate) async fn init<R: Runtime>(
         .unwrap_or_else(|_| resource_dir.join("kokoro-tts"));
 
     log::info!(
-        "[KokoroTTS] Initializing engine with resource dir: {:?}",
-        model_dir
+        "[KokoroTTS] Initializing engine with resource dir: {:?}, data dir: {:?}",
+        model_dir,
+        app_data_dir
     );
 
-    match crate::kokoro_engine::KokoroEngine::new(model_dir) {
+    match crate::kokoro_engine::KokoroEngine::new(model_dir, app_data_dir) {
         Ok(engine) => {
             let voice_count = engine.get_voices().len();
             let mut engine_guard = state.engine.write();

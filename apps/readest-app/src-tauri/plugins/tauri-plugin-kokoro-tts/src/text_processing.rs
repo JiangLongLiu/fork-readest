@@ -159,15 +159,31 @@ use parking_lot::Mutex;
 /// Wrapped in Mutex because EspeakNg may not be Sync.
 static ESPEAK_ENGINE: OnceLock<Mutex<espeak_ng::EspeakNg>> = OnceLock::new();
 
-/// Directory where bundled espeak-ng data is extracted at runtime.
+/// Configurable data directory for espeak-ng (set during engine init).
+/// Falls back to CARGO_MANIFEST_DIR/espeak-ng-data if not set (dev/test mode).
+static ESPEAK_DATA_DIR_OVERRIDE: OnceLock<std::path::PathBuf> = OnceLock::new();
 static ESPEAK_DATA_DIR: OnceLock<std::path::PathBuf> = OnceLock::new();
 
-/// Extract bundled espeak-ng data to a local directory (once).
+/// Set the directory where espeak-ng bundled data will be extracted.
+/// Must be called before any phonemization (typically from KokoroEngine::new).
+/// The directory must be writable at runtime.
+pub fn set_espeak_data_dir(dir: std::path::PathBuf) {
+    let _ = ESPEAK_DATA_DIR_OVERRIDE.set(dir);
+}
+
+/// Extract bundled espeak-ng data to a writable directory (once).
 /// Returns the path to the data directory.
 fn ensure_espeak_data() -> &'static std::path::PathBuf {
     ESPEAK_DATA_DIR.get_or_init(|| {
-        let data_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("espeak-ng-data");
+        // Use configured path (runtime app data), or fall back to CARGO_MANIFEST_DIR (dev/test)
+        let data_dir = if let Some(configured) = ESPEAK_DATA_DIR_OVERRIDE.get() {
+            configured.clone()
+        } else {
+            log::warn!(
+                "[KokoroTTS] espeak data dir not configured, falling back to CARGO_MANIFEST_DIR"
+            );
+            std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("espeak-ng-data")
+        };
 
         // Only extract if not already present
         if !data_dir.join("en_dict").exists() {
@@ -175,6 +191,10 @@ fn ensure_espeak_data() -> &'static std::path::PathBuf {
                 "[KokoroTTS] Extracting bundled espeak-ng data to {:?}",
                 data_dir
             );
+            // Ensure parent directory exists
+            if let Some(parent) = data_dir.parent() {
+                let _ = std::fs::create_dir_all(parent);
+            }
             if let Err(e) = espeak_ng::install_bundled_language(&data_dir, "en") {
                 log::error!("[KokoroTTS] Failed to extract bundled espeak-ng data: {:?}", e);
             }

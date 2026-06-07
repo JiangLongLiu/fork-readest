@@ -3,7 +3,7 @@ import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { getUserLocale } from '@/utils/misc';
 import { parseSSMLMarks } from '@/utils/ssml';
 import { TTSClient, TTSMessageEvent } from './TTSClient';
-import { TTSGranularity, TTSVoice, TTSVoicesGroup, TTSMark } from './types';
+import { TTSGranularity, TTSVoice, TTSVoicesGroup } from './types';
 import { TTSUtils } from './TTSUtils';
 import { TTSController } from './TTSController';
 
@@ -58,7 +58,6 @@ export class KokoroTTSClient implements TTSClient {
   #speakingLang = '';
   #currentVoiceId = '';
   #rate = 1.0;
-  #pitch = 1.0;
 
   // Web Audio playback state
   #audioContext: AudioContext | null = null;
@@ -226,7 +225,7 @@ export class KokoroTTSClient implements TTSClient {
         }
 
         if (eventQueue.length > 0) {
-          const event = eventQueue.shift();
+          const event = eventQueue.shift()!;
           if (event === null) {
             // Session complete sentinel
             yield { code: 'end', message: 'Synthesis complete' } as TTSMessageEvent;
@@ -315,8 +314,7 @@ export class KokoroTTSClient implements TTSClient {
     }
   }
 
-  async setPitch(pitch: number): Promise<void> {
-    this.#pitch = pitch;
+  async setPitch(_pitch: number): Promise<void> {
     // Kokoro does not support direct pitch control
   }
 
@@ -340,8 +338,11 @@ export class KokoroTTSClient implements TTSClient {
   async getVoices(lang: string): Promise<TTSVoicesGroup[]> {
     const locale = lang === 'en' ? getUserLocale(lang) || lang : lang;
     const voices = await this.getAllVoices();
+    // Match voices where language prefixes overlap in either direction:
+    //   v.lang="en" matches locale="en-US" (v.lang is prefix of locale)
+    //   v.lang="en-US" matches locale="en" (locale is prefix of v.lang)
     const filteredVoices = voices.filter(
-      (v) => v.lang.startsWith(locale) || (lang === 'en' && ['en-US', 'en-GB'].includes(v.lang)),
+      (v) => locale.startsWith(v.lang) || v.lang.startsWith(locale),
     );
 
     return [
