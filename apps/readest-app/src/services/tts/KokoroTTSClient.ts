@@ -68,6 +68,7 @@ export class KokoroTTSClient implements TTSClient {
   #isPlaying = false;
   #isPaused = false;
   #pauseBuffer: Float32Array[] = [];
+  #lastSampleRate = 24000;
 
   // Event listeners
   #audioListener: UnlistenFn | null = null;
@@ -165,6 +166,7 @@ export class KokoroTTSClient implements TTSClient {
       'kokoro-tts-audio-chunk',
       (event) => {
         const { audioBase64, sampleRate, sentenceIndex, totalSentences } = event.payload;
+        this.#lastSampleRate = sampleRate;
 
         // Decode and play audio
         const pcmData = decodeBase64ToFloat32(audioBase64);
@@ -295,7 +297,7 @@ export class KokoroTTSClient implements TTSClient {
 
     // Replay buffered chunks
     for (const data of this.#pauseBuffer) {
-      this.#scheduleAudioChunk(data, 24000);
+      this.#scheduleAudioChunk(data, this.#lastSampleRate);
     }
     this.#pauseBuffer = [];
     return true;

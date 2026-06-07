@@ -104,7 +104,11 @@ impl KokoroEngine {
             .map_err(|e| Error::ModelLoadError(format!("Failed to create session builder: {}", e)))?
             .with_optimization_level(GraphOptimizationLevel::Level3)
             .map_err(|e| Error::ModelLoadError(format!("Failed to set optimization level: {}", e)))?
-            .with_intra_threads(4)
+            .with_intra_threads(
+                std::thread::available_parallelism()
+                    .map(|n| n.get().min(8))
+                    .unwrap_or(4),
+            )
             .map_err(|e| Error::ModelLoadError(format!("Failed to set thread count: {}", e)))?
             .commit_from_memory(&model_bytes)
             .map_err(|e| Error::ModelLoadError(format!("Failed to load model: {}", e)))?;

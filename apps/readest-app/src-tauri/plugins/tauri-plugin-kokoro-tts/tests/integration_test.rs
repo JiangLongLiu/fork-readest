@@ -129,6 +129,11 @@ fn test_text_normalization_pipeline() {
 // Model Loading Test (requires 170MB model, marked #[ignore])
 // ============================================================================
 
+/// Check if a file's content is a Git LFS pointer rather than actual data.
+fn is_lfs_pointer(content: &[u8]) -> bool {
+    content.starts_with(b"version https://git-lfs.github.com/spec/v1")
+}
+
 #[test]
 #[ignore]
 fn test_onnx_model_load_and_inference() {
@@ -142,6 +147,16 @@ fn test_onnx_model_load_and_inference() {
     assert!(model_path.exists(), "ONNX model not found at {:?}", model_path);
 
     let model_bytes = std::fs::read(&model_path).expect("Failed to read model");
+
+    // Skip gracefully if the model file is a Git LFS pointer (not pulled)
+    if is_lfs_pointer(&model_bytes) {
+        eprintln!(
+            "SKIP: ONNX model is a Git LFS pointer ({} bytes). Run `git lfs pull` to download the actual model.",
+            model_bytes.len()
+        );
+        return;
+    }
+
     assert!(
         model_bytes.len() > 100_000_000,
         "Model file seems too small: {} bytes",
