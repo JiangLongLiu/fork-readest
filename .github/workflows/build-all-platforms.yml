@@ -144,7 +144,11 @@ jobs:
         shell: bash
         run: |
           mkdir -p artifacts
-          find target/x86_64-pc-windows-msvc/release/bundle -name "*.exe" -exec cp {} artifacts/ \;
+          TIMESTAMP=$(python -c "from datetime import datetime,timezone,timedelta; print(datetime.now(timezone(timedelta(hours=8))).strftime('%Y%m%d-%H%M%S'))")
+          find target/x86_64-pc-windows-msvc/release/bundle -name "*.exe" | while read f; do
+            EXT="${f##*.}"
+            cp "$f" "artifacts/Readest_x64-setup-${TIMESTAMP}.${EXT}"
+          done
 
       - uses: actions/upload-artifact@v4
         with:
@@ -229,8 +233,13 @@ jobs:
       - name: Collect artifacts
         run: |
           mkdir -p artifacts
-          find target/x86_64-unknown-linux-gnu/release/bundle -name "*.AppImage" -exec cp {} artifacts/ \;
-          find target/x86_64-unknown-linux-gnu/release/bundle -name "*.deb" -exec cp {} artifacts/ \;
+          TIMESTAMP=$(python3 -c "from datetime import datetime,timezone,timedelta; print(datetime.now(timezone(timedelta(hours=8))).strftime('%Y%m%d-%H%M%S'))")
+          find target/x86_64-unknown-linux-gnu/release/bundle -name "*.AppImage" | while read f; do
+            cp "$f" "artifacts/Readest_amd64-${TIMESTAMP}.AppImage"
+          done
+          find target/x86_64-unknown-linux-gnu/release/bundle -name "*.deb" | while read f; do
+            cp "$f" "artifacts/Readest_amd64-${TIMESTAMP}.deb"
+          done
 
       - uses: actions/upload-artifact@v4
         with:
@@ -482,7 +491,10 @@ jobs:
       - name: Collect APK artifacts
         run: |
           mkdir -p artifacts
-          find . -name "*.apk" -not -path "*/node_modules/*" -exec cp {} artifacts/ \;
+          TIMESTAMP=$(python3 -c "from datetime import datetime,timezone,timedelta; print(datetime.now(timezone(timedelta(hours=8))).strftime('%Y%m%d-%H%M%S'))")
+          find . -name "*.apk" -not -path "*/node_modules/*" | while read f; do
+            cp "$f" "artifacts/Readest-arm64-${TIMESTAMP}.apk"
+          done
           ls -la artifacts/
           test -n "$(ls artifacts/*.apk 2>/dev/null)" || { echo "ERROR: No APK files generated"; exit 1; }
 
@@ -492,7 +504,7 @@ jobs:
           path: artifacts/*.apk
           retention-days: 7
 
-  # ── macOS Universal (Intel + Apple Silicon) ───────────────────────
+  # ── macOS ARM64 (Apple Silicon) ────────────────────────────────
   build-macos:
     needs: prepare
     runs-on: macos-14
@@ -557,7 +569,10 @@ jobs:
       - name: Collect artifacts
         run: |
           mkdir -p artifacts
-          find target/aarch64-apple-darwin/release/bundle -name "*.dmg" -exec cp {} artifacts/ \;
+          TIMESTAMP=$(python3 -c "from datetime import datetime,timezone,timedelta; print(datetime.now(timezone(timedelta(hours=8))).strftime('%Y%m%d-%H%M%S'))")
+          find target/aarch64-apple-darwin/release/bundle -name "*.dmg" | while read f; do
+            cp "$f" "artifacts/Readest_aarch64-${TIMESTAMP}.dmg"
+          done
 
       - uses: actions/upload-artifact@v4
         with:
