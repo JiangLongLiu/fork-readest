@@ -155,7 +155,7 @@ jobs:
   # ── Linux x64 ─────────────────────────────────────────────────────
   build-linux:
     needs: prepare
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -511,7 +511,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ env.RUST_VERSION }}
-          targets: aarch64-apple-darwin,x86_64-apple-darwin
+          targets: aarch64-apple-darwin
 
       - name: Download build env
         uses: actions/download-artifact@v4
@@ -544,7 +544,7 @@ jobs:
         with:
           workspaces: apps/readest-app/src-tauri
 
-      - name: Build macOS Universal DMG
+      - name: Build macOS ARM64 DMG
         env:
           # Ad-hoc signing (no certificate needed for self-hosted distribution)
           APPLE_SIGNING_IDENTITY: '-'
@@ -552,16 +552,16 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           cd apps/readest-app
-          npx dotenv -e .env.tauri -- tauri build --target universal-apple-darwin --bundles dmg
+          npx dotenv -e .env.tauri -- tauri build --target aarch64-apple-darwin --bundles dmg
 
       - name: Collect artifacts
         run: |
           mkdir -p artifacts
-          find target/universal-apple-darwin/release/bundle -name "*.dmg" -exec cp {} artifacts/ \;
+          find target/aarch64-apple-darwin/release/bundle -name "*.dmg" -exec cp {} artifacts/ \;
 
       - uses: actions/upload-artifact@v4
         with:
-          name: readest-macos-universal
+          name: readest-macos-aarch64
           path: artifacts/*.dmg
           retention-days: 7
 
@@ -610,7 +610,7 @@ jobs:
             - Windows x64 (NSIS installer)
             - Linux x64 (AppImage + deb)
             - Android ARM64 (APK)
-            - macOS Universal (DMG, Intel + Apple Silicon)
+            - macOS ARM64 (DMG, Apple Silicon)
 
             ### Changelog
             ${{ steps.changelog.outputs.changelog }}
