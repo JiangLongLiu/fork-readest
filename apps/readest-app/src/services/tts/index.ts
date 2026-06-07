@@ -6,6 +6,3 @@ export * from './NativeTTSClient';
 export * from './KokoroTTSClient';
 export * from './TTSController';
 export * from './TTSData';
-export * from './TTSManager';
-export * from './KokoroTTSProvider';
-export * from './MinimaxTTSProvider';

@@ -33,11 +33,10 @@ export type TTSMark = {
 };
 
 // ============================================================================
-// TTS Provider Strategy Pattern Interface
+// TTS Provider Strategy Pattern Interface (reserved for future use)
 // ============================================================================
 // This file defines the strategy pattern interface for TTS providers.
-// Each provider (Kokoro offline, Minimax cloud, etc.) implements TTSProvider,
-// allowing TTSManager to switch between them transparently.
+// Currently unused — TTSController uses the TTSClient interface directly.
 // ============================================================================
 
 /**
