@@ -1,7 +1,8 @@
 {
   "bundle": {
     "resources": {
-      "../extensions/windows-thumbnail/target/windows_thumbnail.dll": "readest_thumbnail.dll"
+      "../extensions/windows-thumbnail/target/windows_thumbnail.dll": "readest_thumbnail.dll",
+      "resources/kokoro-tts/*": "kokoro-tts/"
     }
   }
 }
