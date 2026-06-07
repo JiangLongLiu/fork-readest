@@ -78,8 +78,20 @@ else
     echo "  Size: $ONNX_FULL_SIZE"
 fi
 
+# Check if file exists and is large enough (not just a Git LFS pointer)
+# FP16 model is ~169 MB, FP32 is ~310 MB; LFS pointers are < 1 KB
+MIN_MODEL_SIZE=$((10 * 1024 * 1024))  # 10 MB minimum
 if [ -f "$RESOURCES_DIR/$MODEL_FILE" ]; then
-    echo "  [SKIP] $MODEL_FILE already exists"
+    EXISTING_SIZE=$(stat -c%s "$RESOURCES_DIR/$MODEL_FILE" 2>/dev/null || stat -f%z "$RESOURCES_DIR/$MODEL_FILE" 2>/dev/null || echo 0)
+    if [ "$EXISTING_SIZE" -ge "$MIN_MODEL_SIZE" ]; then
+        echo "  [SKIP] $MODEL_FILE already exists ($EXISTING_SIZE bytes)"
+    else
+        echo "  [WARN] $MODEL_FILE exists but is too small ($EXISTING_SIZE bytes), likely a Git LFS pointer"
+        echo "  Re-downloading..."
+        rm -f "$RESOURCES_DIR/$MODEL_FILE"
+        curl -L --progress-bar -o "$RESOURCES_DIR/$MODEL_FILE" "$MODEL_URL"
+        echo "  [OK] Downloaded $MODEL_FILE"
+    fi
 else
     echo "  Downloading..."
     curl -L --progress-bar -o "$RESOURCES_DIR/$MODEL_FILE" "$MODEL_URL"
@@ -90,8 +102,29 @@ fi
 echo ""
 echo "[Step 2/2] Obtaining tokens.txt..."
 
+# Check if tokens.txt exists and has real content (not a Git LFS pointer)
+MIN_TOKENS_LINES=10
 if [ -f "$RESOURCES_DIR/tokens.txt" ]; then
-    echo "  [SKIP] tokens.txt already exists"
+    EXISTING_LINES=$(wc -l < "$RESOURCES_DIR/tokens.txt")
+    if [ "$EXISTING_LINES" -ge "$MIN_TOKENS_LINES" ]; then
+        echo "  [SKIP] tokens.txt already exists ($EXISTING_LINES lines)"
+    else
+        echo "  [WARN] tokens.txt exists but has too few lines ($EXISTING_LINES), likely a Git LFS pointer"
+        rm -f "$RESOURCES_DIR/tokens.txt"
+        echo "  Downloading sherpa-onnx bundle to extract tokens.txt..."
+        TEMP_DIR=$(mktemp -d)
+        BUNDLE_FILE="$TEMP_DIR/kokoro-en-v0_19.tar.bz2"
+        curl -L --progress-bar -o "$BUNDLE_FILE" "$SHERPA_BUNDLE_URL"
+        echo "  Extracting tokens.txt from bundle..."
+        tar -xjf "$BUNDLE_FILE" -C "$TEMP_DIR" --wildcards '*/tokens.txt' 2>/dev/null || \
+        tar -xjf "$BUNDLE_FILE" -C "$TEMP_DIR" 2>/dev/null
+        TOKENS_FILE=$(find "$TEMP_DIR" -name "tokens.txt" -type f | head -1)
+        if [ -n "$TOKENS_FILE" ] && [ -f "$TOKENS_FILE" ]; then
+            cp "$TOKENS_FILE" "$RESOURCES_DIR/tokens.txt"
+            echo "  [OK] Extracted tokens.txt ($(wc -l < "$RESOURCES_DIR/tokens.txt") lines)"
+        fi
+        rm -rf "$TEMP_DIR"
+    fi
 else
     echo "  Downloading sherpa-onnx bundle to extract tokens.txt..."
     TEMP_DIR=$(mktemp -d)
