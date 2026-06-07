@@ -156,8 +156,8 @@ use std::sync::OnceLock;
 use parking_lot::Mutex;
 
 /// Global espeak-ng engine instance.
-/// Wrapped in Mutex because EspeakNg may not be Sync.
-static ESPEAK_ENGINE: OnceLock<Mutex<espeak_ng::EspeakNg>> = OnceLock::new();
+/// Wrapped in Option<Mutex<...>>: None if espeak-ng initialization failed (CJK-only fallback).
+static ESPEAK_ENGINE: OnceLock<Option<Mutex<espeak_ng::EspeakNg>>> = OnceLock::new();
 
 /// Configurable data directory for espeak-ng (set during engine init).
 /// Falls back to CARGO_MANIFEST_DIR/espeak-ng-data if not set (dev/test mode).
@@ -207,7 +207,8 @@ fn ensure_espeak_data() -> &'static std::path::PathBuf {
 }
 
 /// Get or initialize the global espeak-ng engine.
-fn get_espeak_engine() -> &'static Mutex<espeak_ng::EspeakNg> {
+/// Returns None if espeak-ng could not be initialized (CJK text will use fallback).
+fn get_espeak_engine() -> Option<&'static Mutex<espeak_ng::EspeakNg>> {
     ESPEAK_ENGINE.get_or_init(|| {
         // First, ensure bundled data is extracted
         let data_dir = ensure_espeak_data();
@@ -215,15 +216,24 @@ fn get_espeak_engine() -> &'static Mutex<espeak_ng::EspeakNg> {
         match espeak_ng::EspeakNg::with_data_dir("en", data_dir) {
             Ok(engine) => {
                 log::info!("[KokoroTTS] espeak-ng engine initialized for English (data: {:?})", data_dir);
-                Mutex::new(engine)
+                Some(Mutex::new(engine))
             }
             Err(e) => {
-                log::error!("[KokoroTTS] Failed to initialize espeak-ng engine with bundled data: {:?}", e);
+                log::error!("[KokoroTTS] Failed to initialize espeak-ng with bundled data: {:?}", e);
                 // Fallback: try default init (may work if ESPEAK_DATA_PATH env var is set)
-                Mutex::new(espeak_ng::EspeakNg::new("en").expect("espeak-ng init"))
+                match espeak_ng::EspeakNg::new("en") {
+                    Ok(engine) => {
+                        log::info!("[KokoroTTS] espeak-ng engine initialized via default path");
+                        Some(Mutex::new(engine))
+                    }
+                    Err(e2) => {
+                        log::error!("[KokoroTTS] espeak-ng fallback init also failed: {:?}. English phonemization will use char-level fallback.", e2);
+                        None
+                    }
+                }
             }
         }
-    })
+    }).as_ref()
 }
 
 /// Convert text to phoneme token IDs using espeak-ng (pure Rust).
@@ -251,7 +261,10 @@ pub fn text_to_phoneme_ids(text: &str, phoneme_to_id: &std::collections::HashMap
     }
 
     // Use espeak-ng for English text
-    let engine = get_espeak_engine();
+    let Some(engine) = get_espeak_engine() else {
+        log::warn!("[KokoroTTS] espeak-ng not available, using char-level fallback for English text");
+        return text_to_phoneme_ids_fallback(text, phoneme_to_id);
+    };
     let engine_guard = engine.lock();
 
     let phonemes = match engine_guard.text_to_phonemes(text) {

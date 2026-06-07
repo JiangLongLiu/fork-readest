@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use tauri::{command, AppHandle, Manager, Runtime, State};
+use tauri::{command, AppHandle, Emitter, Manager, Runtime, State};
 use tokio_util::sync::CancellationToken;
 
 use crate::error::{Error, Result};
@@ -144,6 +144,7 @@ pub(crate) async fn start<R: Runtime>(
     // Spawn background synthesis task
     // IMPORTANT: This task runs on the Tokio runtime, NOT on the Tauri main thread.
     // The UI remains responsive during synthesis.
+    let app_for_error = app.clone();
     tokio::spawn(async move {
         let result = engine
             .synthesize(
@@ -162,8 +163,12 @@ pub(crate) async fn start<R: Runtime>(
                 session_id_clone,
                 e
             );
-            // Error events are emitted from within synthesize() if needed.
-            // Here we just log the top-level failure.
+            // Emit error event so the frontend is notified immediately
+            let error_event = KokoroErrorEvent {
+                session_id: session_id_clone.clone(),
+                error: e.to_string(),
+            };
+            let _ = app_for_error.emit("kokoro-tts-error", &error_event);
         }
     });
 
@@ -208,9 +213,10 @@ pub(crate) async fn set_rate<R: Runtime>(
         }
     }
 
+    let clamped_rate = args.rate.clamp(0.5, 3.0);
     let mut rate_guard = state.default_rate.lock();
-    *rate_guard = args.rate;
-    log::info!("[KokoroTTS] Default rate set to {}", args.rate);
+    *rate_guard = clamped_rate;
+    log::info!("[KokoroTTS] Default rate set to {} (requested: {})", clamped_rate, args.rate);
     Ok(())
 }
 
