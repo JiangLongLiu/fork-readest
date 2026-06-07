@@ -51,9 +51,6 @@ pub struct KokoroEngine {
     default_speed: f32,
     /// Current voice index
     default_voice_id: i64,
-    /// Resource base directory (where models/ and tokens.txt live)
-    #[allow(dead_code)]
-    resource_dir: PathBuf,
 }
 
 // SAFETY: The tokio::sync::Mutex<Session> provides synchronized access.
@@ -64,42 +61,20 @@ unsafe impl Sync for KokoroEngine {}
 impl KokoroEngine {
     /// Create and initialize a new KokoroEngine.
     ///
-    /// Loads the ONNX model and tokens file from the given resource directory.
-    ///
     /// # Arguments
-    /// * `resource_dir` — Base directory containing:
-    ///   - `kokoro-v0_19.onnx` (the FP16 or FP32 ONNX model)
-    ///   - `tokens.txt` (token vocabulary file)
+    /// * `model_bytes` — Raw bytes of the ONNX model file (kokoro-v0_19.onnx).
+    ///   On Android, these are read via Tauri's FsExt which handles the asset:// protocol.
+    /// * `tokens_bytes` — Raw bytes of the token vocabulary file (tokens.txt).
     /// * `app_data_dir` — Writable application data directory for espeak-ng data extraction.
-    pub fn new(resource_dir: PathBuf, app_data_dir: PathBuf) -> Result<Self> {
+    pub fn new(model_bytes: Vec<u8>, tokens_bytes: Vec<u8>, app_data_dir: PathBuf) -> Result<Self> {
         // Configure espeak-ng data directory before any phonemization
         let espeak_data_dir = app_data_dir.join("espeak-ng-data");
         text_processing::set_espeak_data_dir(espeak_data_dir);
 
-        let model_path = resource_dir.join("kokoro-v0_19.onnx");
-        let tokens_path = resource_dir.join("tokens.txt");
+        log::info!("[KokoroTTS] Loading ONNX model ({} bytes)", model_bytes.len());
 
-        log::info!("[KokoroTTS] Loading ONNX model from: {:?}", model_path);
-
-        if !model_path.exists() {
-            return Err(Error::ModelLoadError(format!(
-                "Model file not found: {:?}. Please place the kokoro-v0_19.onnx file in the resources directory.",
-                model_path
-            )));
-        }
-
-        if !tokens_path.exists() {
-            return Err(Error::TokensLoadError(format!(
-                "Tokens file not found: {:?}. Please place the tokens.txt file in the resources directory.",
-                tokens_path
-            )));
-        }
-
-        // Read model bytes and build ONNX session
+        // Build ONNX session from memory
         // Note: ort 2.0.0-rc.12 uses commit_from_memory (no commit_from_file)
-        let model_bytes = std::fs::read(&model_path)
-            .map_err(|e| Error::ModelLoadError(format!("Failed to read model file: {}", e)))?;
-
         let session = Session::builder()
             .map_err(|e| Error::ModelLoadError(format!("Failed to create session builder: {}", e)))?
             .with_optimization_level(GraphOptimizationLevel::Level3)
@@ -115,9 +90,9 @@ impl KokoroEngine {
 
         log::info!("[KokoroTTS] ONNX model loaded successfully");
 
-        // Load token vocabulary
-        let tokens_content = std::fs::read_to_string(&tokens_path)
-            .map_err(|e| Error::TokensLoadError(format!("Failed to read tokens file: {}", e)))?;
+        // Load token vocabulary from bytes
+        let tokens_content = String::from_utf8(tokens_bytes)
+            .map_err(|e| Error::TokensLoadError(format!("Tokens file is not valid UTF-8: {}", e)))?;
         let phoneme_to_id = text_processing::load_tokens_file(&tokens_content);
 
         log::info!(
@@ -131,7 +106,6 @@ impl KokoroEngine {
             phoneme_to_id,
             default_speed: 1.0,
             default_voice_id: 0,
-            resource_dir,
         })
     }
 

@@ -66,8 +66,8 @@ export class TTSController extends EventTarget {
     if (appService?.isAndroidApp) {
       this.ttsNativeClient = new NativeTTSClient(this);
     }
-    // Kokoro offline TTS: available on desktop platforms (macOS, Windows, Linux)
-    if (!appService?.isAndroidApp && !appService?.isIOSApp) {
+    // Kokoro offline TTS: available on desktop and Android (not iOS due to ONNX compilation complexity)
+    if (!appService?.isIOSApp) {
       this.ttsKokoroClient = new KokoroTTSClient(this);
     }
     this.ttsClient = this.ttsWebClient;

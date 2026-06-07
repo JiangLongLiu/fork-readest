@@ -389,6 +389,10 @@ export class KokoroTTSClient implements TTSClient {
         window.AudioContext ||
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       this.#audioContext = new Ctor({ sampleRate: 24000 });
+      // On Android WebView, AudioContext may start suspended; resume proactively
+      if (this.#audioContext.state === 'suspended') {
+        this.#audioContext.resume().catch(() => {});
+      }
     }
     this.#nextStartTime = 0;
     this.#playbackOffset = 0;

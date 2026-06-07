@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use tauri::{command, AppHandle, Emitter, Manager, Runtime, State};
+use tauri_plugin_fs::FsExt;
 use tokio_util::sync::CancellationToken;
 
 use crate::error::{Error, Result};
@@ -48,13 +49,42 @@ pub(crate) async fn init<R: Runtime>(
         .map(std::path::PathBuf::from)
         .unwrap_or_else(|_| resource_dir.join("kokoro-tts"));
 
+    let model_path = model_dir.join("kokoro-v0_19.onnx");
+    let tokens_path = model_dir.join("tokens.txt");
+
     log::info!(
-        "[KokoroTTS] Initializing engine with resource dir: {:?}, data dir: {:?}",
+        "[KokoroTTS] Initializing engine with model dir: {:?}, data dir: {:?}",
         model_dir,
         app_data_dir
     );
 
-    match crate::kokoro_engine::KokoroEngine::new(model_dir, app_data_dir) {
+    // Read model and tokens via Tauri FsExt.
+    // On desktop, this uses standard filesystem.
+    // On Android, resource_dir returns "asset://localhost/..." and FsExt
+    // transparently reads from the APK assets.
+    let model_bytes = app.fs().read(&model_path).map_err(|e| {
+        Error::ModelLoadError(format!(
+            "Failed to read model file {:?}: {}. \
+             Ensure kokoro-v0_19.onnx is in the resources directory.",
+            model_path, e
+        ))
+    })?;
+
+    let tokens_bytes = app.fs().read(&tokens_path).map_err(|e| {
+        Error::TokensLoadError(format!(
+            "Failed to read tokens file {:?}: {}. \
+             Ensure tokens.txt is in the resources directory.",
+            tokens_path, e
+        ))
+    })?;
+
+    log::info!(
+        "[KokoroTTS] Read model ({} bytes) and tokens ({} bytes)",
+        model_bytes.len(),
+        tokens_bytes.len()
+    );
+
+    match crate::kokoro_engine::KokoroEngine::new(model_bytes, tokens_bytes, app_data_dir) {
         Ok(engine) => {
             let voice_count = engine.get_voices().len();
             let mut engine_guard = state.engine.write();
