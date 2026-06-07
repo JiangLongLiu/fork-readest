@@ -2058,6 +2058,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dea2df4cf52843e0452895c455a1a2cfbb842a1e7329671acf418fdc53ed4c59"
 
 [[package]]
+name = "espeak-ng"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "083cee3337773bfa7f1c38fe022dab392438ced57f3a64c883011952d13b83a1"
+dependencies = [
+ "bitflags 2.11.1",
+ "espeak-ng-data-dict-en",
+ "espeak-ng-data-phonemes",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "espeak-ng-data-dict-en"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ca161ecc2d9398ca60142f9eb8d8174d24b3a03b90372734f9580cad0b4b7006"
+
+[[package]]
+name = "espeak-ng-data-phonemes"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d65418fdbf64db690f177ae55b6cb0f01eec5ffd46f5e1cba6f841ae3f214ec0"
+
+[[package]]
 name = "event-listener"
 version = "5.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7822,6 +7846,7 @@ name = "tauri-plugin-kokoro-tts"
 version = "0.1.0"
 dependencies = [
  "base64 0.22.1",
+ "espeak-ng",
  "log",
  "ndarray",
  "ort",

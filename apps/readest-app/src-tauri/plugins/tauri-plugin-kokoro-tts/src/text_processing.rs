@@ -1,6 +1,10 @@
 use regex::Regex;
 use unicode_segmentation::UnicodeSegmentation;
 
+// ============================================================================
+// Sentence Splitting
+// ============================================================================
+
 /// Split text into sentences using Unicode-aware heuristics.
 ///
 /// Handles common patterns in English, Chinese, Japanese, and Korean:
@@ -13,31 +17,86 @@ pub fn split_sentences(text: &str) -> Vec<String> {
         return vec![];
     }
 
-    // Regex for sentence boundaries:
-    // Group 1: CJK sentence-ending punctuation
-    // Group 2: Latin sentence-ending punctuation followed by space/EOL
-    let sentence_re = Regex::new(
-        r"(?<=[。！？\n])|(?<=[.!?])\s+",
-    )
-    .unwrap();
+    let chars: Vec<char> = text.chars().collect();
+    let len = chars.len();
+    let mut sentences: Vec<String> = Vec::new();
+    let mut current = String::new();
+    let mut i = 0;
 
-    let raw_parts: Vec<&str> = sentence_re.split(text).collect();
-    let mut sentences = Vec::new();
+    while i < len {
+        let ch = chars[i];
 
-    for part in raw_parts {
-        let trimmed = part.trim();
-        if !trimmed.is_empty() {
-            sentences.push(trimmed.to_string());
+        if ch == '\n' {
+            // Newline: end the current sentence (newline itself is discarded)
+            let trimmed = current.trim().to_string();
+            if !trimmed.is_empty() {
+                sentences.push(trimmed);
+            }
+            current.clear();
+            i += 1;
+        } else if ch == '。' || ch == '！' || ch == '？' {
+            // CJK sentence-ending punctuation: include it, then split
+            current.push(ch);
+            sentences.push(current.trim().to_string());
+            current.clear();
+            i += 1;
+        } else if ch == '.' || ch == '!' || ch == '?' {
+            // Check for ellipsis patterns: "..." (three or more ASCII dots)
+            if ch == '.' && i + 2 < len && chars[i + 1] == '.' && chars[i + 2] == '.' {
+                // Consume all consecutive dots as part of the current sentence
+                current.push('.');
+                i += 1;
+                while i < len && chars[i] == '.' {
+                    current.push('.');
+                    i += 1;
+                }
+                // Ellipsis ends the sentence
+                sentences.push(current.trim().to_string());
+                current.clear();
+            } else if i + 1 < len && chars[i + 1].is_whitespace() && chars[i + 1] != '\n' {
+                // ASCII sentence-ending punctuation followed by whitespace (but not newline)
+                current.push(ch);
+                sentences.push(current.trim().to_string());
+                current.clear();
+                i += 1;
+                // Skip the whitespace character(s) after the punctuation
+                while i < len && chars[i].is_whitespace() && chars[i] != '\n' {
+                    i += 1;
+                }
+            } else {
+                // Not a sentence boundary (e.g., abbreviation at end of text, or before newline)
+                current.push(ch);
+                i += 1;
+            }
+        } else if ch == '…' && i + 1 < len && chars[i + 1] == '…' {
+            // CJK ellipsis "……" (consume both and any further '…')
+            current.push('…');
+            current.push('…');
+            i += 2;
+            while i < len && chars[i] == '…' {
+                current.push('…');
+                i += 1;
+            }
+            sentences.push(current.trim().to_string());
+            current.clear();
+        } else {
+            current.push(ch);
+            i += 1;
         }
     }
 
-    // Post-process: merge very short fragments (< 3 graphemes) with the
-    // previous sentence to avoid awkward prosody breaks
-    let mut merged = Vec::new();
+    // Flush any remaining text as the final sentence
+    let trimmed = current.trim().to_string();
+    if !trimmed.is_empty() {
+        sentences.push(trimmed);
+    }
+
+    // Merge very short fragments (< 3 graphemes) with the previous sentence
+    let mut merged: Vec<String> = Vec::new();
     for sentence in sentences {
         let grapheme_count = sentence.graphemes(true).count();
         if grapheme_count < 3 && !merged.is_empty() {
-            let last: &mut String = merged.last_mut().unwrap();
+            let last = merged.last_mut().unwrap();
             last.push(' ');
             last.push_str(&sentence);
         } else {
@@ -46,107 +105,218 @@ pub fn split_sentences(text: &str) -> Vec<String> {
     }
 
     if merged.is_empty() {
-        // Fallback: return the whole text as one sentence
         vec![text.trim().to_string()]
     } else {
         merged
     }
 }
 
+// ============================================================================
+// Text Normalization
+// ============================================================================
+
 /// Normalize text for TTS synthesis.
 ///
-/// Performs the following cleanups:
 /// - Collapse multiple whitespace into single spaces
 /// - Remove control characters (except newline and tab)
-/// - Normalize Unicode dashes to hyphens
-/// - Expand ellipsis to spaced periods
+/// - Normalize Unicode dashes to commas
+/// - Expand ellipsis
 /// - Strip markdown formatting (bold, italic, code)
 pub fn normalize_text(text: &str) -> String {
     let mut result = text.to_string();
 
-    // Remove control characters except \n, \r, \t
     result = result
         .chars()
         .filter(|c| !c.is_control() || *c == '\n' || *c == '\r' || *c == '\t')
         .collect();
 
-    // Strip markdown bold/italic markers
     let md_re = Regex::new(r"\*{1,3}([^*]+)\*{1,3}").unwrap();
     result = md_re.replace_all(&result, "$1").to_string();
 
-    // Strip inline code markers
     let code_re = Regex::new(r"`([^`]+)`").unwrap();
     result = code_re.replace_all(&result, "$1").to_string();
 
-    // Normalize various dashes to comma (better for TTS prosody)
     let dash_re = Regex::new(r"[–—―]").unwrap();
     result = dash_re.replace_all(&result, ",").to_string();
 
-    // Expand ellipsis
     let ellipsis_re = Regex::new(r"\.{3,}|……+").unwrap();
     result = ellipsis_re.replace_all(&result, ", ").to_string();
 
-    // Collapse whitespace
     let ws_re = Regex::new(r"\s+").unwrap();
     result = ws_re.replace_all(&result, " ").to_string();
 
     result.trim().to_string()
 }
 
-/// Basic phonemizer that maps characters to phoneme-like token IDs.
+// ============================================================================
+// Phonemizer — espeak-ng (pure Rust) with CJK fallback
+// ============================================================================
+
+use std::sync::OnceLock;
+use parking_lot::Mutex;
+
+/// Global espeak-ng engine instance.
+/// Wrapped in Mutex because EspeakNg may not be Sync.
+static ESPEAK_ENGINE: OnceLock<Mutex<espeak_ng::EspeakNg>> = OnceLock::new();
+
+/// Directory where bundled espeak-ng data is extracted at runtime.
+static ESPEAK_DATA_DIR: OnceLock<std::path::PathBuf> = OnceLock::new();
+
+/// Extract bundled espeak-ng data to a local directory (once).
+/// Returns the path to the data directory.
+fn ensure_espeak_data() -> &'static std::path::PathBuf {
+    ESPEAK_DATA_DIR.get_or_init(|| {
+        let data_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("espeak-ng-data");
+
+        // Only extract if not already present
+        if !data_dir.join("en_dict").exists() {
+            log::info!(
+                "[KokoroTTS] Extracting bundled espeak-ng data to {:?}",
+                data_dir
+            );
+            if let Err(e) = espeak_ng::install_bundled_language(&data_dir, "en") {
+                log::error!("[KokoroTTS] Failed to extract bundled espeak-ng data: {:?}", e);
+            }
+        } else {
+            log::debug!("[KokoroTTS] espeak-ng data already present at {:?}", data_dir);
+        }
+
+        data_dir
+    })
+}
+
+/// Get or initialize the global espeak-ng engine.
+fn get_espeak_engine() -> &'static Mutex<espeak_ng::EspeakNg> {
+    ESPEAK_ENGINE.get_or_init(|| {
+        // First, ensure bundled data is extracted
+        let data_dir = ensure_espeak_data();
+
+        match espeak_ng::EspeakNg::with_data_dir("en", data_dir) {
+            Ok(engine) => {
+                log::info!("[KokoroTTS] espeak-ng engine initialized for English (data: {:?})", data_dir);
+                Mutex::new(engine)
+            }
+            Err(e) => {
+                log::error!("[KokoroTTS] Failed to initialize espeak-ng engine with bundled data: {:?}", e);
+                // Fallback: try default init (may work if ESPEAK_DATA_PATH env var is set)
+                Mutex::new(espeak_ng::EspeakNg::new("en").expect("espeak-ng init"))
+            }
+        }
+    })
+}
+
+/// Convert text to phoneme token IDs using espeak-ng (pure Rust).
 ///
-/// IMPORTANT: This is a **simplified ASCII phonemizer** suitable for initial
-/// testing and validation. For production-quality speech, replace this with
-/// an espeak-ng based phonemizer (via `piper-phonemize` FFI or `espeak-ng`
-/// command-line invocation) that produces proper IPA phoneme sequences.
+/// For English text, uses espeak-ng to produce proper IPA phonemes,
+/// then maps each IPA character to a token ID via the vocabulary.
 ///
-/// The Kokoro model expects phoneme token IDs as input. This function maps
-/// each character to a token ID using the provided `phoneme_to_id` mapping.
-/// Unknown characters are skipped.
+/// For CJK text (detected by character ratio), falls back to the
+/// simplified character-level mapper.
+///
+/// The returned token IDs do NOT include pad tokens — those are added
+/// by the inference engine.
 pub fn text_to_phoneme_ids(text: &str, phoneme_to_id: &std::collections::HashMap<char, i64>) -> Vec<i64> {
+    // Detect if text is primarily CJK
+    let char_count = text.chars().count().max(1);
+    let cjk_count = text.chars().filter(|c| is_cjk(*c)).count();
+    let cjk_ratio = cjk_count as f64 / char_count as f64;
+
+    if cjk_ratio > 0.3 {
+        log::debug!(
+            "[KokoroTTS] CJK text detected (ratio={:.2}), using char-level phonemizer",
+            cjk_ratio
+        );
+        return text_to_phoneme_ids_fallback(text, phoneme_to_id);
+    }
+
+    // Use espeak-ng for English text
+    let engine = get_espeak_engine();
+    let engine_guard = engine.lock();
+
+    let phonemes = match engine_guard.text_to_phonemes(text) {
+        Ok(phonemes) => phonemes,
+        Err(e) => {
+            log::warn!(
+                "[KokoroTTS] espeak-ng phonemization failed: {:?}, falling back to char-level",
+                e
+            );
+            return text_to_phoneme_ids_fallback(text, phoneme_to_id);
+        }
+    };
+
+    drop(engine_guard);
+
+    log::debug!(
+        "[KokoroTTS] espeak-ng: {:?} -> {:?}",
+        &text[..text.len().min(40)],
+        &phonemes[..phonemes.len().min(60)]
+    );
+
+    // Map phoneme characters to token IDs, filtering unknown chars
+    let mut ids = Vec::new();
+    for ch in phonemes.chars() {
+        if let Some(&id) = phoneme_to_id.get(&ch) {
+            ids.push(id);
+        }
+        // Unknown phoneme characters are silently skipped (same as kokoro-onnx)
+    }
+
+    if ids.is_empty() {
+        log::warn!("[KokoroTTS] espeak-ng produced empty phoneme sequence, falling back");
+        return text_to_phoneme_ids_fallback(text, phoneme_to_id);
+    }
+
+    ids
+}
+
+/// Fallback phonemizer: direct character-to-token-ID mapping.
+///
+/// Used for CJK text or when espeak-ng fails. Maps each character
+/// directly to its token ID from the vocabulary.
+fn text_to_phoneme_ids_fallback(text: &str, phoneme_to_id: &std::collections::HashMap<char, i64>) -> Vec<i64> {
     let mut ids = Vec::new();
 
     for ch in text.chars() {
-        // Direct character mapping (for models that use character-level tokenization)
         if let Some(&id) = phoneme_to_id.get(&ch) {
             ids.push(id);
         } else {
-            // Try lowercase
             let lower = ch.to_lowercase().next().unwrap_or(ch);
             if let Some(&id) = phoneme_to_id.get(&lower) {
                 ids.push(id);
             }
-            // Unknown characters are silently skipped
         }
     }
 
     ids
 }
 
-/// Load a tokens file (one token per line) and build a char -> id mapping.
+/// Check if a character is CJK (Chinese, Japanese, Korean).
+fn is_cjk(ch: char) -> bool {
+    let cp = ch as u32;
+    (0x4E00..=0x9FFF).contains(&cp)      // CJK Unified Ideographs
+        || (0x3400..=0x4DBF).contains(&cp) // CJK Extension A
+        || (0x3040..=0x309F).contains(&cp) // Hiragana
+        || (0x30A0..=0x30FF).contains(&cp) // Katakana
+        || (0xAC00..=0xD7AF).contains(&cp) // Hangul Syllables
+}
+
+// ============================================================================
+// Token Vocabulary Loading
+// ============================================================================
+
+/// Load a tokens file (sherpa-onnx format) and build a char -> id mapping.
 ///
-/// The file format is expected to be:
-/// ```text
-/// <blank>
-/// <pad>
-/// a
-/// b
-/// c
-/// ...
-/// ```
-///
-/// Each line's index (0-based) becomes the token ID.
+/// Format: `<token> <id>` per line, e.g. `$ 0`, `; 1`, `  16` (space char).
 pub fn load_tokens_file(content: &str) -> std::collections::HashMap<char, i64> {
     let mut map = std::collections::HashMap::new();
 
     for line in content.lines() {
-        let line = line.trim_end(); // preserve leading spaces (space char is a valid token)
+        let line = line.trim_end();
         if line.is_empty() {
             continue;
         }
 
-        // sherpa-onnx tokens.txt format: "<token> <id>" per line
-        // e.g. "$ 0", "; 1", "  16" (space character with id 16)
         let Some(last_space) = line.rfind(' ') else {
             continue;
         };
@@ -157,12 +327,10 @@ pub fn load_tokens_file(content: &str) -> std::collections::HashMap<char, i64> {
             continue;
         };
 
-        // Skip special tokens like <blank>, <pad>, <unk>, etc.
         if token_part.starts_with('<') && token_part.ends_with('>') {
             continue;
         }
 
-        // Only map single-character tokens (handles multi-byte Unicode like IPA, CJK)
         if token_part.chars().count() == 1 {
             let ch = token_part.chars().next().unwrap();
             map.insert(ch, id);
@@ -176,6 +344,10 @@ pub fn load_tokens_file(content: &str) -> std::collections::HashMap<char, i64> {
 
     map
 }
+
+// ============================================================================
+// Tests
+// ============================================================================
 
 #[cfg(test)]
 mod tests {
@@ -210,6 +382,43 @@ mod tests {
         assert_eq!(map.get(&'a'), Some(&2));
         assert_eq!(map.get(&'b'), Some(&3));
         assert_eq!(map.get(&'c'), Some(&4));
-        assert_eq!(map.get(&' '), Some(&16)); // space character
+        assert_eq!(map.get(&' '), Some(&16));
+    }
+
+    #[test]
+    fn test_is_cjk() {
+        assert!(is_cjk('你'));
+        assert!(is_cjk('あ'));
+        assert!(is_cjk('ア'));
+        assert!(is_cjk('가'));
+        assert!(!is_cjk('a'));
+        assert!(!is_cjk('Z'));
+    }
+
+    #[test]
+    fn test_phonemizer_english() {
+        let mut vocab = std::collections::HashMap::new();
+        // Add common IPA characters that espeak-ng would produce
+        for ch in "hɛləˈoʊ wˈɜːld æ ɪ ŋ ʃ ʒ θ ð ʔ ə ɐ ɒ ɔ ɜ ʊ ʌ ˈ ˌ ː ' ".chars() {
+            vocab.insert(ch, (ch as u32) as i64);
+        }
+
+        let text = "hello world";
+        let ids = text_to_phoneme_ids(text, &vocab);
+        assert!(!ids.is_empty(), "espeak-ng should produce phonemes for 'hello world'");
+    }
+
+    #[test]
+    fn test_phonemizer_cjk_fallback() {
+        let mut vocab = std::collections::HashMap::new();
+        vocab.insert('你', 100);
+        vocab.insert('好', 101);
+        vocab.insert('世', 102);
+        vocab.insert('界', 103);
+
+        let text = "你好世界";
+        let ids = text_to_phoneme_ids(text, &vocab);
+        assert_eq!(ids.len(), 4);
+        assert_eq!(ids[0], 100);
     }
 }

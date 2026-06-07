@@ -23,6 +23,7 @@ regex = "1"
 unicode-segmentation = "1.11"
 log = "0.4"
 parking_lot = "0.12"
+espeak-ng = { version = "0.1", features = ["bundled-data-en"] }
 
 [build-dependencies]
 tauri-plugin = { version = "2", features = ["build"] }

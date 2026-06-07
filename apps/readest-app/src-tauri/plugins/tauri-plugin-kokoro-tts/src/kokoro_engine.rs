@@ -18,8 +18,9 @@ const KOKORO_SAMPLE_RATE: u32 = 24000;
 /// Style vector dimension for Kokoro v0.19
 const STYLE_VECTOR_DIM: usize = 256;
 
-/// Maximum number of tokens per inference chunk to prevent OOM
-const MAX_TOKENS_PER_CHUNK: usize = 512;
+/// Maximum number of phoneme characters per inference chunk.
+/// Kokoro model limit is 510; we leave room for the pad tokens at start/end.
+const MAX_PHONEME_CHARS: usize = 510;
 
 /// Built-in Kokoro English voices (v0.19).
 /// Each voice corresponds to a row index in the style embedding matrix.
@@ -278,6 +279,9 @@ impl KokoroEngine {
 
     /// Run ONNX inference on a sequence of phoneme token IDs.
     ///
+    /// Adds pad tokens (0) at the start and end of the sequence as required
+    /// by the Kokoro model: [0, *token_ids, 0].
+    ///
     /// Returns raw Float32 PCM audio samples at 24kHz.
     /// Acquires the session mutex for the duration of inference.
     async fn run_inference(
@@ -286,17 +290,22 @@ impl KokoroEngine {
         voice_idx: i64,
         speed: f32,
     ) -> Result<Vec<f32>> {
-        let token_len = token_ids.len();
+        // Add pad tokens: [0, *token_ids, 0]
+        let mut padded = Vec::with_capacity(token_ids.len() + 2);
+        padded.push(0); // pad start
+        padded.extend_from_slice(token_ids);
+        padded.push(0); // pad end
+        let token_len = padded.len();
 
         // For very long sequences, split into chunks to prevent OOM
-        if token_len > MAX_TOKENS_PER_CHUNK {
-            return self.run_inference_chunked(token_ids, voice_idx, speed).await;
+        if token_len > MAX_PHONEME_CHARS {
+            return self.run_inference_chunked(&padded, voice_idx, speed).await;
         }
 
         // Build input tensors
         let tokens_array = Array2::from_shape_vec(
             (1, token_len),
-            token_ids.to_vec(),
+            padded,
         )
         .map_err(|e| Error::InferenceError(format!("Failed to create token tensor: {}", e)))?;
 
@@ -327,21 +336,22 @@ impl KokoroEngine {
     }
 
     /// Run inference on long sequences by splitting into chunks.
+    /// The input is expected to already include pad tokens.
     /// Each chunk runs inference directly (no recursion into run_inference).
     async fn run_inference_chunked(
         &self,
-        token_ids: &[i64],
+        padded_ids: &[i64],
         voice_idx: i64,
         speed: f32,
     ) -> Result<Vec<f32>> {
         let mut all_audio = Vec::new();
-        let chunks = token_ids.chunks(MAX_TOKENS_PER_CHUNK);
+        let chunks = padded_ids.chunks(MAX_PHONEME_CHARS);
 
         for (chunk_idx, chunk) in chunks.enumerate() {
             log::debug!(
                 "[KokoroTTS] Processing chunk {}/{} ({} tokens)",
                 chunk_idx + 1,
-                (token_ids.len() + MAX_TOKENS_PER_CHUNK - 1) / MAX_TOKENS_PER_CHUNK,
+                (padded_ids.len() + MAX_PHONEME_CHARS - 1) / MAX_PHONEME_CHARS,
                 chunk.len()
             );
 
