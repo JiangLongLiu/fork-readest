@@ -49,7 +49,7 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": [],
+    "resources": ["resources/kokoro-tts/*"],
     "windows": {
       "webviewInstallMode": {
         "type": "embedBootstrapper"

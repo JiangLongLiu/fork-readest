@@ -1,0 +1,10 @@
+[default]
+description = "Default permissions for the kokoro-tts plugin"
+permissions = [
+  "allow-init",
+  "allow-start",
+  "allow-stop",
+  "allow-set-rate",
+  "allow-set-voice",
+  "allow-get-voices",
+]

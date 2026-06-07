@@ -1,0 +1,3 @@
+# Large model files that are NOT committed (use download scripts instead)
+*.pth
+*.pt

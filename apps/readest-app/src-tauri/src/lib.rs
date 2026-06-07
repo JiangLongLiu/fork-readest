@@ -295,6 +295,7 @@ pub fn run() {
         .plugin(tauri_plugin_turso::init())
         .plugin(tauri_plugin_native_bridge::init())
         .plugin(tauri_plugin_native_tts::init())
+        .plugin(tauri_plugin_kokoro_tts::init())
         .plugin(tauri_plugin_webview_upgrade::init());
 
     #[cfg(desktop)]

@@ -201,6 +201,7 @@
     "device-info:default",
     "turso:default",
     "native-tts:default",
+    "kokoro-tts:default",
     "native-bridge:default"
   ]
 }
