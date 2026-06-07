@@ -87,7 +87,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          lfs: true
 
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -132,6 +131,10 @@ jobs:
         with:
           workspaces: apps/readest-app/src-tauri
 
+      - name: Download Kokoro TTS model
+        shell: bash
+        run: bash apps/readest-app/scripts/download-kokoro-model.sh
+
       - name: Build Windows NSIS installer
         shell: bash
         env:
@@ -165,7 +168,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          lfs: true
 
       - name: Install system dependencies
         run: |
@@ -224,6 +226,9 @@ jobs:
         with:
           workspaces: apps/readest-app/src-tauri
 
+      - name: Download Kokoro TTS model
+        run: bash apps/readest-app/scripts/download-kokoro-model.sh
+
       - name: Build Linux AppImage + deb
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -259,7 +264,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          lfs: true
 
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -448,6 +452,9 @@ jobs:
           popd
           echo "Android signing configured"
 
+      - name: Download Kokoro TTS model
+        run: bash apps/readest-app/scripts/download-kokoro-model.sh
+
       - name: Build Android APK (aarch64)
         env:
           NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
@@ -515,7 +522,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          lfs: true
 
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -559,6 +565,9 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: apps/readest-app/src-tauri
+
+      - name: Download Kokoro TTS model
+        run: bash apps/readest-app/scripts/download-kokoro-model.sh
 
       - name: Build macOS ARM64 DMG
         env:
