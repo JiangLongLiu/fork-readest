@@ -85,9 +85,12 @@ pub(crate) async fn init<R: Runtime>(
     };
 
     // Allow overriding model path via env var for development.
+    // NOTE: Tauri bundles resources under assets/resources/ on Android,
+    // and resource_dir() returns the parent of resources/ on desktop.
+    // So joining "resources/kokoro-tts" works on all platforms.
     let model_dir = std::env::var("KOKORO_MODEL_DIR")
         .map(std::path::PathBuf::from)
-        .unwrap_or_else(|_| resource_dir.join("kokoro-tts"));
+        .unwrap_or_else(|_| resource_dir.join("resources").join("kokoro-tts"));
 
     let model_path = model_dir.join("kokoro-v0_19.onnx");
     let tokens_path = model_dir.join("tokens.txt");
