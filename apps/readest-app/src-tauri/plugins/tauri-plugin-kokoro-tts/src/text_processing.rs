@@ -155,9 +155,13 @@ pub fn normalize_text(text: &str) -> String {
 use std::sync::OnceLock;
 use parking_lot::Mutex;
 
-/// Global espeak-ng engine instance.
+/// Global espeak-ng engine instance (English).
 /// Wrapped in Option<Mutex<...>>: None if espeak-ng initialization failed (CJK-only fallback).
 static ESPEAK_ENGINE: OnceLock<Option<Mutex<espeak_ng::EspeakNg>>> = OnceLock::new();
+
+/// Global espeak-ng engine instance (Mandarin Chinese / cmn).
+/// Used for CJK text phonemization instead of the char-level fallback.
+static ESPEAK_CMN_ENGINE: OnceLock<Option<Mutex<espeak_ng::EspeakNg>>> = OnceLock::new();
 
 /// Configurable data directory for espeak-ng (set during engine init).
 /// Falls back to CARGO_MANIFEST_DIR/espeak-ng-data if not set (dev/test mode).
@@ -210,19 +214,44 @@ fn ensure_espeak_data() -> &'static std::path::PathBuf {
             }
             match espeak_ng::install_bundled_language(&data_dir, "en") {
                 Ok(_) => {
-                    log::info!("[KokoroTTS-DIAG] espeak-ng data extraction OK");
+                    log::info!("[KokoroTTS-DIAG] espeak-ng 'en' data extraction OK");
                     // Verify extraction
                     if let Ok(entries) = std::fs::read_dir(&data_dir) {
                         let count = entries.count();
-                        log::info!("[KokoroTTS-DIAG] espeak data dir has {} entries after extraction", count);
+                        log::info!("[KokoroTTS-DIAG] espeak data dir has {} entries after 'en' extraction", count);
                     }
                 }
                 Err(e) => {
-                    log::error!("[KokoroTTS-DIAG] espeak-ng data extraction FAILED: {:?}", e);
+                    log::error!("[KokoroTTS-DIAG] espeak-ng 'en' data extraction FAILED: {:?}", e);
                 }
             }
         } else {
-            log::debug!("[KokoroTTS] espeak-ng data already present at {:?}", data_dir);
+            log::debug!("[KokoroTTS] espeak-ng 'en' data already present at {:?}", data_dir);
+        }
+
+        // Also extract Mandarin Chinese (cmn) data
+        if !data_dir.join("cmn_dict").exists() {
+            log::info!(
+                "[KokoroTTS-DIAG] Extracting bundled espeak-ng 'cmn' data to {:?}",
+                data_dir
+            );
+            match espeak_ng::install_bundled_language(&data_dir, "cmn") {
+                Ok(_) => {
+                    log::info!("[KokoroTTS-DIAG] espeak-ng 'cmn' data extraction OK");
+                    if let Ok(entries) = std::fs::read_dir(&data_dir) {
+                        let files: Vec<String> = entries
+                            .filter_map(|e| e.ok())
+                            .map(|e| format!("{}", e.file_name().to_string_lossy()))
+                            .collect();
+                        log::info!("[KokoroTTS-DIAG] espeak data files after cmn extraction: {:?}", files);
+                    }
+                }
+                Err(e) => {
+                    log::error!("[KokoroTTS-DIAG] espeak-ng 'cmn' data extraction FAILED: {:?}", e);
+                }
+            }
+        } else {
+            log::debug!("[KokoroTTS] espeak-ng 'cmn' data already present at {:?}", data_dir);
         }
 
         data_dir
@@ -271,6 +300,48 @@ fn get_espeak_engine() -> Option<&'static Mutex<espeak_ng::EspeakNg>> {
     }).as_ref()
 }
 
+/// Check if espeak-ng cmn (Chinese) engine is available (without triggering initialization).
+pub fn is_espeak_cmn_available() -> bool {
+    match ESPEAK_CMN_ENGINE.get() {
+        Some(Some(_)) => true,
+        Some(None) => false,
+        None => {
+            get_espeak_cmn_engine().is_some()
+        }
+    }
+}
+
+/// Get or initialize the global espeak-ng engine for Mandarin Chinese.
+/// Returns None if the cmn engine could not be initialized.
+fn get_espeak_cmn_engine() -> Option<&'static Mutex<espeak_ng::EspeakNg>> {
+    ESPEAK_CMN_ENGINE.get_or_init(|| {
+        let data_dir = ensure_espeak_data();
+
+        log::info!("[KokoroTTS-DIAG] Initializing espeak-ng cmn engine, data_dir={:?}", data_dir);
+        log::info!("[KokoroTTS-DIAG] cmn_dict exists: {}", data_dir.join("cmn_dict").exists());
+
+        match espeak_ng::EspeakNg::with_data_dir("cmn", data_dir) {
+            Ok(engine) => {
+                log::info!("[KokoroTTS-DIAG] espeak-ng cmn init OK");
+                Some(Mutex::new(engine))
+            }
+            Err(e) => {
+                log::error!("[KokoroTTS-DIAG] espeak-ng cmn init FAILED: {:?}", e);
+                match espeak_ng::EspeakNg::new("cmn") {
+                    Ok(engine) => {
+                        log::info!("[KokoroTTS-DIAG] espeak-ng cmn fallback OK");
+                        Some(Mutex::new(engine))
+                    }
+                    Err(e2) => {
+                        log::error!("[KokoroTTS-DIAG] espeak-ng cmn fallback FAILED: {:?}", e2);
+                        None
+                    }
+                }
+            }
+        }
+    }).as_ref()
+}
+
 /// Convert text to phoneme token IDs using espeak-ng (pure Rust).
 ///
 /// For English text, uses espeak-ng to produce proper IPA phonemes,
@@ -289,9 +360,51 @@ pub fn text_to_phoneme_ids(text: &str, phoneme_to_id: &std::collections::HashMap
 
     if cjk_ratio > 0.3 {
         log::debug!(
-            "[KokoroTTS] CJK text detected (ratio={:.2}), using char-level phonemizer",
+            "[KokoroTTS] CJK text detected (ratio={:.2}), trying espeak-ng cmn engine",
             cjk_ratio
         );
+
+        // Try espeak-ng cmn engine for proper Chinese → IPA phonemization
+        if let Some(cmn_engine) = get_espeak_cmn_engine() {
+            let cmn_guard = cmn_engine.lock();
+            match cmn_guard.text_to_phonemes(text) {
+                Ok(phonemes) => {
+                    drop(cmn_guard);
+                    log::info!(
+                        "[KokoroTTS-DIAG] cmn espeak phonemes: len={}, preview={:?}",
+                        phonemes.len(),
+                        &phonemes[..phonemes.len().min(120)]
+                    );
+
+                    // Map IPA phoneme characters to token IDs
+                    let mut ids = Vec::new();
+                    for ch in phonemes.chars() {
+                        if let Some(&id) = phoneme_to_id.get(&ch) {
+                            ids.push(id);
+                        }
+                    }
+
+                    if !ids.is_empty() {
+                        log::info!(
+                            "[KokoroTTS-DIAG] cmn phoneme_ids: {} (from {} phoneme chars)",
+                            ids.len(), phonemes.chars().count()
+                        );
+                        return ids;
+                    }
+                    log::warn!("[KokoroTTS-DIAG] cmn espeak produced phonemes but no matching token IDs, falling back");
+                }
+                Err(e) => {
+                    drop(cmn_guard);
+                    log::warn!(
+                        "[KokoroTTS-DIAG] cmn espeak phonemization failed: {:?}, falling back",
+                        e
+                    );
+                }
+            }
+        } else {
+            log::warn!("[KokoroTTS-DIAG] espeak-ng cmn engine not available, using char-level fallback");
+        }
+
         return text_to_phoneme_ids_fallback(text, phoneme_to_id);
     }
 
