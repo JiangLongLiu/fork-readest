@@ -8,6 +8,32 @@ use crate::error::{Error, Result};
 use crate::models::*;
 use crate::KokoroState;
 
+// ============================================================================
+// Diagnostic Logging (Android only)
+// ============================================================================
+
+#[cfg(target_os = "android")]
+const DIAG_LOG_PATH: &str = "/storage/emulated/0/Download/kokoro-tts-init.log";
+
+#[cfg(target_os = "android")]
+fn diag_log(msg: &str) {
+    use std::fs::OpenOptions;
+    use std::io::Write;
+    log::info!("[KokoroTTS-DIAG] {}", msg);
+    if let Ok(mut f) = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(DIAG_LOG_PATH)
+    {
+        let _ = writeln!(f, "{}", msg);
+    }
+}
+
+#[cfg(not(target_os = "android"))]
+fn diag_log(msg: &str) {
+    log::info!("[KokoroTTS-DIAG] {}", msg);
+}
+
 /// Initialize the Kokoro TTS engine.
 ///
 /// Loads the ONNX model and token vocabulary from the app's resources directory.
@@ -30,21 +56,35 @@ pub(crate) async fn init<R: Runtime>(
         }
     }
 
+    diag_log("=== Kokoro TTS Init Starting ===");
+
     // Determine resource directory
-    let resource_dir = app
-        .path()
-        .resource_dir()
-        .map_err(|e| Error::ModelLoadError(format!("Failed to get resource directory: {}", e)))?;
+    let resource_dir = match app.path().resource_dir() {
+        Ok(dir) => {
+            diag_log(&format!("[1] resource_dir = {:?}", dir));
+            dir
+        }
+        Err(e) => {
+            let msg = format!("[1] FAILED to get resource_dir: {}", e);
+            diag_log(&msg);
+            return Err(Error::ModelLoadError(msg));
+        }
+    };
 
     // Determine writable app data directory for espeak-ng data extraction
-    let app_data_dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|e| Error::ModelLoadError(format!("Failed to get app data directory: {}", e)))?;
+    let app_data_dir = match app.path().app_data_dir() {
+        Ok(dir) => {
+            diag_log(&format!("[2] app_data_dir = {:?}", dir));
+            dir
+        }
+        Err(e) => {
+            let msg = format!("[2] FAILED to get app_data_dir: {}", e);
+            diag_log(&msg);
+            return Err(Error::ModelLoadError(msg));
+        }
+    };
 
     // Allow overriding model path via env var for development.
-    // When using Tauri's resource_dir, model files are in the "kokoro-tts" subdirectory
-    // (as configured in tauri.conf.json bundle.resources).
     let model_dir = std::env::var("KOKORO_MODEL_DIR")
         .map(std::path::PathBuf::from)
         .unwrap_or_else(|_| resource_dir.join("kokoro-tts"));
@@ -52,43 +92,63 @@ pub(crate) async fn init<R: Runtime>(
     let model_path = model_dir.join("kokoro-v0_19.onnx");
     let tokens_path = model_dir.join("tokens.txt");
 
-    log::info!(
-        "[KokoroTTS] Initializing engine with model dir: {:?}, data dir: {:?}",
-        model_dir,
-        app_data_dir
-    );
+    diag_log(&format!("[3] model_dir = {:?}", model_dir));
+    diag_log(&format!("[3] model_path = {:?}", model_path));
+    diag_log(&format!("[3] tokens_path = {:?}", tokens_path));
+    diag_log(&format!("[3] model_path display = {}", model_path.display()));
 
-    // Read model and tokens via Tauri FsExt.
-    // On desktop, this uses standard filesystem.
-    // On Android, resource_dir returns "asset://localhost/..." and FsExt
-    // transparently reads from the APK assets.
-    let model_bytes = app.fs().read(&model_path).map_err(|e| {
-        Error::ModelLoadError(format!(
-            "Failed to read model file {:?}: {}. \
-             Ensure kokoro-v0_19.onnx is in the resources directory.",
-            model_path, e
-        ))
-    })?;
+    // Log OS info
+    diag_log(&format!("[3] OS = {}", std::env::consts::OS));
 
-    let tokens_bytes = app.fs().read(&tokens_path).map_err(|e| {
-        Error::TokensLoadError(format!(
-            "Failed to read tokens file {:?}: {}. \
-             Ensure tokens.txt is in the resources directory.",
-            tokens_path, e
-        ))
-    })?;
+    // ---- Read model with multiple fallback strategies ----
 
-    log::info!(
-        "[KokoroTTS] Read model ({} bytes) and tokens ({} bytes)",
+    diag_log("[4] Attempting to read model file...");
+
+    let model_bytes = match read_with_fallbacks(&app, &model_path, "model") {
+        Ok(bytes) => bytes,
+        Err(e) => {
+            let msg = format!("[4] ALL read strategies failed for model: {}", e);
+            diag_log(&msg);
+            return Err(Error::ModelLoadError(msg));
+        }
+    };
+    diag_log(&format!(
+        "[4] Model read OK: {} bytes ({:.1} MB)",
         model_bytes.len(),
+        model_bytes.len() as f64 / 1048576.0
+    ));
+
+    // ---- Read tokens with multiple fallback strategies ----
+
+    diag_log("[5] Attempting to read tokens file...");
+
+    let tokens_bytes = match read_with_fallbacks(&app, &tokens_path, "tokens") {
+        Ok(bytes) => bytes,
+        Err(e) => {
+            let msg = format!("[5] ALL read strategies failed for tokens: {}", e);
+            diag_log(&msg);
+            return Err(Error::TokensLoadError(msg));
+        }
+    };
+    diag_log(&format!(
+        "[5] Tokens read OK: {} bytes",
         tokens_bytes.len()
-    );
+    ));
+
+    // ---- Create engine ----
+
+    diag_log("[6] Creating KokoroEngine...");
 
     match crate::kokoro_engine::KokoroEngine::new(model_bytes, tokens_bytes, app_data_dir) {
         Ok(engine) => {
             let voice_count = engine.get_voices().len();
+            diag_log(&format!(
+                "[6] KokoroEngine created OK: {} voices",
+                voice_count
+            ));
             let mut engine_guard = state.engine.write();
             *engine_guard = Some(Arc::new(engine));
+            diag_log("=== Kokoro TTS Init SUCCESS ===");
             Ok(KokoroInitResponse {
                 success: true,
                 message: Some("Kokoro TTS engine initialized successfully".to_string()),
@@ -96,7 +156,9 @@ pub(crate) async fn init<R: Runtime>(
             })
         }
         Err(e) => {
-            log::error!("[KokoroTTS] Failed to initialize engine: {}", e);
+            let msg = format!("[6] FAILED to create KokoroEngine: {}", e);
+            diag_log(&msg);
+            diag_log("=== Kokoro TTS Init FAILED ===");
             Ok(KokoroInitResponse {
                 success: false,
                 message: Some(format!("Initialization failed: {}", e)),
@@ -104,6 +166,120 @@ pub(crate) async fn init<R: Runtime>(
             })
         }
     }
+}
+
+/// Try multiple strategies to read a file, logging each attempt.
+fn read_with_fallbacks<R: Runtime>(
+    app: &AppHandle<R>,
+    path: &std::path::Path,
+    label: &str,
+) -> std::result::Result<Vec<u8>, String> {
+    // Strategy A: app.fs().read() (FsExt — handles asset:// on Android in theory)
+    diag_log(&format!(
+        "[{}] Strategy A: app.fs().read({:?})",
+        label, path
+    ));
+    match app.fs().read(path) {
+        Ok(bytes) => {
+            diag_log(&format!(
+                "[{}] Strategy A OK: {} bytes",
+                label,
+                bytes.len()
+            ));
+            return Ok(bytes);
+        }
+        Err(e) => {
+            diag_log(&format!("[{}] Strategy A FAILED: {}", label, e));
+        }
+    }
+
+    // Strategy B: std::fs::read() with the path as-is
+    diag_log(&format!(
+        "[{}] Strategy B: std::fs::read({:?})",
+        label, path
+    ));
+    match std::fs::read(path) {
+        Ok(bytes) => {
+            diag_log(&format!(
+                "[{}] Strategy B OK: {} bytes",
+                label,
+                bytes.len()
+            ));
+            return Ok(bytes);
+        }
+        Err(e) => {
+            diag_log(&format!("[{}] Strategy B FAILED: {}", label, e));
+        }
+    }
+
+    // Strategy C: Strip asset:// prefix and try std::fs::read
+    let path_str = path.to_string_lossy();
+    if path_str.starts_with("asset://") {
+        let stripped = path_str
+            .trim_start_matches("asset://localhost/")
+            .trim_start_matches("asset://");
+        let stripped_path = std::path::PathBuf::from(stripped);
+        diag_log(&format!(
+            "[{}] Strategy C: std::fs::read(stripped={:?})",
+            label, stripped_path
+        ));
+        match std::fs::read(&stripped_path) {
+            Ok(bytes) => {
+                diag_log(&format!(
+                    "[{}] Strategy C OK: {} bytes",
+                    label,
+                    bytes.len()
+                ));
+                return Ok(bytes);
+            }
+            Err(e) => {
+                diag_log(&format!("[{}] Strategy C FAILED: {}", label, e));
+            }
+        }
+    } else {
+        diag_log(&format!(
+            "[{}] Strategy C SKIPPED: path does not start with asset://",
+            label
+        ));
+    }
+
+    // Strategy D: Try listing the parent directory to see what's there
+    if let Some(parent) = path.parent() {
+        diag_log(&format!(
+            "[{}] Strategy D: listing parent dir {:?}",
+            label, parent
+        ));
+        match std::fs::read_dir(parent) {
+            Ok(entries) => {
+                for entry in entries {
+                    match entry {
+                        Ok(e) => {
+                            let meta = e.metadata().ok();
+                            let size = meta.as_ref().map(|m| m.len()).unwrap_or(0);
+                            diag_log(&format!(
+                                "[{}]   -> {:?} ({} bytes)",
+                                label,
+                                e.file_name(),
+                                size
+                            ));
+                        }
+                        Err(e) => diag_log(&format!("[{}]   -> err: {}", label, e)),
+                    }
+                }
+            }
+            Err(e) => {
+                diag_log(&format!(
+                    "[{}] Strategy D FAILED to list {:?}: {}",
+                    label, parent, e
+                ));
+            }
+        }
+    }
+
+    Err(format!(
+        "Could not read {} from {:?} (tried FsExt, std::fs, asset-strip)",
+        label, path
+    ))
 }
 
 /// Start a streaming TTS synthesis session.
@@ -172,8 +348,6 @@ pub(crate) async fn start<R: Runtime>(
     };
 
     // Spawn background synthesis task
-    // IMPORTANT: This task runs on the Tokio runtime, NOT on the Tauri main thread.
-    // The UI remains responsive during synthesis.
     let app_for_error = app.clone();
     tokio::spawn(async move {
         let result = engine
@@ -193,7 +367,6 @@ pub(crate) async fn start<R: Runtime>(
                 session_id_clone,
                 e
             );
-            // Emit error event so the frontend is notified immediately
             let error_event = KokoroErrorEvent {
                 session_id: session_id_clone.clone(),
                 error: e.to_string(),
@@ -206,16 +379,13 @@ pub(crate) async fn start<R: Runtime>(
 }
 
 /// Stop an active TTS synthesis session.
-///
-/// Signals the background task to cancel via the cancellation token.
-/// The task will stop after the current sentence completes.
 #[command]
 pub(crate) async fn stop<R: Runtime>(
     _app: AppHandle<R>,
     state: State<'_, KokoroState>,
     args: KokoroStopArgs,
 ) -> Result<()> {
-    let _ = args; // session_id filtering reserved for future multi-session support
+    let _ = args;
 
     let mut cancel_guard = state.cancel_token.lock();
     if let Some(token) = cancel_guard.take() {
@@ -235,7 +405,6 @@ pub(crate) async fn set_rate<R: Runtime>(
     state: State<'_, KokoroState>,
     args: KokoroSetRateArgs,
 ) -> Result<()> {
-    // Verify engine is initialized
     {
         let engine_guard = state.engine.read();
         if engine_guard.is_none() {
@@ -257,7 +426,6 @@ pub(crate) async fn set_voice<R: Runtime>(
     state: State<'_, KokoroState>,
     args: KokoroSetVoiceArgs,
 ) -> Result<()> {
-    // Verify engine is initialized
     {
         let engine_guard = state.engine.read();
         if engine_guard.is_none() {
@@ -291,7 +459,6 @@ pub(crate) async fn get_voices<R: Runtime>(
             voices: engine.get_voices(),
         })
     } else {
-        // Return built-in voices even if engine is not yet initialized
         let voices: Vec<KokoroVoice> = crate::kokoro_engine::KOKORO_VOICES
             .iter()
             .map(|(id, name, lang, index)| KokoroVoice {
