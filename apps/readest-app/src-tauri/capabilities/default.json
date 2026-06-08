@@ -2,7 +2,11 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "enables the default permissions",
-  "windows": ["main", "updater", "reader-*"],
+  "windows": [
+    "main",
+    "updater",
+    "reader-*"
+  ],
   "permissions": [
     "core:default",
     "fs:default",
@@ -88,6 +92,9 @@
         },
         {
           "path": "$TEMP/**/*"
+        },
+        {
+          "path": "$RESOURCE/**/*"
         }
       ]
     },
@@ -176,17 +183,33 @@
         {
           "name": "start-readest",
           "cmd": "cmd",
-          "args": ["/C", "start", "", { "validator": "^.*Readest(.*)\\.exe$" }]
+          "args": [
+            "/C",
+            "start",
+            "",
+            {
+              "validator": "^.*Readest(.*)\\.exe$"
+            }
+          ]
         },
         {
           "name": "chmod-appimage",
           "cmd": "chmod",
-          "args": ["+x", { "validator": "^.*Readest(.*)\\.AppImage$" }]
+          "args": [
+            "+x",
+            {
+              "validator": "^.*Readest(.*)\\.AppImage$"
+            }
+          ]
         },
         {
           "name": "launch-appimage",
           "cmd": "setsid",
-          "args": [{ "validator": "^.*Readest(.*)\\.AppImage$" }]
+          "args": [
+            {
+              "validator": "^.*Readest(.*)\\.AppImage$"
+            }
+          ]
         }
       ]
     },
