@@ -155,13 +155,208 @@ pub fn normalize_text(text: &str) -> String {
 use std::sync::OnceLock;
 use parking_lot::Mutex;
 
-/// Global espeak-ng engine instance (English).
-/// Wrapped in Option<Mutex<...>>: None if espeak-ng initialization failed (CJK-only fallback).
-static ESPEAK_ENGINE: OnceLock<Option<Mutex<espeak_ng::EspeakNg>>> = OnceLock::new();
+// ============================================================================
+// Chinese Phonemizer — Pinyin → IPA (based on misaki/zh.py ZHG2P)
+// ============================================================================
 
-/// Global espeak-ng engine instance (Mandarin Chinese / cmn).
-/// Used for CJK text phonemization instead of the char-level fallback.
-static ESPEAK_CMN_ENGINE: OnceLock<Option<Mutex<espeak_ng::EspeakNg>>> = OnceLock::new();
+/// Pinyin initial (声母) to IPA mapping.
+/// Based on misaki INITIAL_MAPPING for Kokoro v0.19.
+const PINYIN_INITIALS: &[(&str, &str)] = &[
+    ("zh", "\u{AB67}"),  // ʈʂ (retroflex)
+    ("ch", "\u{AB67}h"), // ʈh (aspirated retroflex)
+    ("sh", "\u{0282}"),  // ʂ (retroflex fricative)
+    ("b", "p"),
+    ("c", "\u{02A6}h"),  // ʦh
+    ("d", "t"),
+    ("f", "f"),
+    ("g", "k"),
+    ("h", "x"),
+    ("j", "\u{02A8}"),   // ʨ
+    ("k", "kh"),
+    ("l", "l"),
+    ("m", "m"),
+    ("n", "n"),
+    ("p", "ph"),
+    ("q", "\u{02A8}h"),  // ʨh
+    ("r", "\u{027B}"),   // ɻ
+    ("s", "s"),
+    ("t", "th"),
+    ("x", "\u{0255}"),   // ɕ
+    ("z", "\u{02A6}"),   // ʦ
+];
+
+/// Pinyin final (韵母) to IPA mapping.
+/// Based on misaki FINAL_MAPPING for Kokoro v0.19.
+const PINYIN_FINALS: &[(&str, &[&str])] = &[
+    ("iang", &["j", "a", "\u{014B}"]),
+    ("iong", &["j", "\u{028A}", "\u{014B}"]),
+    ("uang", &["w", "a", "\u{014B}"]),
+    ("ing", &["i", "\u{014B}"]),
+    ("uai", &["w", "a", "i\u{032F}"]),
+    ("uan", &["w", "a", "n"]),
+    ("uei", &["w", "e", "i\u{032F}"]),
+    ("uen", &["w", "\u{0259}", "n"]),
+    ("ang", &["a", "\u{014B}"]),
+    ("eng", &["\u{0259}", "\u{014B}"]),
+    ("ian", &["j", "\u{025B}", "n"]),
+    ("iao", &["j", "a", "u\u{032F}"]),
+    ("iou", &["j", "o", "u\u{032F}"]),
+    ("ong", &["\u{028A}", "\u{014B}"]),
+    ("uo", &["w", "o"]),
+    ("ua", &["w", "a"]),
+    ("ai", &["a", "i\u{032F}"]),
+    ("an", &["a", "n"]),
+    ("ao", &["a", "u\u{032F}"]),
+    ("ei", &["e", "i\u{032F}"]),
+    ("en", &["\u{0259}", "n"]),
+    ("ia", &["j", "a"]),
+    ("ie", &["j", "e"]),
+    ("in", &["i", "n"]),
+    ("ou", &["o", "u\u{032F}"]),
+    ("er", &["\u{0259}"]),
+    ("a", &["a"]),
+    ("e", &["\u{0264}"]),
+    ("i", &["i"]),
+    ("o", &["o"]),
+    ("u", &["u"]),
+    ("\u{00FC}", &["y"]),
+    ("\u{00FC}e", &["\u{0265}", "e"]),
+    ("\u{00FC}an", &["\u{0265}", "\u{025B}", "n"]),
+    ("\u{00FC}n", &["y", "n"]),
+];
+
+/// Convert a single pinyin syllable (e.g. "zhong1") to IPA phoneme chars.
+fn pinyin_syllable_to_ipa(syllable: &str) -> Vec<char> {
+    let s = syllable.trim();
+    if s.is_empty() {
+        return Vec::new();
+    }
+
+    // Extract trailing tone number (1-5)
+    let (base, _tone) = if let Some(last) = s.chars().last() {
+        if last.is_ascii_digit() {
+            let idx = s.len() - last.len_utf8();
+            (&s[..idx], Some(last))
+        } else {
+            (s, None)
+        }
+    } else {
+        (s, None)
+    };
+
+    let base_lower = base.to_lowercase();
+
+    // Handle zero-initial standalone syllables
+    match base_lower.as_str() {
+        "a" => return vec!['a'],
+        "o" => return vec!['o'],
+        "e" => return vec!['\u{0264}'],
+        "ai" => return vec!['a', 'i'],
+        "ei" => return vec!['e', 'i'],
+        "ao" => return vec!['a', 'u'],
+        "ou" => return vec!['o', 'u'],
+        "an" => return vec!['a', 'n'],
+        "en" => return vec!['\u{0259}', 'n'],
+        "ang" => return vec!['a', '\u{014B}'],
+        "eng" => return vec!['\u{0259}', '\u{014B}'],
+        "er" => return vec!['\u{0259}'],
+        "yi" => return vec!['i'],
+        "wu" => return vec!['u'],
+        "yu" => return vec!['y'],
+        _ => {}
+    }
+
+    let mut phonemes = Vec::new();
+
+    // Greedy match initial (longest first: 2-char before 1-char)
+    let mut remaining = base_lower.as_str();
+    for &(init, ipa_init) in PINYIN_INITIALS {
+        if remaining.starts_with(init) {
+            phonemes.extend(ipa_init.chars());
+            remaining = &remaining[init.len()..];
+            break;
+        }
+    }
+
+    // Match final (longest first)
+    if !remaining.is_empty() {
+        let mut found = false;
+        for &(fin, ipa_fin) in PINYIN_FINALS {
+            if remaining == fin {
+                for &ipa_ch in ipa_fin {
+                    phonemes.extend(ipa_ch.chars());
+                }
+                found = true;
+                break;
+            }
+        }
+        if !found {
+            for ch in remaining.chars() {
+                if ch.is_ascii_alphabetic() {
+                    phonemes.push(ch);
+                }
+            }
+        }
+    }
+
+    phonemes
+}
+
+/// Phonemize Chinese text via pinyin → IPA conversion.
+///
+/// Mimics the misaki ZHG2P.legacy_call() pipeline:
+/// 1. Split text into CJK and non-CJK segments
+/// 2. Convert CJK characters to pinyin
+/// 3. Map pinyin to IPA phonemes
+/// 4. Preserve non-CJK characters (spaces, punctuation, ASCII)
+pub fn chinese_text_to_phonemes(text: &str) -> String {
+    use pinyin::ToPinyin;
+
+    let mut result = String::new();
+    let mut chinese_buf = String::new();
+
+    let flush_chinese = |buf: &str, result: &mut String| {
+        if buf.is_empty() {
+            return;
+        }
+        let pinyins: Vec<String> = buf
+            .to_pinyin()
+            .filter_map(|p| p.map(|p| p.with_tone_num_end().to_string()))
+            .collect();
+
+        for (i, py) in pinyins.iter().enumerate() {
+            if i > 0 {
+                result.push(' ');
+            }
+            let ipa_chars = pinyin_syllable_to_ipa(py);
+            for ipa_ch in &ipa_chars {
+                result.push(*ipa_ch);
+            }
+        }
+    };
+
+    for ch in text.chars() {
+        if is_cjk(ch) {
+            chinese_buf.push(ch);
+        } else {
+            if !chinese_buf.is_empty() {
+                flush_chinese(&chinese_buf, &mut result);
+                chinese_buf.clear();
+            }
+            if ch == ' ' || ch.is_ascii() {
+                result.push(ch);
+            }
+        }
+    }
+
+    flush_chinese(&chinese_buf, &mut result);
+
+    result
+}
+
+/// Global espeak-ng engine instance (English).
+/// Wrapped in Option<Mutex<...>>: None if espeak-ng initialization failed.
+static ESPEAK_ENGINE: OnceLock<Option<Mutex<espeak_ng::EspeakNg>>> = OnceLock::new();
 
 /// Configurable data directory for espeak-ng (set during engine init).
 /// Falls back to CARGO_MANIFEST_DIR/espeak-ng-data if not set (dev/test mode).
@@ -229,31 +424,6 @@ fn ensure_espeak_data() -> &'static std::path::PathBuf {
             log::debug!("[KokoroTTS] espeak-ng 'en' data already present at {:?}", data_dir);
         }
 
-        // Also extract Mandarin Chinese (cmn) data
-        if !data_dir.join("cmn_dict").exists() {
-            log::info!(
-                "[KokoroTTS-DIAG] Extracting bundled espeak-ng 'cmn' data to {:?}",
-                data_dir
-            );
-            match espeak_ng::install_bundled_language(&data_dir, "cmn") {
-                Ok(_) => {
-                    log::info!("[KokoroTTS-DIAG] espeak-ng 'cmn' data extraction OK");
-                    if let Ok(entries) = std::fs::read_dir(&data_dir) {
-                        let files: Vec<String> = entries
-                            .filter_map(|e| e.ok())
-                            .map(|e| format!("{}", e.file_name().to_string_lossy()))
-                            .collect();
-                        log::info!("[KokoroTTS-DIAG] espeak data files after cmn extraction: {:?}", files);
-                    }
-                }
-                Err(e) => {
-                    log::error!("[KokoroTTS-DIAG] espeak-ng 'cmn' data extraction FAILED: {:?}", e);
-                }
-            }
-        } else {
-            log::debug!("[KokoroTTS] espeak-ng 'cmn' data already present at {:?}", data_dir);
-        }
-
         data_dir
     })
 }
@@ -300,48 +470,6 @@ fn get_espeak_engine() -> Option<&'static Mutex<espeak_ng::EspeakNg>> {
     }).as_ref()
 }
 
-/// Check if espeak-ng cmn (Chinese) engine is available (without triggering initialization).
-pub fn is_espeak_cmn_available() -> bool {
-    match ESPEAK_CMN_ENGINE.get() {
-        Some(Some(_)) => true,
-        Some(None) => false,
-        None => {
-            get_espeak_cmn_engine().is_some()
-        }
-    }
-}
-
-/// Get or initialize the global espeak-ng engine for Mandarin Chinese.
-/// Returns None if the cmn engine could not be initialized.
-fn get_espeak_cmn_engine() -> Option<&'static Mutex<espeak_ng::EspeakNg>> {
-    ESPEAK_CMN_ENGINE.get_or_init(|| {
-        let data_dir = ensure_espeak_data();
-
-        log::info!("[KokoroTTS-DIAG] Initializing espeak-ng cmn engine, data_dir={:?}", data_dir);
-        log::info!("[KokoroTTS-DIAG] cmn_dict exists: {}", data_dir.join("cmn_dict").exists());
-
-        match espeak_ng::EspeakNg::with_data_dir("cmn", data_dir) {
-            Ok(engine) => {
-                log::info!("[KokoroTTS-DIAG] espeak-ng cmn init OK");
-                Some(Mutex::new(engine))
-            }
-            Err(e) => {
-                log::error!("[KokoroTTS-DIAG] espeak-ng cmn init FAILED: {:?}", e);
-                match espeak_ng::EspeakNg::new("cmn") {
-                    Ok(engine) => {
-                        log::info!("[KokoroTTS-DIAG] espeak-ng cmn fallback OK");
-                        Some(Mutex::new(engine))
-                    }
-                    Err(e2) => {
-                        log::error!("[KokoroTTS-DIAG] espeak-ng cmn fallback FAILED: {:?}", e2);
-                        None
-                    }
-                }
-            }
-        }
-    }).as_ref()
-}
-
 /// Convert text to phoneme token IDs using espeak-ng (pure Rust).
 ///
 /// For English text, uses espeak-ng to produce proper IPA phonemes,
@@ -360,51 +488,34 @@ pub fn text_to_phoneme_ids(text: &str, phoneme_to_id: &std::collections::HashMap
 
     if cjk_ratio > 0.3 {
         log::debug!(
-            "[KokoroTTS] CJK text detected (ratio={:.2}), trying espeak-ng cmn engine",
+            "[KokoroTTS] CJK text detected (ratio={:.2}), using pinyin→IPA phonemizer",
             cjk_ratio
         );
 
-        // Try espeak-ng cmn engine for proper Chinese → IPA phonemization
-        if let Some(cmn_engine) = get_espeak_cmn_engine() {
-            let cmn_guard = cmn_engine.lock();
-            match cmn_guard.text_to_phonemes(text) {
-                Ok(phonemes) => {
-                    drop(cmn_guard);
-                    log::info!(
-                        "[KokoroTTS-DIAG] cmn espeak phonemes: len={}, preview={:?}",
-                        phonemes.len(),
-                        &phonemes[..phonemes.len().min(120)]
-                    );
+        // Use pinyin → IPA conversion (mimics misaki ZHG2P pipeline)
+        let phonemes = chinese_text_to_phonemes(text);
+        log::info!(
+            "[KokoroTTS-DIAG] chinese G2P phonemes: len={}, preview={:?}",
+            phonemes.len(),
+            &phonemes[..phonemes.len().min(120)]
+        );
 
-                    // Map IPA phoneme characters to token IDs
-                    let mut ids = Vec::new();
-                    for ch in phonemes.chars() {
-                        if let Some(&id) = phoneme_to_id.get(&ch) {
-                            ids.push(id);
-                        }
-                    }
-
-                    if !ids.is_empty() {
-                        log::info!(
-                            "[KokoroTTS-DIAG] cmn phoneme_ids: {} (from {} phoneme chars)",
-                            ids.len(), phonemes.chars().count()
-                        );
-                        return ids;
-                    }
-                    log::warn!("[KokoroTTS-DIAG] cmn espeak produced phonemes but no matching token IDs, falling back");
-                }
-                Err(e) => {
-                    drop(cmn_guard);
-                    log::warn!(
-                        "[KokoroTTS-DIAG] cmn espeak phonemization failed: {:?}, falling back",
-                        e
-                    );
-                }
+        // Map phoneme characters to token IDs
+        let mut ids = Vec::new();
+        for ch in phonemes.chars() {
+            if let Some(&id) = phoneme_to_id.get(&ch) {
+                ids.push(id);
             }
-        } else {
-            log::warn!("[KokoroTTS-DIAG] espeak-ng cmn engine not available, using char-level fallback");
         }
 
+        if !ids.is_empty() {
+            log::info!(
+                "[KokoroTTS-DIAG] chinese phoneme_ids: {} (from {} phoneme chars)",
+                ids.len(), phonemes.chars().count()
+            );
+            return ids;
+        }
+        log::warn!("[KokoroTTS-DIAG] chinese G2P produced no matching token IDs, using char-level fallback");
         return text_to_phoneme_ids_fallback(text, phoneme_to_id);
     }
 
@@ -595,16 +706,15 @@ mod tests {
     }
 
     #[test]
-    fn test_phonemizer_cjk_fallback() {
+    fn test_phonemizer_cjk_pinyin() {
         let mut vocab = std::collections::HashMap::new();
-        vocab.insert('你', 100);
-        vocab.insert('好', 101);
-        vocab.insert('世', 102);
-        vocab.insert('界', 103);
+        // Add common IPA characters that the Chinese G2P would produce
+        for ch in "ptkxsmnlaioejywh\u{0282}\u{0255}\u{02A8}\u{02A6}\u{027B}\u{0264}\u{0259}\u{014B}\u{025B}\u{028A}\u{032F}".chars() {
+            vocab.insert(ch, (ch as u32) as i64);
+        }
 
         let text = "你好世界";
         let ids = text_to_phoneme_ids(text, &vocab);
-        assert_eq!(ids.len(), 4);
-        assert_eq!(ids[0], 100);
+        assert!(!ids.is_empty(), "pinyin G2P should produce phoneme IDs for Chinese text");
     }
 }
