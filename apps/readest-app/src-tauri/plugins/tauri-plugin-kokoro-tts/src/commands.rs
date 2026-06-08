@@ -42,8 +42,6 @@ pub(crate) async fn init<R: Runtime>(
         .map_err(|e| Error::ModelLoadError(format!("Failed to get app data directory: {}", e)))?;
 
     // Allow overriding model path via env var for development.
-    // When using Tauri's resource_dir, model files are in the "kokoro-tts" subdirectory
-    // (as configured in tauri.conf.json bundle.resources).
     let model_dir = std::env::var("KOKORO_MODEL_DIR")
         .map(std::path::PathBuf::from)
         .unwrap_or_else(|_| resource_dir.join("kokoro-tts"));
@@ -54,14 +52,32 @@ pub(crate) async fn init<R: Runtime>(
         app_data_dir
     );
 
-    // Read model and tokens files from disk
-    let model_path = model_dir.join("kokoro-v0_19.onnx");
-    let tokens_path = model_dir.join("tokens.txt");
+    // Load model and tokens bytes.
+    // Strategy: try Tauri asset_resolver first (works on Android where resources are in APK),
+    // then fall back to std::fs::read (works on desktop with filesystem access).
+    let model_bytes = {
+        if let Some(asset) = app.asset_resolver().get("kokoro-tts/kokoro-v0_19.onnx".to_string()) {
+            log::info!("[KokoroTTS] Model loaded via asset_resolver ({} bytes)", asset.bytes.len());
+            asset.bytes
+        } else {
+            let model_path = model_dir.join("kokoro-v0_19.onnx");
+            log::info!("[KokoroTTS] asset_resolver failed, trying filesystem: {:?}", model_path);
+            std::fs::read(&model_path)
+                .map_err(|e| Error::ModelLoadError(format!("Failed to read model {:?}: {}", model_path, e)))?
+        }
+    };
 
-    let model_bytes = std::fs::read(&model_path)
-        .map_err(|e| Error::ModelLoadError(format!("Failed to read model {:?}: {}", model_path, e)))?;
-    let tokens_bytes = std::fs::read(&tokens_path)
-        .map_err(|e| Error::TokensLoadError(format!("Failed to read tokens {:?}: {}", tokens_path, e)))?;
+    let tokens_bytes = {
+        if let Some(asset) = app.asset_resolver().get("kokoro-tts/tokens.txt".to_string()) {
+            log::info!("[KokoroTTS] Tokens loaded via asset_resolver ({} bytes)", asset.bytes.len());
+            asset.bytes
+        } else {
+            let tokens_path = model_dir.join("tokens.txt");
+            log::info!("[KokoroTTS] asset_resolver failed, trying filesystem: {:?}", tokens_path);
+            std::fs::read(&tokens_path)
+                .map_err(|e| Error::TokensLoadError(format!("Failed to read tokens {:?}: {}", tokens_path, e)))?
+        }
+    };
 
     log::info!(
         "[KokoroTTS] Loaded model ({} bytes) and tokens ({} bytes)",
