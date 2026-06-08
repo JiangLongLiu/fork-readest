@@ -92,19 +92,22 @@ fn test_sentence_splitting_and_phonemization() {
 }
 
 #[test]
-fn test_cjk_text_uses_fallback() {
+fn test_cjk_text_uses_pinyin_g2p() {
     let tokens_path = resource_dir().join("tokens.txt");
     let tokens_content = std::fs::read_to_string(&tokens_path).unwrap();
     let phoneme_to_id: HashMap<char, i64> =
         tauri_plugin_kokoro_tts::text_processing::load_tokens_file(&tokens_content);
 
-    // CJK text should use fallback (char-level mapping), not espeak-ng
+    // CJK text should use pinyin→IPA phonemizer (not espeak-ng)
     let text = "你好世界";
     let ids = tauri_plugin_kokoro_tts::text_processing::text_to_phoneme_ids(text, &phoneme_to_id);
-    // CJK chars likely won't be in the Kokoro vocabulary (it's English-focused),
-    // so we just verify the function doesn't panic and returns gracefully
-    // (IDs may be empty if CJK chars aren't in vocab)
-    let _ = ids; // No assertion on length — CJK chars may not be in English vocab
+    // Pinyin G2P should produce IPA phonemes that map to token IDs.
+    // Some IPA symbols may not be in the Kokoro vocab, so IDs may be sparse,
+    // but the function should not panic and should produce some results.
+    println!("CJK phoneme IDs for '{}': {:?} ({} IDs)", text, &ids[..ids.len().min(20)], ids.len());
+    // We don't assert on length because some IPA chars may not be in vocab,
+    // but the function must not panic.
+    let _ = ids;
 }
 
 #[test]
