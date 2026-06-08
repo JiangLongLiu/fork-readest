@@ -242,8 +242,7 @@ impl KokoroEngine {
         // Check espeak-ng status
         let espeak_ok = text_processing::is_espeak_available();
         synth_log(&format!("[S1] espeak-ng (en) available: {}", espeak_ok));
-        let espeak_cmn_ok = text_processing::is_espeak_cmn_available();
-        synth_log(&format!("[S1] espeak-ng (cmn) available: {}", espeak_cmn_ok));
+        synth_log(&format!("[S1] chinese G2P: pinyin→IPA (built-in)"));
 
         // Normalize and split text into sentences
         let normalized = text_processing::normalize_text(&text);
@@ -334,6 +333,22 @@ impl KokoroEngine {
                 "[S4] sentence[{}]: {} samples ({:.0}ms), min={:.4}, max={:.4}, mean={:.6}, NaN={}, Inf={}",
                 idx, audio_data.len(), audio_duration_ms, audio_min, audio_max, audio_mean, nan_count, inf_count
             ));
+
+            // Audio safety: remove NaN/Inf, then normalize if values exceed [-1, 1]
+            let mut audio_data = audio_data;
+            for sample in audio_data.iter_mut() {
+                if sample.is_nan() || sample.is_infinite() {
+                    *sample = 0.0;
+                }
+            }
+            let abs_max = audio_data.iter().cloned().fold(0.0f32, |a, b| a.max(b.abs()));
+            if abs_max > 1.0 {
+                synth_log(&format!("[S4-NORM] normalizing audio: abs_max={:.4} → scaling to [-1,1]", abs_max));
+                let scale = 0.95 / abs_max;
+                for sample in audio_data.iter_mut() {
+                    *sample *= scale;
+                }
+            }
 
             // Encode audio as base64 for IPC transport
             let audio_bytes: &[u8] = bytemuck_cast_f32_slice(&audio_data);
