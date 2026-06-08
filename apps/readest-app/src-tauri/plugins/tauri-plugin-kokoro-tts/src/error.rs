@@ -22,6 +22,9 @@ pub enum Error {
     #[error("Session already running, stop it first")]
     SessionAlreadyRunning,
 
+    #[error("Invalid voice: {0}")]
+    InvalidVoice(String),
+
     #[error("Plugin error: {0}")]
     PluginError(String),
 

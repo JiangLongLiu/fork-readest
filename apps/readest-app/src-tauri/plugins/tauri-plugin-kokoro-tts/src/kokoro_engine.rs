@@ -22,19 +22,75 @@ const STYLE_VECTOR_DIM: usize = 256;
 /// Kokoro model limit is 510; we leave room for the pad tokens at start/end.
 const MAX_PHONEME_CHARS: usize = 510;
 
-/// Built-in Kokoro English voices (v0.19).
+/// Built-in Kokoro voices (v0.19) — 54 voices across 9 languages.
 /// Each voice corresponds to a row index in the style embedding matrix.
-const KOKORO_EN_VOICES: &[(&str, &str, i64)] = &[
-    ("af_bella", "Bella (Female, American)", 0),
-    ("af_nicole", "Nicole (Female, American)", 1),
-    ("af_sarah", "Sarah (Female, American)", 2),
-    ("af_sky", "Sky (Female, American)", 3),
-    ("am_adam", "Adam (Male, American)", 4),
-    ("am_michael", "Michael (Male, American)", 5),
-    ("bf_emma", "Emma (Female, British)", 6),
-    ("bf_isabella", "Isabella (Female, British)", 7),
-    ("bm_george", "George (Male, British)", 8),
-    ("bm_lewis", "Lewis (Male, British)", 9),
+/// Tuple format: (id, display_name, language_code, style_index)
+pub(crate) const KOKORO_VOICES: &[(&str, &str, &str, i64)] = &[
+    // ── American English Female (11) ──
+    ("af_alloy",    "Alloy",    "en-us", 0),
+    ("af_aoede",    "Aoede",    "en-us", 1),
+    ("af_bella",    "Bella",    "en-us", 2),
+    ("af_heart",    "Heart",    "en-us", 3),
+    ("af_jessica",  "Jessica",  "en-us", 4),
+    ("af_kore",     "Kore",     "en-us", 5),
+    ("af_nicole",   "Nicole",   "en-us", 6),
+    ("af_nova",     "Nova",     "en-us", 7),
+    ("af_river",    "River",    "en-us", 8),
+    ("af_sarah",    "Sarah",    "en-us", 9),
+    ("af_sky",      "Sky",      "en-us", 10),
+    // ── American English Male (9) ──
+    ("am_adam",     "Adam",     "en-us", 11),
+    ("am_echo",     "Echo",     "en-us", 12),
+    ("am_eric",     "Eric",     "en-us", 13),
+    ("am_fenrir",   "Fenrir",   "en-us", 14),
+    ("am_liam",     "Liam",     "en-us", 15),
+    ("am_michael",  "Michael",  "en-us", 16),
+    ("am_onyx",     "Onyx",     "en-us", 17),
+    ("am_puck",     "Puck",     "en-us", 18),
+    ("am_santa",    "Santa",    "en-us", 19),
+    // ── British English Female (4) ──
+    ("bf_alice",    "Alice",    "en-gb", 20),
+    ("bf_emma",     "Emma",     "en-gb", 21),
+    ("bf_isabella", "Isabella", "en-gb", 22),
+    ("bf_lily",     "Lily",     "en-gb", 23),
+    // ── British English Male (4) ──
+    ("bm_daniel",   "Daniel",   "en-gb", 24),
+    ("bm_fable",    "Fable",    "en-gb", 25),
+    ("bm_george",   "George",   "en-gb", 26),
+    ("bm_lewis",    "Lewis",    "en-gb", 27),
+    // ── Spanish (3) ──
+    ("ef_dora",     "Dora",     "es", 28),
+    ("em_alex",     "Alex",     "es", 29),
+    ("em_santa",    "Santa",    "es", 30),
+    // ── French (1) ──
+    ("ff_siwis",    "Siwis",    "fr", 31),
+    // ── Hindi (4) ──
+    ("hf_alpha",    "Alpha",    "hi", 32),
+    ("hf_beta",     "Beta",     "hi", 33),
+    ("hm_omega",    "Omega",    "hi", 34),
+    ("hm_psi",      "Psi",      "hi", 35),
+    // ── Italian (2) ──
+    ("if_sara",     "Sara",     "it", 36),
+    ("im_nicola",   "Nicola",   "it", 37),
+    // ── Japanese (5) ──
+    ("jf_alpha",      "Alpha",      "ja", 38),
+    ("jf_gongitsune", "Gongitsune", "ja", 39),
+    ("jf_nezumi",     "Nezumi",     "ja", 40),
+    ("jf_tebukuro",   "Tebukuro",   "ja", 41),
+    ("jm_kumo",       "Kumo",       "ja", 42),
+    // ── Portuguese (3) ──
+    ("pf_dora",     "Dora",     "pt", 43),
+    ("pm_alex",     "Alex",     "pt", 44),
+    ("pm_santa",    "Santa",    "pt", 45),
+    // ── Chinese (8) ──
+    ("zf_xiaobei",  "Xiaobei",  "zh", 46),
+    ("zf_xiaoni",   "Xiaoni",   "zh", 47),
+    ("zf_xiaoxiao", "Xiaoxiao", "zh", 48),
+    ("zf_xiaoyi",   "Xiaoyi",   "zh", 49),
+    ("zm_yunjian",  "Yunjian",  "zh", 50),
+    ("zm_yunxi",    "Yunxi",    "zh", 51),
+    ("zm_yunxia",   "Yunxia",   "zh", 52),
+    ("zm_yunyang",  "Yunyang",  "zh", 53),
 ];
 
 /// The core Kokoro ONNX inference engine.
@@ -111,12 +167,12 @@ impl KokoroEngine {
 
     /// Get the list of available voices.
     pub fn get_voices(&self) -> Vec<KokoroVoice> {
-        KOKORO_EN_VOICES
+        KOKORO_VOICES
             .iter()
-            .map(|(id, name, index)| KokoroVoice {
+            .map(|(id, name, lang, index)| KokoroVoice {
                 id: id.to_string(),
                 name: name.to_string(),
-                lang: "en".to_string(),
+                lang: lang.to_string(),
                 index: *index,
             })
             .collect()
@@ -131,7 +187,7 @@ impl KokoroEngine {
     /// Set the default voice ID for future synthesis calls.
     #[allow(dead_code)]
     pub fn set_default_voice(&mut self, voice_id: i64) {
-        let max_voice = KOKORO_EN_VOICES.len() as i64 - 1;
+        let max_voice = KOKORO_VOICES.len() as i64 - 1;
         self.default_voice_id = voice_id.clamp(0, max_voice);
     }
 

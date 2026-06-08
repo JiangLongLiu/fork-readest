@@ -265,9 +265,17 @@ pub(crate) async fn set_voice<R: Runtime>(
         }
     }
 
+    let voice_id = args.voice_id;
+    let max_voice = crate::kokoro_engine::KOKORO_VOICES.len() as i64 - 1;
+    if voice_id < 0 || voice_id > max_voice {
+        return Err(Error::InvalidVoice(format!(
+            "voice_id {} out of range [0, {}]", voice_id, max_voice
+        )));
+    }
+
     let mut voice_guard = state.default_voice.lock();
-    *voice_guard = args.voice_id;
-    log::info!("[KokoroTTS] Default voice set to {}", args.voice_id);
+    *voice_guard = voice_id;
+    log::info!("[KokoroTTS] Default voice set to {}", voice_id);
     Ok(())
 }
 
@@ -284,29 +292,15 @@ pub(crate) async fn get_voices<R: Runtime>(
         })
     } else {
         // Return built-in voices even if engine is not yet initialized
-        let voices = KOKORO_EN_VOICES_STATIC
+        let voices: Vec<KokoroVoice> = crate::kokoro_engine::KOKORO_VOICES
             .iter()
-            .map(|(id, name, index)| KokoroVoice {
+            .map(|(id, name, lang, index)| KokoroVoice {
                 id: id.to_string(),
                 name: name.to_string(),
-                lang: "en".to_string(),
+                lang: lang.to_string(),
                 index: *index,
             })
             .collect();
         Ok(KokoroGetVoicesResponse { voices })
     }
 }
-
-/// Static voice list for when engine is not yet initialized
-const KOKORO_EN_VOICES_STATIC: &[(&str, &str, i64)] = &[
-    ("af_bella", "Bella (Female, American)", 0),
-    ("af_nicole", "Nicole (Female, American)", 1),
-    ("af_sarah", "Sarah (Female, American)", 2),
-    ("af_sky", "Sky (Female, American)", 3),
-    ("am_adam", "Adam (Male, American)", 4),
-    ("am_michael", "Michael (Male, American)", 5),
-    ("bf_emma", "Emma (Female, British)", 6),
-    ("bf_isabella", "Isabella (Female, British)", 7),
-    ("bm_george", "George (Male, British)", 8),
-    ("bm_lewis", "Lewis (Male, British)", 9),
-];
