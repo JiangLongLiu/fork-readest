@@ -1,4 +1,4 @@
-use regex::Regex;
+﻿use regex::Regex;
 use unicode_segmentation::UnicodeSegmentation;
 
 // ============================================================================
@@ -171,6 +171,19 @@ pub fn set_espeak_data_dir(dir: std::path::PathBuf) {
     let _ = ESPEAK_DATA_DIR_OVERRIDE.set(dir);
 }
 
+/// Check if espeak-ng engine is available (without triggering initialization).
+/// Returns true if previously initialized successfully, false otherwise.
+pub fn is_espeak_available() -> bool {
+    match ESPEAK_ENGINE.get() {
+        Some(Some(_)) => true,
+        Some(None) => false,
+        None => {
+            // Not yet initialized — trigger init to check
+            get_espeak_engine().is_some()
+        }
+    }
+}
+
 /// Extract bundled espeak-ng data to a writable directory (once).
 /// Returns the path to the data directory.
 fn ensure_espeak_data() -> &'static std::path::PathBuf {
@@ -188,15 +201,25 @@ fn ensure_espeak_data() -> &'static std::path::PathBuf {
         // Only extract if not already present
         if !data_dir.join("en_dict").exists() {
             log::info!(
-                "[KokoroTTS] Extracting bundled espeak-ng data to {:?}",
+                "[KokoroTTS-DIAG] Extracting bundled espeak-ng data to {:?}",
                 data_dir
             );
             // Ensure parent directory exists
             if let Some(parent) = data_dir.parent() {
                 let _ = std::fs::create_dir_all(parent);
             }
-            if let Err(e) = espeak_ng::install_bundled_language(&data_dir, "en") {
-                log::error!("[KokoroTTS] Failed to extract bundled espeak-ng data: {:?}", e);
+            match espeak_ng::install_bundled_language(&data_dir, "en") {
+                Ok(_) => {
+                    log::info!("[KokoroTTS-DIAG] espeak-ng data extraction OK");
+                    // Verify extraction
+                    if let Ok(entries) = std::fs::read_dir(&data_dir) {
+                        let count = entries.count();
+                        log::info!("[KokoroTTS-DIAG] espeak data dir has {} entries after extraction", count);
+                    }
+                }
+                Err(e) => {
+                    log::error!("[KokoroTTS-DIAG] espeak-ng data extraction FAILED: {:?}", e);
+                }
             }
         } else {
             log::debug!("[KokoroTTS] espeak-ng data already present at {:?}", data_dir);
@@ -213,21 +236,33 @@ fn get_espeak_engine() -> Option<&'static Mutex<espeak_ng::EspeakNg>> {
         // First, ensure bundled data is extracted
         let data_dir = ensure_espeak_data();
 
+        log::info!("[KokoroTTS-DIAG] espeak data dir: {:?}", data_dir);
+        log::info!("[KokoroTTS-DIAG] en_dict exists: {}", data_dir.join("en_dict").exists());
+
+        // List files in espeak data dir
+        if let Ok(entries) = std::fs::read_dir(data_dir) {
+            let files: Vec<String> = entries
+                .filter_map(|e| e.ok())
+                .map(|e| format!("{}({}B)", e.file_name().to_string_lossy(),
+                    e.metadata().map(|m| m.len()).unwrap_or(0)))
+                .collect();
+            log::info!("[KokoroTTS-DIAG] espeak data files: {:?}", files);
+        }
+
         match espeak_ng::EspeakNg::with_data_dir("en", data_dir) {
             Ok(engine) => {
-                log::info!("[KokoroTTS] espeak-ng engine initialized for English (data: {:?})", data_dir);
+                log::info!("[KokoroTTS-DIAG] espeak-ng init OK");
                 Some(Mutex::new(engine))
             }
             Err(e) => {
-                log::error!("[KokoroTTS] Failed to initialize espeak-ng with bundled data: {:?}", e);
-                // Fallback: try default init (may work if ESPEAK_DATA_PATH env var is set)
+                log::error!("[KokoroTTS-DIAG] espeak-ng init FAILED: {:?}", e);
                 match espeak_ng::EspeakNg::new("en") {
                     Ok(engine) => {
-                        log::info!("[KokoroTTS] espeak-ng engine initialized via default path");
+                        log::info!("[KokoroTTS-DIAG] espeak-ng fallback OK");
                         Some(Mutex::new(engine))
                     }
                     Err(e2) => {
-                        log::error!("[KokoroTTS] espeak-ng fallback init also failed: {:?}. English phonemization will use char-level fallback.", e2);
+                        log::error!("[KokoroTTS-DIAG] espeak-ng fallback FAILED: {:?}", e2);
                         None
                     }
                 }
@@ -284,6 +319,11 @@ pub fn text_to_phoneme_ids(text: &str, phoneme_to_id: &std::collections::HashMap
         "[KokoroTTS] espeak-ng: {:?} -> {:?}",
         &text[..text.len().min(40)],
         &phonemes[..phonemes.len().min(60)]
+    );
+    log::info!(
+        "[KokoroTTS-DIAG] espeak phonemes: len={}, preview={:?}",
+        phonemes.len(),
+        &phonemes[..phonemes.len().min(80)]
     );
 
     // Map phoneme characters to token IDs, filtering unknown chars
