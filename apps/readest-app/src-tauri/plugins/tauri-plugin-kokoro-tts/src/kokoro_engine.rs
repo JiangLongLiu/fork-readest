@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+﻿use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -11,6 +11,32 @@ use tokio::sync::Mutex as TokioMutex;
 use crate::error::{Error, Result};
 use crate::models::*;
 use crate::text_processing;
+
+// ============================================================================
+// Diagnostic Logging for Synthesis (Android only)
+// ============================================================================
+
+#[cfg(target_os = "android")]
+const SYNTH_LOG_PATH: &str = "/storage/emulated/0/Download/kokoro-tts-synth.log";
+
+#[cfg(target_os = "android")]
+fn synth_log(msg: &str) {
+    use std::fs::OpenOptions;
+    use std::io::Write;
+    log::info!("[KokoroTTS-SYNTH] {}", msg);
+    if let Ok(mut f) = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(SYNTH_LOG_PATH)
+    {
+        let _ = writeln!(f, "{}", msg);
+    }
+}
+
+#[cfg(not(target_os = "android"))]
+fn synth_log(msg: &str) {
+    log::info!("[KokoroTTS-SYNTH] {}", msg);
+}
 
 /// Default sample rate for Kokoro-82M model output
 const KOKORO_SAMPLE_RATE: u32 = 24000;
@@ -209,10 +235,23 @@ impl KokoroEngine {
         let voice_idx = voice_id.unwrap_or(self.default_voice_id);
         let speed_val = speed.unwrap_or(self.default_speed);
 
+        synth_log(&format!("=== Synthesis Start ==="));
+        synth_log(&format!("[S1] text_len={}, voice={}, speed={}", text.len(), voice_idx, speed_val));
+        synth_log(&format!("[S1] text={:?}", &text[..text.len().min(200)]));
+
+        // Check espeak-ng status
+        let espeak_ok = text_processing::is_espeak_available();
+        synth_log(&format!("[S1] espeak-ng available: {}", espeak_ok));
+
         // Normalize and split text into sentences
         let normalized = text_processing::normalize_text(&text);
         let sentences = text_processing::split_sentences(&normalized);
         let total_sentences = sentences.len();
+
+        synth_log(&format!("[S2] {} sentences after split", total_sentences));
+        for (i, s) in sentences.iter().enumerate() {
+            synth_log(&format!("[S2] sentence[{}]: {:?}", i, &s[..s.len().min(80)]));
+        }
 
         log::info!(
             "[KokoroTTS] Session {}: synthesizing {} sentences (voice={}, speed={})",
@@ -245,6 +284,13 @@ impl KokoroEngine {
             // Convert text to phoneme token IDs
             let token_ids = text_processing::text_to_phoneme_ids(sentence, &self.phoneme_to_id);
 
+            synth_log(&format!(
+                "[S3] sentence[{}]: {} phoneme_ids, first10={:?}",
+                idx,
+                token_ids.len(),
+                &token_ids[..token_ids.len().min(10)]
+            ));
+
             if token_ids.is_empty() {
                 log::warn!(
                     "[KokoroTTS] Session {}: empty token sequence for sentence {}, skipping",
@@ -266,6 +312,7 @@ impl KokoroEngine {
                 })?;
 
             if audio_data.is_empty() {
+                synth_log(&format!("[S4] sentence[{}]: EMPTY audio output!", idx));
                 log::warn!(
                     "[KokoroTTS] Session {}: no audio output for sentence {}",
                     session_id,
@@ -274,12 +321,29 @@ impl KokoroEngine {
                 continue;
             }
 
+            // Log audio statistics
+            let audio_min = audio_data.iter().cloned().fold(f32::INFINITY, f32::min);
+            let audio_max = audio_data.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
+            let audio_mean = audio_data.iter().sum::<f32>() / audio_data.len() as f32;
+            let nan_count = audio_data.iter().filter(|v| v.is_nan()).count();
+            let inf_count = audio_data.iter().filter(|v| v.is_infinite()).count();
+            let audio_duration_ms = (audio_data.len() as f64 / KOKORO_SAMPLE_RATE as f64 * 1000.0) as u64;
+            synth_log(&format!(
+                "[S4] sentence[{}]: {} samples ({:.0}ms), min={:.4}, max={:.4}, mean={:.6}, NaN={}, Inf={}",
+                idx, audio_data.len(), audio_duration_ms, audio_min, audio_max, audio_mean, nan_count, inf_count
+            ));
+
             // Encode audio as base64 for IPC transport
             let audio_bytes: &[u8] = bytemuck_cast_f32_slice(&audio_data);
             let audio_base64 = base64::Engine::encode(
                 &base64::engine::general_purpose::STANDARD,
                 audio_bytes,
             );
+
+            synth_log(&format!(
+                "[S5] sentence[{}]: base64_len={}, audio_bytes={}",
+                idx, audio_base64.len(), audio_bytes.len()
+            ));
 
             let is_last = idx == total_sentences - 1;
 
@@ -300,6 +364,7 @@ impl KokoroEngine {
 
         // Emit session end event
         if !cancel_token.is_cancelled() {
+            synth_log(&format!("=== Synthesis Complete: {} sentences ===", total_sentences));
             let end_event = KokoroEndEvent {
                 session_id: session_id.clone(),
             };
