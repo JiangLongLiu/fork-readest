@@ -241,7 +241,9 @@ impl KokoroEngine {
 
         // Check espeak-ng status
         let espeak_ok = text_processing::is_espeak_available();
-        synth_log(&format!("[S1] espeak-ng available: {}", espeak_ok));
+        synth_log(&format!("[S1] espeak-ng (en) available: {}", espeak_ok));
+        let espeak_cmn_ok = text_processing::is_espeak_cmn_available();
+        synth_log(&format!("[S1] espeak-ng (cmn) available: {}", espeak_cmn_ok));
 
         // Normalize and split text into sentences
         let normalized = text_processing::normalize_text(&text);
